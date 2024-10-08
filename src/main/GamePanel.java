@@ -1,0 +1,98 @@
+package main;
+
+
+
+import entity.Player;
+import object.*;
+import tile.TileManager;
+
+import javax.swing.JPanel;
+import java.awt.*;
+
+public class GamePanel extends JPanel implements Runnable {
+    final int OriginalTileSize=16; //16x16-os
+    final int scale = 3;
+    public final int tileSize = OriginalTileSize*scale; //48x48-as
+    public final int maxScreenCol =16;
+    public final int maxScreenRow =12;
+    public final int screenWidth = maxScreenCol*tileSize; //768 pixel
+    public final int screenHeight = maxScreenRow*tileSize; //576 pixel
+
+    public final int maxWorldCol = 50;
+    public final int maxWorldRow = 50;
+    public final int worldWidth = maxWorldCol*tileSize;
+    public final int worldHeight = maxWorldRow*tileSize;
+
+    int FPS=60;
+
+    TileManager tileman=new TileManager(this);
+    InputHandler inpkez = new InputHandler();
+    public UserInterface ui=new UserInterface(this);
+    Thread gameThread;
+    public CollisionChecker cChecker=new CollisionChecker(this);
+    public Player player = new Player(this,inpkez);
+    public AssetSetter aSetter= new AssetSetter(this);
+
+    public GamePanel() {
+        this.setPreferredSize(new Dimension(screenWidth,screenHeight));
+        this.setBackground(Color.BLACK);
+        this.setDoubleBuffered(true);
+        this.addKeyListener(inpkez);
+        this.setFocusable(true);
+    }
+
+    public void setupGame(){
+        aSetter.setObject("key",25*tileSize,8*tileSize);
+        aSetter.setObject("key",20*tileSize,8*tileSize);
+        aSetter.setObject("door",18*tileSize,7*tileSize);
+        aSetter.setObject("chest",17*tileSize,6*tileSize);
+        aSetter.setObject("chest",16*tileSize,8*tileSize);
+        aSetter.setObject("boots",15*tileSize,8*tileSize);
+        aSetter.setObject("EnemyTestAttack",14*tileSize,8*tileSize);
+        aSetter.setObject("EnemyTestAttack",14*tileSize,7*tileSize);
+    }
+
+    public void startGameThread() {
+        gameThread = new Thread(this);
+        gameThread.start();
+    }
+    public void run(){
+        double drawInterval =1000000000/FPS;
+        double nextDrawTime = System.nanoTime() + drawInterval;
+
+        while(gameThread!=null) {
+            update();
+            repaint();
+            try {
+                double remainingTime = nextDrawTime - System.nanoTime();
+                remainingTime /= 1000000;
+                if(remainingTime<0)
+                    remainingTime=0;
+                Thread.sleep((long)remainingTime);
+                nextDrawTime += drawInterval;
+            }catch(InterruptedException e){e.printStackTrace();}
+        }
+    }
+
+    public void update() {
+        player.update();
+        for(SuperObject obj : aSetter.lista)
+            if(obj!=null)
+                obj.update();
+    }
+
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        //Tile
+        tileman.draw(g2);
+        //Object
+        for(SuperObject object : aSetter.lista)
+            if(object!=null)
+                object.draw(g2,this);
+        player.draw(g2);
+        ui.draw(g2);
+        g2.dispose();
+    }
+
+}
