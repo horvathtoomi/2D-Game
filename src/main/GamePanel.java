@@ -1,13 +1,12 @@
 package main;
 
-
-
+import entity.EnemyTest;
 import entity.Player;
 import object.*;
 import tile.TileManager;
-
 import javax.swing.JPanel;
 import java.awt.*;
+import java.io.IOException;
 
 public class GamePanel extends JPanel implements Runnable {
     final int OriginalTileSize=16; //16x16-os
@@ -32,6 +31,7 @@ public class GamePanel extends JPanel implements Runnable {
     public CollisionChecker cChecker=new CollisionChecker(this);
     public Player player = new Player(this,inpkez);
     public AssetSetter aSetter= new AssetSetter(this);
+    public EnemyTest et = new EnemyTest(this, player);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -42,14 +42,11 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void setupGame(){
-        aSetter.setObject("key",25*tileSize,8*tileSize);
-        aSetter.setObject("key",20*tileSize,8*tileSize);
-        aSetter.setObject("door",18*tileSize,7*tileSize);
-        aSetter.setObject("chest",17*tileSize,6*tileSize);
-        aSetter.setObject("chest",16*tileSize,8*tileSize);
-        aSetter.setObject("boots",15*tileSize,8*tileSize);
-        aSetter.setObject("EnemyTestAttack",14*tileSize,8*tileSize);
-        aSetter.setObject("EnemyTestAttack",14*tileSize,7*tileSize);
+        try{
+            aSetter.setObject();
+        }catch(IOException e){
+            System.out.println("Object was not set.");
+            e.printStackTrace();}
     }
 
     public void startGameThread() {
@@ -75,6 +72,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void update() {
+        et.update();
         player.update();
         for(SuperObject obj : aSetter.lista)
             if(obj!=null)
@@ -90,6 +88,7 @@ public class GamePanel extends JPanel implements Runnable {
         for(SuperObject object : aSetter.lista)
             if(object!=null)
                 object.draw(g2,this);
+        et.draw(g2);
         player.draw(g2);
         ui.draw(g2);
         g2.dispose();

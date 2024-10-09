@@ -47,21 +47,10 @@ public class Player extends Entity{
     }
 
     public void getPlayerImage(){
-        right = scale("jobbra");
-        left = scale("balra");
-        down = scale("le");
-        up = scale("fel");
-    }
-
-    public BufferedImage scale(String imageName){
-        UtilityTool uTool = new UtilityTool();
-        BufferedImage bufim = null;
-        try{
-            bufim = ImageIO.read(getClass().getClassLoader().getResourceAsStream("player/"+ imageName +".png"));
-            bufim = uTool.scaleImage(bufim, gp.tileSize, gp.tileSize);
-
-        }catch(IOException e){e.printStackTrace();}
-        return bufim;
+        right = scale(gp,"player","jobbra");
+        left = scale(gp,"player","balra");
+        down = scale(gp,"player","le");
+        up = scale(gp,"player","fel");
     }
 
     public void update(){
@@ -124,10 +113,10 @@ public class Player extends Entity{
                     gp.aSetter.lista.set(index,null);
                     break;
                 case "EnemyTestAttack" :
-                    System.out.print("Before: " + health);
+                    System.out.println("Before: " + health);
                     health-=50;
                     gp.aSetter.lista.set(index,null);
-                    System.out.print("After: " + health);
+                    System.out.println("After: " + health);
                     if(health<=0) {
                         gp.ui.died = true;
                         speed=0;

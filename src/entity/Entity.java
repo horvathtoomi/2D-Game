@@ -1,7 +1,13 @@
 package entity;
 
+import main.GamePanel;
+import main.UtilityTool;
+import object.SuperObject;
+
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class Entity {
     public int worldX,worldY;
@@ -12,4 +18,20 @@ public class Entity {
     public Rectangle solidArea;
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
+
+    public BufferedImage scale(GamePanel gp, String folderName, String imageName){
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage bufim = null;
+        try{
+            bufim = ImageIO.read(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png"));
+            bufim = uTool.scaleImage(bufim, gp.tileSize, gp.tileSize);
+
+        }catch(IOException e){e.printStackTrace();}
+        return bufim;
+    }
+
+    public void manuallySetObject(GamePanel gp,SuperObject obj){
+        gp.aSetter.lista.add(obj);
+    }
+
 }

@@ -1,0 +1,9 @@
+key 25 8
+key 20 8
+door 18 7
+chest 17 6
+chest 16 8
+boots 15 8
+EnemyTestAttack 14 8
+EnemyTestAttack 14 7
+key 24 8

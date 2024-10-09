@@ -2,6 +2,7 @@ package entity;
 
 import main.GamePanel;
 import main.UtilityTool;
+import object.EnemyTestAttack;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,12 +15,10 @@ public class EnemyTest extends Entity{
     BufferedImage shot;
     public int screenX;
     public int screenY;
+    int directionChanger = 0;
 
     public EnemyTest(GamePanel panel, Player player) {
         this.gp = panel;
-        screenX=gp.screenWidth/2 - (gp.tileSize/2);
-        screenY=gp.screenHeight/2 - (gp.tileSize/2);
-
         solidArea = new Rectangle();
         solidArea.x=8;
         solidArea.y=16;
@@ -30,49 +29,47 @@ public class EnemyTest extends Entity{
         }catch (Exception e){
             System.out.println("getEntityTestImage() is not working");
         }
-        worldX=gp.tileSize* 23;
-        worldY=gp.tileSize*21;
+        screenX=gp.tileSize*21;
+        screenY=gp.tileSize* 23;
+        worldX=screenX;
+        worldY=screenY;
         this.speed=player.speed;
         direction = "left";
     }
 
     public void getEnemyTestImage(){
-            right = scale("right");
-            left = scale("left");
-            shot = scale("shot");
-    }
-
-    public BufferedImage scale(String imageName){
-        UtilityTool uTool = new UtilityTool();
-        BufferedImage bufim = null;
-        try{
-            bufim = ImageIO.read(getClass().getClassLoader().getResourceAsStream("EnemyTest/"+ imageName +".png"));
-            bufim = uTool.scaleImage(bufim, gp.tileSize, gp.tileSize);
-        }catch(IOException e){e.printStackTrace();}
-        return bufim;
+            right = scale(gp,"EnemyTest","right");
+            left = scale(gp,"EnemyTest","left");
+            shot = scale(gp,"EnemyTest","shot");
     }
 
     public void update(){
-            //Check Tile Collision
-            collisionOn = false;
-            gp.cChecker.checkTile(this);
-            if (!collisionOn) {
-                switch (direction) {
-                    case "left":
-                        worldX -= speed;
-                        break;
-                    case "right":
-                        worldX += speed;
-                        break;
-                    case "shot":
-                        shoot();
-                        break;
-                }
+        if(directionChanger>60) {
+            if (direction.equals("right")) {
+                direction = "left";
+            } else if (direction.equals("left")) {
+                direction = "right";
             }
+            shoot();
+            directionChanger = 0;
+        }
+        collisionOn = false;
+        gp.cChecker.checkTile(this);
+        if (!collisionOn) {
+            switch (direction) {
+                case "left":
+                    worldX -= speed;
+                    break;
+                case "right":
+                    worldX += speed;
+                    break;
+            }
+        }
+        directionChanger++;
     }
 
     public void shoot(){
-        gp.aSetter.setObject("EnemyTestAttack",worldX,worldY);
+        manuallySetObject(gp,new EnemyTestAttack(gp,worldX,worldY));
     }
 
     public void draw(Graphics2D g2) {
@@ -88,6 +85,6 @@ public class EnemyTest extends Entity{
                 image = right;
                 break;
         }
-        g2.drawImage(image,screenX,screenY, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image,worldX,worldY, gp.tileSize, gp.tileSize, null);
     }
 }
