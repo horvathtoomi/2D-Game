@@ -10,7 +10,7 @@ public class Player extends Entity{
     InputHandler kezelo;
     public final int screenX;
     public final int screenY;
-    public int hasKeys = 0;
+
 
     public Player(GamePanel panel, InputHandler kezelo) {
         this.gp = panel;
@@ -88,39 +88,7 @@ public class Player extends Entity{
 
     public void pickUpObject(int index){
         if(index!=999){
-            String objectName = gp.aSetter.lista.get(index).name;
-            switch (objectName){
-                case "key":
-                    hasKeys++;
-                    gp.aSetter.lista.set(index,null);
-                    break;
-                case "door":
-                    if(hasKeys > 0) {
-                        gp.aSetter.lista.set(index,null);
-                        hasKeys--;
-                    }
-                    break;
-                case "chest":
-                    gp.ui.gameFinished=true;
-                    break;
-                case "boots":
-                    speed += speed/3;
-                    gp.aSetter.lista.set(index,null);
-                    break;
-                case "EnemyTestAttack" :
-                    System.out.println("Before: " + health);
-                    health-=50;
-                    gp.aSetter.lista.set(index,null);
-                    System.out.println("After: " + health);
-                    System.out.println("----------");
-                    if(health<=0) {
-                        gp.ui.died = true;
-                        speed=0;
-                        up = down = left = right = null;
-                        gp.killEntitys();
-                    }
-                    break;
-            }
+
         }
     }
 
@@ -132,7 +100,24 @@ public class Player extends Entity{
             case "right" -> right;
             default -> null;
         };
-        g2.drawImage(image,screenX,screenY,null);
+
+        int x = screenX;
+        int y = screenY;
+        if(screenX > worldX){
+            x = worldX;
+        }
+        if(screenY > worldY){
+            y = worldY;
+        }
+        int rightOffset = gp.screenWidth - screenX;
+        if(rightOffset > gp.worldWidth - worldX){
+            x = gp.screenWidth - gp.worldWidth - worldX;
+        }
+        int bottomOffset = gp.screenHeight - screenY;
+        if(bottomOffset > gp.worldHeight - worldY){
+            y = gp.screenHeight - gp.worldHeight - worldY;
+        }
+        g2.drawImage(image,x,y,null);
     }
 
 }

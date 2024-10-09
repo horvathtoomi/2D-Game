@@ -8,8 +8,8 @@ import java.text.DecimalFormat;
 
 public class UserInterface {
     GamePanel gp;
+    Graphics2D g2;
     Font font;
-    BufferedImage img;
     public boolean died = false;
     public boolean gameFinished =false;
     double playTime;
@@ -17,61 +17,31 @@ public class UserInterface {
 
     public UserInterface(GamePanel gp) {
         this.gp = gp;
-        font = new Font("Times New Roman", Font.PLAIN, 25);
-        OBJ_Key key = new OBJ_Key(gp,0,0);
-        img = key.image;
+        font = new Font("Times New Roman", Font.PLAIN, 40);
     }
 
     public void draw(Graphics2D g2) {
-        if (gameFinished) {
-            g2.setFont(font);
-            g2.setColor(Color.white);
-
-            String text;
-            int textLength;
-            int x,y;
-
-            text="You won!";
-            textLength=(int)g2.getFontMetrics().getStringBounds(text,g2).getWidth();
-            x= gp.screenWidth/2 - textLength/2;
-            y = gp.screenHeight/2 - gp.tileSize*3;
-            g2.drawString(text,x,y);
-
-            text="Your time: " + decimalFormat.format(playTime);
-            textLength=(int)g2.getFontMetrics().getStringBounds(text,g2).getWidth();
-            x= gp.screenWidth/2 - textLength/2;
-            y = gp.screenHeight/2 + gp.tileSize*3;
-            g2.drawString(text,x,y);
+        this.g2 = g2;
+        g2.setFont(font);
+        g2.setColor(Color.BLACK);
+        if(gp.gameState==gp.playState){
+            //Do playstate stuff later
         }
-        else if(died){
-                g2.setFont(font);
-                g2.setColor(Color.white);
-
-                String text;
-                int textLength;
-                int x,y;
-
-                text="You Died!";
-                textLength=(int)g2.getFontMetrics().getStringBounds(text,g2).getWidth();
-                x= gp.screenWidth/2 - textLength/2;
-                y = gp.screenHeight/2 - gp.tileSize*3;
-                g2.drawString(text,x,y);
-
-                text="Playtime: " + decimalFormat.format(playTime);
-                textLength=(int)g2.getFontMetrics().getStringBounds(text,g2).getWidth();
-                x= gp.screenWidth/2 - textLength/2;
-                y = gp.screenHeight/2 + gp.tileSize*3;
-                g2.drawString(text,x,y);
-        }
-        else {
-            g2.setFont(font);
-            g2.setColor(Color.black);
-            g2.drawImage(img, gp.tileSize / 2, gp.tileSize / 2, gp.tileSize, gp.tileSize, null);
-            g2.drawString("x " + gp.player.hasKeys, 74, 53);
-
-            //TIME
-            playTime +=(double)1/60;
-            g2.drawString("Your time: " + decimalFormat.format(playTime), gp.tileSize*12+gp.tileSize/2,53);
+        if(gp.gameState == gp.pauseState){
+            drawPauseScreen(g2);
         }
     }
+
+    public void drawPauseScreen(Graphics2D g2) {
+        String text = "PAUSED";
+        int y = gp.screenHeight/2;
+        g2.drawString(text,getXforCenteredText(text),y);
+    }
+
+    public int getXforCenteredText(String text){
+        int length =(int)g2.getFontMetrics().getStringBounds(text,g2).getWidth();
+        int x = gp.screenWidth/2-length/2;
+        return x;
+    }
+
 }

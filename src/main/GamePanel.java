@@ -26,13 +26,18 @@ public class GamePanel extends JPanel implements Runnable {
     int FPS=60;
 
     public TileManager tileman=new TileManager(this);
-    InputHandler inpkez = new InputHandler();
+    InputHandler inpkez = new InputHandler(this);
     public UserInterface ui=new UserInterface(this);
     Thread gameThread;
     public CollisionChecker cChecker=new CollisionChecker(this);
     public Player player = new Player(this,inpkez);
     public AssetSetter aSetter= new AssetSetter(this);
-    public EnemyTest et = null;
+    //public EnemyTest et = null;
+
+    //Game State
+    public int gameState;
+    public final int playState = 1;
+    public final int pauseState = 2;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -50,8 +55,9 @@ public class GamePanel extends JPanel implements Runnable {
             e.printStackTrace();
         }
 
-        et = new EnemyTest(this, 23*tileSize,21*tileSize);
+        //et = new EnemyTest(this, 23*tileSize,21*tileSize);
         aSetter.lista = new CopyOnWriteArrayList<>(aSetter.lista);
+        gameState=playState;
     }
 
     public void addObject(SuperObject obj){
@@ -81,16 +87,19 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void killEntitys(){
-        et.left = et.right = et.shoot = null;
+        //et.left = et.right = et.shoot = null;
     }
 
     public void update() {
-        player.update();
-        et.update();
-        for(SuperObject obj : aSetter.lista) {
-            if (obj != null) {
-                obj.update();
-            }
+        if(gameState == playState) {
+            player.update();
+            //et.update();
+            for (SuperObject obj : aSetter.lista)
+                if (obj != null)
+                    obj.update();
+        }
+        if(gameState == pauseState) {
+
         }
     }
 
@@ -105,11 +114,12 @@ public class GamePanel extends JPanel implements Runnable {
                 object.draw(g2, this);
         }
         player.draw(g2);
-        if(et!=null) {
-            et.draw(g2);
-        }
+        //if(et!=null) {
+        //    et.draw(g2);
+        //}
         ui.draw(g2);
         g2.dispose();
     }
+
 
 }
