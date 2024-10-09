@@ -2,12 +2,8 @@ package entity;
 
 import main.InputHandler;
 import main.GamePanel;
-import main.UtilityTool;
-
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 public class Player extends Entity{
     GamePanel gp;
@@ -15,7 +11,6 @@ public class Player extends Entity{
     public final int screenX;
     public final int screenY;
     public int hasKeys = 0;
-    int standCounter = 0;
 
     public Player(GamePanel panel, InputHandler kezelo) {
         this.gp = panel;
@@ -117,10 +112,12 @@ public class Player extends Entity{
                     health-=50;
                     gp.aSetter.lista.set(index,null);
                     System.out.println("After: " + health);
+                    System.out.println("----------");
                     if(health<=0) {
                         gp.ui.died = true;
                         speed=0;
                         up = down = left = right = null;
+                        gp.killEntitys();
                     }
                     break;
             }
@@ -128,21 +125,13 @@ public class Player extends Entity{
     }
 
     public void draw(Graphics2D g2){
-        BufferedImage image = null;
-        switch(direction){
-            case "up":
-                image = up;
-                break;
-            case "down":
-                image = down;
-                break;
-            case "left":
-                image = left;
-                break;
-            case "right":
-                image = right;
-                break;
-        }
+        BufferedImage image = switch (direction) {
+            case "up" -> up;
+            case "down" -> down;
+            case "left" -> left;
+            case "right" -> right;
+            default -> null;
+        };
         g2.drawImage(image,screenX,screenY,null);
     }
 

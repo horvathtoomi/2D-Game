@@ -3,11 +3,11 @@ package entity;
 import main.GamePanel;
 import main.UtilityTool;
 import object.SuperObject;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Entity {
     public int worldX,worldY;
@@ -23,15 +23,11 @@ public class Entity {
         UtilityTool uTool = new UtilityTool();
         BufferedImage bufim = null;
         try{
-            bufim = ImageIO.read(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png"));
+            bufim = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png")));
             bufim = uTool.scaleImage(bufim, gp.tileSize, gp.tileSize);
 
         }catch(IOException e){e.printStackTrace();}
         return bufim;
-    }
-
-    public void manuallySetObject(GamePanel gp,SuperObject obj){
-        gp.aSetter.lista.add(obj);
     }
 
 }

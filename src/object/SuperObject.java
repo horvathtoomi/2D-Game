@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import main.GamePanel;
 import main.UtilityTool;
 
-public class SuperObject {
+public abstract class SuperObject {
     public GamePanel gp;
     public BufferedImage image;
     public String name;
@@ -27,4 +27,5 @@ public class SuperObject {
     }
 
     public void update() {}
+
 }

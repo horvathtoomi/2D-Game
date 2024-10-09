@@ -7,6 +7,7 @@ import tile.TileManager;
 import javax.swing.JPanel;
 import java.awt.*;
 import java.io.IOException;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GamePanel extends JPanel implements Runnable {
     final int OriginalTileSize=16; //16x16-os
@@ -24,14 +25,14 @@ public class GamePanel extends JPanel implements Runnable {
 
     int FPS=60;
 
-    TileManager tileman=new TileManager(this);
+    public TileManager tileman=new TileManager(this);
     InputHandler inpkez = new InputHandler();
     public UserInterface ui=new UserInterface(this);
     Thread gameThread;
     public CollisionChecker cChecker=new CollisionChecker(this);
     public Player player = new Player(this,inpkez);
     public AssetSetter aSetter= new AssetSetter(this);
-    public EnemyTest et = new EnemyTest(this, player);
+    public EnemyTest et = null;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -46,7 +47,15 @@ public class GamePanel extends JPanel implements Runnable {
             aSetter.setObject();
         }catch(IOException e){
             System.out.println("Object was not set.");
-            e.printStackTrace();}
+            e.printStackTrace();
+        }
+
+        et = new EnemyTest(this, 23*tileSize,21*tileSize);
+        aSetter.lista = new CopyOnWriteArrayList<>(aSetter.lista);
+    }
+
+    public void addObject(SuperObject obj){
+        aSetter.lista.add(obj);
     }
 
     public void startGameThread() {
@@ -71,12 +80,18 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    public void killEntitys(){
+        et.left = et.right = et.shoot = null;
+    }
+
     public void update() {
-        et.update();
         player.update();
-        for(SuperObject obj : aSetter.lista)
-            if(obj!=null)
+        et.update();
+        for(SuperObject obj : aSetter.lista) {
+            if (obj != null) {
                 obj.update();
+            }
+        }
     }
 
     public void paintComponent(Graphics g) {
@@ -85,11 +100,14 @@ public class GamePanel extends JPanel implements Runnable {
         //Tile
         tileman.draw(g2);
         //Object
-        for(SuperObject object : aSetter.lista)
-            if(object!=null)
-                object.draw(g2,this);
-        et.draw(g2);
+        for(SuperObject object : aSetter.lista) {
+            if (object != null)
+                object.draw(g2, this);
+        }
         player.draw(g2);
+        if(et!=null) {
+            et.draw(g2);
+        }
         ui.draw(g2);
         g2.dispose();
     }
