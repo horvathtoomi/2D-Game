@@ -1,12 +1,14 @@
 package main;
 
 import entity.EnemyTest;
+import entity.Entity;
 import entity.Player;
 import object.*;
 import tile.TileManager;
 import javax.swing.JPanel;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GamePanel extends JPanel implements Runnable {
@@ -30,8 +32,13 @@ public class GamePanel extends JPanel implements Runnable {
     public UserInterface ui=new UserInterface(this);
     Thread gameThread;
     public CollisionChecker cChecker=new CollisionChecker(this);
+
     public Player player = new Player(this,inpkez);
+
     public AssetSetter aSetter= new AssetSetter(this);
+
+    public ArrayList<Entity> npc = new ArrayList<>();
+
     //public EnemyTest et = null;
 
     //Game State
@@ -53,8 +60,9 @@ public class GamePanel extends JPanel implements Runnable {
         }catch(IOException e){
             System.out.println("Object was not set.");
             e.printStackTrace();
-        }
 
+        }
+        aSetter.setNPC();
         //et = new EnemyTest(this, 23*tileSize,21*tileSize);
         aSetter.lista = new CopyOnWriteArrayList<>(aSetter.lista);
         gameState=playState;
@@ -93,7 +101,14 @@ public class GamePanel extends JPanel implements Runnable {
     public void update() {
         if(gameState == playState) {
             player.update();
+
             //et.update();
+
+            for(Entity e : npc)
+                if(e != null)
+                    e.update();
+
+
             for (SuperObject obj : aSetter.lista)
                 if (obj != null)
                     obj.update();
@@ -113,6 +128,12 @@ public class GamePanel extends JPanel implements Runnable {
             if (object != null)
                 object.draw(g2, this);
         }
+        //NPC
+        for(Entity entity : npc) {
+            if(entity != null)
+                entity.draw(g2);
+        }
+
         player.draw(g2);
         //if(et!=null) {
         //    et.draw(g2);

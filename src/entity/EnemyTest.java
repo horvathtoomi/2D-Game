@@ -7,8 +7,6 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class EnemyTest extends Entity {
-
-    GamePanel gp;
     public BufferedImage shoot;
     public int screenX;
     public int screenY;
@@ -26,8 +24,8 @@ public class EnemyTest extends Entity {
     private int shootAnimationTimer = 0;
     private final int SHOOT_ANIMATION_DURATION = 30;
 
-    public EnemyTest(GamePanel panel, int startX, int startY) {
-        this.gp = panel;
+    public EnemyTest(GamePanel gp,int startX, int startY) {
+        super(gp);
         solidArea = new Rectangle();
         solidArea.x = 18;
         solidArea.y = 12;
@@ -51,9 +49,9 @@ public class EnemyTest extends Entity {
     }
 
     public void getEnemyTestImage() {
-        right = scale(gp, "EnemyTest", "right");
-        left = scale(gp, "EnemyTest", "left");
-        shoot = scale(gp, "EnemyTest", "shoot");
+        right = scale("EnemyTest", "right");
+        left = scale("EnemyTest", "left");
+        shoot = scale("EnemyTest", "shoot");
     }
 
     public void update() {

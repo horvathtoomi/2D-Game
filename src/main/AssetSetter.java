@@ -1,5 +1,7 @@
 package main;
 
+import entity.Entity;
+import entity.NPC_Wayfarer;
 import object.*;
 
 import java.io.*;
@@ -52,6 +54,14 @@ public class AssetSetter {
             }
         }
         br.close();
+    }
+
+    public void setNPC(){
+        NPC_Wayfarer wf = new NPC_Wayfarer(gp);
+        wf.worldX = gp.tileSize*21;
+        wf.worldY = gp.tileSize*21;
+        gp.npc.add(wf);
+
     }
 
 }

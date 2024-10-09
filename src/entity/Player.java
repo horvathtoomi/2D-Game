@@ -6,14 +6,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Player extends Entity{
-    GamePanel gp;
     InputHandler kezelo;
     public final int screenX;
     public final int screenY;
 
 
     public Player(GamePanel panel, InputHandler kezelo) {
-        this.gp = panel;
+        super(panel);
         this.kezelo = kezelo;
         health = 100;
         screenX=gp.screenWidth/2 - (gp.tileSize/2);
@@ -42,10 +41,10 @@ public class Player extends Entity{
     }
 
     public void getPlayerImage(){
-        right = scale(gp,"player","jobbra");
-        left = scale(gp,"player","balra");
-        down = scale(gp,"player","le");
-        up = scale(gp,"player","fel");
+        right = scale("player","jobbra");
+        left = scale("player","balra");
+        down = scale("player","le");
+        up = scale("player","fel");
     }
 
     public void update(){
@@ -66,6 +65,10 @@ public class Player extends Entity{
             //Check Object Colllision
             int objIndex = gp.cChecker.checkObject(this,true);
             pickUpObject(objIndex);
+
+            //Check npc collision
+            int npcIndex = gp.cChecker.checkEntity(this,gp.npc);
+            interractNPC(npcIndex);
 
             if (!collisionOn) {
                 switch (direction) {
@@ -90,6 +93,12 @@ public class Player extends Entity{
         if(index!=999){
 
         }
+    }
+
+    public void interractNPC(int idx){
+        //if(idx!=999){
+           //System.out.println("interaction w an NPC!");
+        //}
     }
 
     public void draw(Graphics2D g2){
