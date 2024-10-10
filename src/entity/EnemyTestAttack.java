@@ -36,23 +36,23 @@ public class EnemyTestAttack extends Entity{
             e.getCause();
         }
         image = image1;
+        solidArea = new Rectangle(worldX + 6, worldY + 8, 32, 32);
+
     }
 
     @Override
     public void update() {
-        worldX += (int) dx;
-        worldY += (int) dy;
-        initialX = worldX - gp.player.worldX + gp.player.screenX;
-        initialY = worldY - gp.player.worldY + gp.player.screenY;
-        solidArea = new Rectangle(gp.player.screenX,gp.player.screenY,10,10);
-        System.out.println("IDX OF BULLET: " + initialX + " " + initialY);
-        System.out.println("IDX OF PLAYER: " + gp.player.worldX + " " + gp.player.worldY);
-        if (solidArea.intersects(gp.player.solidArea)) {
-            gp.player.health -= 50;
-            System.out.println(gp.player.health);
-            gp.entities.set(gp.entities.indexOf(this),null);
-            return;
-        }
+            worldX += (int) dx;
+            worldY += (int) dy;
+            solidArea.setLocation(worldX + 3, worldY + 4);
+            Rectangle playerHitbox = new Rectangle(gp.player.worldX + gp.player.solidArea.x, gp.player.worldY + gp.player.solidArea.y, gp.player.solidArea.width, gp.player.solidArea.height); //Width=32, Height=32
+            if (solidArea.intersects(playerHitbox)) {
+                System.out.println("EnemyTestAttack hit player.");
+                gp.player.health -= 50;
+                // Set this attack to null in the entities list
+                gp.entities.set(gp.entities.indexOf(this), null);
+                return;
+            }
         imageChange++;
         if (imageChange > 5) {
             if (image == image1)
@@ -65,10 +65,16 @@ public class EnemyTestAttack extends Entity{
 
     @Override
     public void draw(Graphics2D g2) {
-        initialX = worldX - gp.player.worldX + gp.player.screenX;
-        initialY = worldY - gp.player.worldY + gp.player.screenY;
-        if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX && worldX - gp.tileSize < gp.player.worldX + gp.player.screenX && worldY + gp.tileSize > gp.player.worldY - gp.player.screenY && worldY - gp.tileSize < gp.player.worldY + gp.player.screenY)
-            g2.drawImage(image, initialX, initialY, gp.tileSize, gp.tileSize, null);
+        int screenX = worldX - gp.player.worldX + gp.player.screenX;
+        int screenY = worldY - gp.player.worldY + gp.player.screenY;
+        if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
+                worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
+                worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
+                worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
+            g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+            //For degbug
+            //g2.drawRect(screenX + 3, screenY + 4, 10, 10);
+        }
     }
 
 }

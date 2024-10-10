@@ -81,16 +81,20 @@ public class GamePanel extends JPanel implements Runnable {
         double nextDrawTime = System.nanoTime() + drawInterval;
 
         while(gameThread!=null) {
-            update();
-            repaint();
-            try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime /= 1000000;
-                if(remainingTime<0)
-                    remainingTime=0;
-                Thread.sleep((long)remainingTime);
-                nextDrawTime += drawInterval;
-            }catch(InterruptedException e){e.printStackTrace();}
+            if(player.health>0) {
+                update();
+                repaint();
+                try {
+                    double remainingTime = nextDrawTime - System.nanoTime();
+                    remainingTime /= 1000000;
+                    if (remainingTime < 0)
+                        remainingTime = 0;
+                    Thread.sleep((long) remainingTime);
+                    nextDrawTime += drawInterval;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -98,9 +102,17 @@ public class GamePanel extends JPanel implements Runnable {
         if(gameState == playState) {
             player.update();
             et.update();
-            for(Entity ent : entities)
-                if(ent != null)
-                    ent.update();
+            for (int i = 0; i < entities.size(); i++) {
+                Entity entity = entities.get(i);
+
+                if (entity != null) {
+                    entity.update();
+                }
+                else {
+                    entities.remove(i);
+                    i--;  // Adjust index after removal
+                }
+            }
             for (SuperObject obj : aSetter.lista)
                 if (obj != null)
                     obj.update();
@@ -115,18 +127,15 @@ public class GamePanel extends JPanel implements Runnable {
         //Tile
         tileman.draw(g2);
         //Object
-        for(SuperObject object : aSetter.lista) {
+        for(SuperObject object : aSetter.lista)
             if (object != null)
                 object.draw(g2, this);
-        }
-        //NPC
-        for(Entity entity : entities) {
+        //NPC and Entities
+        for(Entity entity : entities)
             if(entity != null)
                 entity.draw(g2);
-        }
-
         player.draw(g2);
-        if(et!=null) {
+        if(et != null) {
             et.draw(g2);
         }
         ui.draw(g2);
