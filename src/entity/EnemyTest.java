@@ -1,7 +1,6 @@
 package entity;
 
 import main.GamePanel;
-import entity.EnemyTestAttack;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -11,12 +10,12 @@ public class EnemyTest extends Entity {
     public int screenX;
     public int screenY;
     int directionChanger = 0;
-    String previousDirection = "";
+    String previousDirection = "right";
     Random rand = new Random();
 
     private final int startX;
     private final int endX;
-    private final int movementRange = 200; // pixels
+    private final int movementRange = 300; // pixels
 
     private int shootCooldown = 0;
     private final int SHOOT_COOLDOWN_TIME = 120; // 2 seconds at 60 FPS
@@ -26,23 +25,17 @@ public class EnemyTest extends Entity {
 
     public EnemyTest(GamePanel gp,int startX, int startY) {
         super(gp);
-        solidArea = new Rectangle();
-        solidArea.x = 18;
-        solidArea.y = 12;
-        solidArea.width = 8;
-        solidArea.height = 8;
-
+        solidArea = new Rectangle(18,12,8,8);
+        shootAnimationTimer=SHOOT_ANIMATION_DURATION;
         try {
             getEnemyTestImage();
         } catch (Exception e) {
             System.out.println("getEntityTestImage() is not working");
         }
-
         this.worldX = startX;
         this.worldY = startY;
         this.startX = startX;
         this.endX = startX + movementRange;
-
         this.speed = 2;
         previousDirection = "right";
         direction = "right";
@@ -56,34 +49,37 @@ public class EnemyTest extends Entity {
 
     public void update() {
         directionChanger++;
-
-        if (shootCooldown > 0) {
+        if (shootCooldown > 0)
             shootCooldown--;
-        }
-
-        if (shootAnimationTimer > 0) {
-            shootAnimationTimer--;
-            direction = "shoot";
-        } else if (direction.equals("shoot")) {
+        if (direction.equals("shoot")) {
+            //private int shootAnimationTimer = 0;
+            //private final int SHOOT_ANIMATION_DURATION = 30;
             if (shootCooldown == 0) {
-                shoot();
-                shootCooldown = SHOOT_COOLDOWN_TIME;
-                shootAnimationTimer = SHOOT_ANIMATION_DURATION;
-                direction = "right";
-            }
-        } else {
-            if (directionChanger >= 120) { // Change direction every 2 seconds (assuming 60 FPS)
-                if (direction.equals("right")) {
-                    direction = "left";
-                } else if (direction.equals("left")) {
-                    direction = "right";
+                if(shootAnimationTimer == 15) {
+                    shoot();
+                    shootCooldown = SHOOT_COOLDOWN_TIME;
                 }
+                else if(shootAnimationTimer == 0){
+                    shootAnimationTimer = SHOOT_ANIMATION_DURATION;
+                }
+                else{
+                    shootAnimationTimer--;
+                }
+            }
+            else {
+                direction = "left";
+            }
+        }
+        else {
+            if (directionChanger >= 120) { // Change direction every seconds (assuming 60 FPS)
+                if (direction.equals("right"))
+                    direction = "left";
+                else if (direction.equals("left"))
+                    direction = "right";
                 directionChanger = 0;
             }
-
             collisionOn = false;
             gp.cChecker.checkTile(this);
-
             if (!collisionOn) {
                 switch (direction) {
                     case "left":
@@ -102,7 +98,6 @@ public class EnemyTest extends Entity {
                         break;
                 }
             }
-
             // Randomly decide to shoot
             if (rand.nextInt(100) < 1 && shootCooldown == 0) { // 1% chance to shoot each frame
                 previousDirection = direction;
@@ -110,6 +105,7 @@ public class EnemyTest extends Entity {
             }
         }
     }
+
 
     public void shoot() {
         int playerWorldX = gp.player.worldX;
@@ -126,7 +122,7 @@ public class EnemyTest extends Entity {
         int startX = (int) (worldX + normalizedDx * gp.tileSize);
         int startY = (int) (worldY + normalizedDy * gp.tileSize);
 
-        gp.npc.add(new EnemyTestAttack(gp, startX, startY, playerWorldX, playerWorldY));
+        gp.entities.add(new EnemyTestAttack(gp, startX, startY, playerWorldX, playerWorldY));
     }
 
     public void draw(Graphics2D g2) {

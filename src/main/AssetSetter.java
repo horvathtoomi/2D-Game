@@ -1,6 +1,5 @@
 package main;
 
-import entity.EnemyTestAttack;
 import entity.NPC_Wayfarer;
 import object.*;
 import java.io.*;
@@ -53,7 +52,7 @@ public class AssetSetter {
         NPC_Wayfarer wf = new NPC_Wayfarer(gp);
         wf.worldX = gp.tileSize*21;
         wf.worldY = gp.tileSize*21;
-        gp.npc.add(wf);
+        gp.entities.add(wf);
 
     }
 

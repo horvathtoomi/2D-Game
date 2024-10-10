@@ -15,7 +15,6 @@ public class EnemyTestAttack extends Entity{
     private double dx, dy;
     private final double speed = 4;
     private int initialX, initialY;
-    private boolean hasMovedOneTile = false;
     private final int MAX_DISTANCE = 10 * 48;
 
     public EnemyTestAttack(GamePanel gp, int startX, int startY, int targetX, int targetY) {
@@ -51,22 +50,14 @@ public class EnemyTestAttack extends Entity{
             worldY += (int) dy;
 
             // Only check for collision after moving one tile
-            if (hasMovedOneTile) {
                 // Check for collision with player
-                Rectangle attackHitbox = new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
-                if (attackHitbox.intersects(gp.player.solidArea)) {
-                    System.out.println("EnemyTestAttack hit player. Removing.");
-                    gp.player.health -= 50; // Decrease player health
-                    gp.npc.remove(this);
-                    return;
-                }
+            Rectangle attackHitbox = new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+            if (attackHitbox.intersects(gp.player.solidArea)) {
+                System.out.println("EnemyTestAttack hit player. Removing.");
+                gp.player.health -= 50; // Decrease player health
+                gp.entities.remove(this);
+                return;
             }
-
-            // Remove if out of bounds
-            //if (worldX < 0 || worldX > gp.worldWidth || worldY < 0 || worldY > gp.worldHeight) {
-            //    System.out.println("EnemyTestAttack out of bounds. Removing.");
-            //    gp.npc.remove(this);
-            //}
         }
         imageChange++;
         if (imageChange > 5) {
@@ -85,8 +76,6 @@ public class EnemyTestAttack extends Entity{
         int screenY = worldY - gp.player.worldY + gp.player.screenY;
         if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX && worldX - gp.tileSize < gp.player.worldX + gp.player.screenX && worldY + gp.tileSize > gp.player.worldY - gp.player.screenY && worldY - gp.tileSize < gp.player.worldY + gp.player.screenY)
             g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
-        else
-            System.out.println("EnemyTestAttack not in view.");
     }
 
 }

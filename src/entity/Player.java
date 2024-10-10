@@ -12,6 +12,7 @@ public class Player extends Entity{
 
 
     public Player(GamePanel panel, InputHandler kezelo) {
+
         super(panel);
         this.kezelo = kezelo;
         health = 100;
@@ -25,12 +26,13 @@ public class Player extends Entity{
         solidAreaDefaultY = solidArea.y;
         solidArea.width=32;
         solidArea.height=32;
+
         setDefaultValues();
+
         try {
             getPlayerImage();
-        }catch (Exception e){
-            System.out.println("getPlayerImage() is not working");
-        }
+        }catch (Exception e){System.out.println("getPlayerImage() is not working");}
+
     }
 
     public void setDefaultValues(){
@@ -67,7 +69,7 @@ public class Player extends Entity{
             pickUpObject(objIndex);
 
             //Check npc collision
-            int npcIndex = gp.cChecker.checkEntity(this,gp.npc);
+            int npcIndex = gp.cChecker.checkEntity(this,gp.entities);
             interractNPC(npcIndex);
 
             if (!collisionOn) {

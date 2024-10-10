@@ -41,7 +41,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public AssetSetter aSetter= new AssetSetter(this);
 
-    public ArrayList<Entity> npc = new ArrayList<>();
+    public ArrayList<Entity> entities = new ArrayList<>();
 
     public EnemyTest et;
 
@@ -64,16 +64,12 @@ public class GamePanel extends JPanel implements Runnable {
         }catch(IOException e){
             System.out.println("Object was not set.");
             e.printStackTrace();
-
         }
+
         aSetter.setNPC();
         et = new EnemyTest(this, 23*tileSize,21*tileSize);
         aSetter.lista = new CopyOnWriteArrayList<>(aSetter.lista);
         gameState=playState;
-    }
-
-    public void addObject(SuperObject obj){
-        aSetter.lista.add(obj);
     }
 
     public void startGameThread() {
@@ -98,17 +94,13 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
-    public void killEntitys(){
-       // et.left = et.right = et.shoot = null;
-    }
-
     public void update() {
         if(gameState == playState) {
             player.update();
 
             et.update();
 
-            for(Entity e : npc)
+            for(Entity e : entities)
                 if(e != null)
                     e.update();
 
@@ -133,7 +125,7 @@ public class GamePanel extends JPanel implements Runnable {
                 object.draw(g2, this);
         }
         //NPC
-        for(Entity entity : npc) {
+        for(Entity entity : entities) {
             if(entity != null)
                 entity.draw(g2);
         }
