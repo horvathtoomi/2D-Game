@@ -14,18 +14,22 @@ public class EnemyTest extends Entity {
     Random rand = new Random();
 
     private final int startX;
+    private final int startY;
     private final int endX;
-    private final int movementRange = 300; // pixels
+    private final int endY;
 
-    private int shootCooldown = 0;
-    private final int SHOOT_COOLDOWN_TIME = 120; // 2 seconds at 60 FPS
+    //Duration between shots
+    private int shootCooldown;
+    private final int SHOOT_COOLDOWN_TIME = 60; // 2 seconds at 60 FPS
 
-    private int shootAnimationTimer = 0;
-    private final int SHOOT_ANIMATION_DURATION = 30;
+    //Duration of the shoot image
+    private int shootAnimationTimer;
+    private final int SHOOT_ANIMATION_DURATION = 40;
 
     public EnemyTest(GamePanel gp,int startX, int startY) {
         super(gp);
         solidArea = new Rectangle(18,12,8,8);
+        shootCooldown = SHOOT_COOLDOWN_TIME;
         shootAnimationTimer=SHOOT_ANIMATION_DURATION;
         try {
             getEnemyTestImage();
@@ -34,8 +38,13 @@ public class EnemyTest extends Entity {
         }
         this.worldX = startX;
         this.worldY = startY;
+
+        int movementRange = 300;
         this.startX = startX;
+        this.startY = startY;
         this.endX = startX + movementRange;
+        this.endY = startY + movementRange;
+
         this.speed = 2;
         previousDirection = "right";
         direction = "right";
@@ -52,26 +61,22 @@ public class EnemyTest extends Entity {
         if (shootCooldown > 0)
             shootCooldown--;
         if (direction.equals("shoot")) {
-            //private int shootAnimationTimer = 0;
-            //private final int SHOOT_ANIMATION_DURATION = 30;
             if (shootCooldown == 0) {
-                if(shootAnimationTimer == 15) {
+                if(shootAnimationTimer == SHOOT_ANIMATION_DURATION/2) {
                     shoot();
-                    shootCooldown = SHOOT_COOLDOWN_TIME;
                 }
                 else if(shootAnimationTimer == 0){
                     shootAnimationTimer = SHOOT_ANIMATION_DURATION;
+                    shootCooldown = SHOOT_COOLDOWN_TIME;
                 }
-                else{
-                    shootAnimationTimer--;
-                }
+                shootAnimationTimer--;
             }
             else {
-                direction = "left";
+                direction = previousDirection;
             }
         }
         else {
-            if (directionChanger >= 120) { // Change direction every seconds (assuming 60 FPS)
+            if (directionChanger >= 120) { // Change direction every second (assuming 60 FPS)
                 if (direction.equals("right"))
                     direction = "left";
                 else if (direction.equals("left"))
@@ -95,6 +100,8 @@ public class EnemyTest extends Entity {
                         } else {
                             direction = "left";
                         }
+                        break;
+                    case "shoot":
                         break;
                 }
             }
@@ -140,4 +147,5 @@ public class EnemyTest extends Entity {
             g2.drawImage(image, screenX, screenY, width, height, null);
         }
     }
+
 }

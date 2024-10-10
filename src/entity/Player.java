@@ -12,27 +12,18 @@ public class Player extends Entity{
 
 
     public Player(GamePanel panel, InputHandler kezelo) {
-
         super(panel);
         this.kezelo = kezelo;
         health = 100;
         screenX=gp.screenWidth/2 - (gp.tileSize/2);
         screenY=gp.screenHeight/2 - (gp.tileSize/2);
-
-        solidArea = new Rectangle();
-        solidArea.x=8;
-        solidArea.y=16;
+        solidArea = new Rectangle(8,16,32,32);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
-        solidArea.width=32;
-        solidArea.height=32;
-
         setDefaultValues();
-
         try {
             getPlayerImage();
         }catch (Exception e){System.out.println("getPlayerImage() is not working");}
-
     }
 
     public void setDefaultValues(){
@@ -111,7 +102,6 @@ public class Player extends Entity{
             case "right" -> right;
             default -> null;
         };
-
         int x = screenX;
         int y = screenY;
         if(screenX > worldX){
