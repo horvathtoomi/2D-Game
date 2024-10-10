@@ -11,5 +11,5 @@ public class UtilityTool {
         g2.drawImage(img,0,0,newWidth,newHeight,null);
         g2.dispose();
         return scaledImage;
-    };
+    }
 }

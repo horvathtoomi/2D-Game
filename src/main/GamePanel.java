@@ -1,8 +1,6 @@
 package main;
 
-import entity.EnemyTest;
-import entity.Entity;
-import entity.Player;
+import entity.*;
 import object.*;
 import tile.TileManager;
 import javax.swing.JPanel;
@@ -10,6 +8,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+
 
 public class GamePanel extends JPanel implements Runnable {
     final int OriginalTileSize=16; //16x16-os
@@ -28,9 +28,13 @@ public class GamePanel extends JPanel implements Runnable {
     int FPS=60;
 
     public TileManager tileman=new TileManager(this);
+
     InputHandler inpkez = new InputHandler(this);
+
     public UserInterface ui=new UserInterface(this);
+
     Thread gameThread;
+
     public CollisionChecker cChecker=new CollisionChecker(this);
 
     public Player player = new Player(this,inpkez);
@@ -39,7 +43,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public ArrayList<Entity> npc = new ArrayList<>();
 
-    //public EnemyTest et = null;
+    public EnemyTest et;
 
     //Game State
     public int gameState;
@@ -63,7 +67,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         }
         aSetter.setNPC();
-        //et = new EnemyTest(this, 23*tileSize,21*tileSize);
+        et = new EnemyTest(this, 23*tileSize,21*tileSize);
         aSetter.lista = new CopyOnWriteArrayList<>(aSetter.lista);
         gameState=playState;
     }
@@ -77,7 +81,7 @@ public class GamePanel extends JPanel implements Runnable {
         gameThread.start();
     }
     public void run(){
-        double drawInterval =1000000000/FPS;
+        double drawInterval = (double) 1000000000 /FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
 
         while(gameThread!=null) {
@@ -95,14 +99,14 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void killEntitys(){
-        //et.left = et.right = et.shoot = null;
+       // et.left = et.right = et.shoot = null;
     }
 
     public void update() {
         if(gameState == playState) {
             player.update();
 
-            //et.update();
+            et.update();
 
             for(Entity e : npc)
                 if(e != null)
@@ -135,9 +139,9 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         player.draw(g2);
-        //if(et!=null) {
-        //    et.draw(g2);
-        //}
+        if(et!=null) {
+            et.draw(g2);
+        }
         ui.draw(g2);
         g2.dispose();
     }

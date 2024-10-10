@@ -34,7 +34,7 @@ public class NPC_Wayfarer extends Entity{
             if (i > 50 && i <= 75) {
                 direction = "left";
             }
-            if (i > 75 && i <= 100) {
+            if (i > 75) {
                 direction = "right";
             }
             actionLockCounter = 0;

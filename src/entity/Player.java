@@ -89,10 +89,10 @@ public class Player extends Entity{
         }
     }
 
-    public void pickUpObject(int index){
-        if(index!=999){
 
-        }
+    public void pickUpObject(int index) {
+        //if(index!=999){
+        //}
     }
 
     public void interractNPC(int idx){

@@ -1,9 +1,8 @@
 package main;
 
-import entity.Entity;
+import entity.EnemyTestAttack;
 import entity.NPC_Wayfarer;
 import object.*;
-
 import java.io.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -41,12 +40,6 @@ public class AssetSetter {
                     break;
                 case "boots":
                     lista.add(new OBJ_Boots(gp, x* gp.tileSize, y* gp.tileSize));
-                    break;
-                case "EnemyTestAttack":
-                    // KIZÁRÓLAG TESZT, A PÁLYÁN ALAPVETŐEN NINCS ELHELYEZVE EZ AZ OBJECT
-                    int playerWorldX = gp.player.worldX;
-                    int playerWorldY = gp.player.worldY;
-                    gp.addObject(new EnemyTestAttack(gp, 20 * gp.tileSize, 20 * gp.tileSize, playerWorldX, playerWorldY));
                     break;
                 default:
                     System.out.println("Object not found");

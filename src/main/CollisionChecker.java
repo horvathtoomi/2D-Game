@@ -56,6 +56,9 @@ public class CollisionChecker {
                 if(gp.tileman.tile[tileNum1].collision||gp.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
+            case "shoot":
+
+                break;
         }
     }
 

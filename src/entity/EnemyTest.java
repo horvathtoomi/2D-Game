@@ -1,7 +1,7 @@
 package entity;
 
 import main.GamePanel;
-import object.EnemyTestAttack;
+import entity.EnemyTestAttack;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -14,9 +14,9 @@ public class EnemyTest extends Entity {
     String previousDirection = "";
     Random rand = new Random();
 
-    private int startX;
-    private int endX;
-    private int movementRange = 200; // pixels
+    private final int startX;
+    private final int endX;
+    private final int movementRange = 200; // pixels
 
     private int shootCooldown = 0;
     private final int SHOOT_COOLDOWN_TIME = 120; // 2 seconds at 60 FPS
@@ -69,6 +69,7 @@ public class EnemyTest extends Entity {
                 shoot();
                 shootCooldown = SHOOT_COOLDOWN_TIME;
                 shootAnimationTimer = SHOOT_ANIMATION_DURATION;
+                direction = "right";
             }
         } else {
             if (directionChanger >= 120) { // Change direction every 2 seconds (assuming 60 FPS)
@@ -125,7 +126,7 @@ public class EnemyTest extends Entity {
         int startX = (int) (worldX + normalizedDx * gp.tileSize);
         int startY = (int) (worldY + normalizedDy * gp.tileSize);
 
-        EnemyTestAttack attack = new EnemyTestAttack(gp, startX, startY, playerWorldX, playerWorldY);
+        gp.npc.add(new EnemyTestAttack(gp, startX, startY, playerWorldX, playerWorldY));
     }
 
     public void draw(Graphics2D g2) {
@@ -135,12 +136,9 @@ public class EnemyTest extends Entity {
             case "right" -> right;
             default -> null;
         };
-
         screenX = worldX - gp.player.worldX + gp.player.screenX;
         screenY = worldY - gp.player.worldY + gp.player.screenY;
-
-        if (screenX > -gp.tileSize && screenX < gp.screenWidth &&
-                screenY > -gp.tileSize && screenY < gp.screenHeight) {
+        if (screenX > -gp.tileSize && screenX < gp.screenWidth && screenY > -gp.tileSize && screenY < gp.screenHeight) {
             int width = (int)(2.25 * gp.tileSize);
             int height = (int)(1.5 * gp.tileSize);
             g2.drawImage(image, screenX, screenY, width, height, null);
