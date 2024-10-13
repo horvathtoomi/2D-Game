@@ -7,11 +7,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AssetSetter {
     GamePanel gp;
-    public CopyOnWriteArrayList<SuperObject> lista;
+    public CopyOnWriteArrayList<SuperObject> list;
 
     public AssetSetter(GamePanel gp) {
         this.gp = gp;
-        lista = new CopyOnWriteArrayList<>();
+        list = new CopyOnWriteArrayList<>();
     }
 
     public void setObject() throws IOException {
@@ -29,16 +29,16 @@ public class AssetSetter {
             int y = Integer.parseInt(parts[2]);
             switch (name) {
                 case "key":
-                    lista.add(new OBJ_Key(gp, x* gp.tileSize, y*gp.tileSize));
+                    list.add(new OBJ_Key(gp, x* gp.tileSize, y*gp.tileSize));
                     break;
                 case "chest":
-                    lista.add(new OBJ_Chest(gp, x* gp.tileSize, y* gp.tileSize));
+                    list.add(new OBJ_Chest(gp, x* gp.tileSize, y* gp.tileSize));
                     break;
                 case "door":
-                    lista.add(new OBJ_Door(gp, x* gp.tileSize, y* gp.tileSize));
+                    list.add(new OBJ_Door(gp, x* gp.tileSize, y* gp.tileSize));
                     break;
                 case "boots":
-                    lista.add(new OBJ_Boots(gp, x* gp.tileSize, y* gp.tileSize));
+                    list.add(new OBJ_Boots(gp, x* gp.tileSize, y* gp.tileSize));
                     break;
                 default:
                     System.out.println("Object not found");

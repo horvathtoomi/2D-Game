@@ -11,8 +11,7 @@ import java.util.Objects;
 
 public class Entity {
     public int worldX,worldY;
-    public int speed;
-    public int health;
+    public int speed, health;
     public int actionLockCounter;
     public BufferedImage right,left,up,down;
     public String direction;
@@ -25,9 +24,7 @@ public class Entity {
         this.gp = gp;
     }
 
-    public void setAction(){
-
-    }
+    public void setAction(){}
 
     public void update(){
         setAction();

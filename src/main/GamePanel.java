@@ -67,8 +67,8 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         aSetter.setNPC();
-        et = new EnemyTest(this, 23*tileSize,21*tileSize);
-        aSetter.lista = new CopyOnWriteArrayList<>(aSetter.lista);
+        et = new EnemyTest(this, 25*tileSize,21*tileSize);
+        aSetter.list = new CopyOnWriteArrayList<>(aSetter.list);
         gameState=playState;
     }
 
@@ -113,7 +113,7 @@ public class GamePanel extends JPanel implements Runnable {
                     i--;  // Adjust index after removal
                 }
             }
-            for (SuperObject obj : aSetter.lista)
+            for (SuperObject obj : aSetter.list)
                 if (obj != null)
                     obj.update();
         }
@@ -127,7 +127,7 @@ public class GamePanel extends JPanel implements Runnable {
         //Tile
         tileman.draw(g2);
         //Object
-        for(SuperObject object : aSetter.lista)
+        for(SuperObject object : aSetter.list)
             if (object != null)
                 object.draw(g2, this);
         //NPC and Entities

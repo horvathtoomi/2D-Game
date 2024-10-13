@@ -44,7 +44,7 @@ public class TileManager {
             tile[idx].image=ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("tiles/" + imagePath + ".png")));
             tile[idx].image = uTool.scaleImage(tile[idx].image,gp.tileSize,gp.tileSize);
             tile[idx].collision=collision;
-        }catch(IOException e){e.printStackTrace();}
+        }catch(IOException e){e.getCause();}
     }
 
     public void loadMap(String address){
@@ -67,7 +67,7 @@ public class TileManager {
                 }
             }
             br.close();
-        }catch(Exception e){ e.printStackTrace();}
+        }catch(Exception e){ e.printStackTrace(); }
     }
 
     public void draw(Graphics2D g2){

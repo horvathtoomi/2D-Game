@@ -14,9 +14,7 @@ public class EnemyTest extends Entity {
     Random rand = new Random();
 
     private final int startX;
-    private final int startY;
     private final int endX;
-    private final int endY;
 
     //Duration between shots
     private int shootCooldown;
@@ -41,9 +39,7 @@ public class EnemyTest extends Entity {
 
         int movementRange = 300;
         this.startX = startX;
-        this.startY = startY;
         this.endX = startX + movementRange;
-        this.endY = startY + movementRange;
 
         this.speed = 2;
         previousDirection = "right";

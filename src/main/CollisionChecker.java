@@ -65,7 +65,7 @@ public class CollisionChecker {
     public int checkObject(Entity entity, boolean is_a_player){
         int index=999;
         int it = 0;
-        for(SuperObject aut : gp.aSetter.lista) {
+        for(SuperObject aut : gp.aSetter.list) {
             if (aut != null) {
                 //Get entity's solid area
                 entity.solidArea.x = entity.worldX + entity.solidArea.x;

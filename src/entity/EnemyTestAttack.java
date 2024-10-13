@@ -13,19 +13,16 @@ public class EnemyTestAttack extends Entity{
     int imageChange = 0;
     public BufferedImage image, image1, image2;
     private double dx, dy;
-    private final double speed = 6;
-    private int initialX, initialY;
 
     public EnemyTestAttack(GamePanel gp, int startX, int startY, int targetX, int targetY) {
         super(gp);
         worldX = startX;
         worldY = startY;
-        initialX = startX;
-        initialY = startY;
         name = "EnemyTestAttack";
 
         // Calculate direction
         double angle = Math.atan2(targetY - startY, targetX - startX);
+        double speed = 6;
         dx = Math.cos(angle) * speed;
         dy = Math.sin(angle) * speed;
 
@@ -65,15 +62,12 @@ public class EnemyTestAttack extends Entity{
 
     @Override
     public void draw(Graphics2D g2) {
-        int screenX = worldX - gp.player.worldX + gp.player.screenX;
-        int screenY = worldY - gp.player.worldY + gp.player.screenY;
         if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
                 worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
                 worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
                 worldY - gp.tileSize < gp.player.worldY + gp.player.screenY) {
-            g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
-            //For degbug
-            //g2.drawRect(screenX + 3, screenY + 4, 10, 10);
+            // x-> screenX, y -> screenY
+            g2.drawImage(image, worldX - gp.player.worldX + gp.player.screenX, worldY - gp.player.worldY + gp.player.screenY, gp.tileSize, gp.tileSize, null);
         }
     }
 
