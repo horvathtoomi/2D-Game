@@ -51,65 +51,87 @@ public class SmallEnemy extends Entity{
         public void getSmallEnemyImage() {
             right = scale("SmallEnemy", "right");
             left = scale("SmallEnemy", "left");
+            up = scale("SmallEnemy", "up");
+            down = scale("SmallEnemy", "down");
             shoot = scale("SmallEnemy", "shoot");
         }
 
-        public void update() {
-            directionChanger++;
-            if (shootCooldown > 0)
-                shootCooldown--;
-            if (direction.equals("shoot")) {
-                if (shootCooldown == 0) {
-                    if(shootAnimationTimer == SHOOT_ANIMATION_DURATION/2) {
-                        shoot();
-                    }
-                    else if(shootAnimationTimer == 0){
-                        shootAnimationTimer = SHOOT_ANIMATION_DURATION;
-                        shootCooldown = SHOOT_COOLDOWN_TIME;
-                    }
-                    shootAnimationTimer--;
+    public void update() {
+        directionChanger++;
+        if (shootCooldown > 0)
+            shootCooldown--;
+        if (direction.equals("shoot")) {
+            if (shootCooldown == 0) {
+                if(shootAnimationTimer == SHOOT_ANIMATION_DURATION/2) {
+                    shoot();
                 }
-                else {
-                    direction = previousDirection;
+                else if(shootAnimationTimer == 0){
+                    shootAnimationTimer = SHOOT_ANIMATION_DURATION;
+                    shootCooldown = SHOOT_COOLDOWN_TIME;
                 }
+                shootAnimationTimer--;
             }
             else {
-                if (directionChanger >= 120) { // Change direction every second (assuming 60 FPS)
-                    if (direction.equals("right"))
-                        direction = "left";
-                    else if (direction.equals("left"))
-                        direction = "right";
-                    directionChanger = 0;
-                }
-                collisionOn = false;
-                gp.cChecker.checkTile(this);
-                if (!collisionOn) {
-                    switch (direction) {
-                        case "left":
-                            if (worldX > startX) {
-                                worldX -= speed;
-                            } else {
-                                direction = "right";
-                            }
-                            break;
-                        case "right":
-                            if (worldX < endX) {
-                                worldX += speed;
-                            } else {
-                                direction = "left";
-                            }
-                            break;
-                        case "shoot":
-                            break;
-                    }
-                }
-                // Randomly decide to shoot
-                if (rand.nextInt(100) < 1 && shootCooldown == 0) { // 1% chance to shoot each frame
-                    previousDirection = direction;
-                    direction = "shoot";
-                }
+                direction = previousDirection;
             }
         }
+        else {
+            if (directionChanger >= 120) { // Change direction every second (assuming 60 FPS)
+                switch (direction) {
+                    case "right":
+                        if(rand.nextInt(2)==1)
+                            direction = "left";
+                        else
+                            direction = "down";
+                        break;
+                    case "left":
+                        if(rand.nextInt(2)==1)
+                            direction = "right";
+                        else
+                            direction = "up";
+                        break;
+                    case "down":
+                        if(rand.nextInt(2)==1)
+                            direction = "left";
+                        else
+                            direction = "up";
+                        break;
+                    case "up":
+                        if(rand.nextInt(2)==1)
+                            direction = "right";
+                        else
+                            direction = "down";
+                        break;
+                }
+                directionChanger = 0;
+            }
+            collisionOn = false;
+            gp.cChecker.checkTile(this);
+            if (!collisionOn) {
+                switch (direction) {
+                    case "left":
+                        worldX -= speed;
+                        break;
+                    case "right":
+                        worldX += speed;
+                        break;
+                    case "down":
+                        worldY += speed;
+                        break;
+                    case "up":
+                        worldY -= speed;
+                        break;
+                    case "shoot":
+                        break;
+                }
+            }
+            // Randomly decide to shoot
+            if (rand.nextInt(100) < 1 && shootCooldown == 0) { // 1% chance to shoot each frame
+                previousDirection = direction;
+                direction = "shoot";
+            }
+        }
+    }
 
 
         public void shoot() {
@@ -134,6 +156,8 @@ public class SmallEnemy extends Entity{
             BufferedImage image = switch (direction) {
                 case "shoot" -> shoot;
                 case "left" -> left;
+                case "up" -> up;
+                case "down" -> down;
                 case "right" -> right;
                 default -> null;
             };

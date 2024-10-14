@@ -14,7 +14,7 @@ public class Player extends Entity{
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
         this.kezelo = kezelo;
-        health = 100;
+        health = 1000;
         screenX=gp.screenWidth/2 - (gp.tileSize/2);
         screenY=gp.screenHeight/2 - (gp.tileSize/2);
         solidArea = new Rectangle(8,16,32,32);

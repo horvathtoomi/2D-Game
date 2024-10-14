@@ -1,6 +1,8 @@
 package entity;
 
 import main.GamePanel;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -41,7 +43,7 @@ public class EnemyTest extends Entity {
         this.startX = startX;
         this.endX = startX + movementRange;
 
-        this.speed = 2;
+        this.speed = 1;
         previousDirection = "right";
         direction = "right";
     }
@@ -49,6 +51,8 @@ public class EnemyTest extends Entity {
     public void getEnemyTestImage() {
         right = scale("EnemyTest", "right");
         left = scale("EnemyTest", "left");
+        down = scale("EnemyTest", "down");
+        up = scale("EnemyTest", "up");
         shoot = scale("EnemyTest", "shoot");
     }
 
@@ -73,10 +77,32 @@ public class EnemyTest extends Entity {
         }
         else {
             if (directionChanger >= 120) { // Change direction every second (assuming 60 FPS)
-                if (direction.equals("right"))
-                    direction = "left";
-                else if (direction.equals("left"))
-                    direction = "right";
+                switch (direction) {
+                    case "right":
+                        if(rand.nextInt(2)==1)
+                            direction = "left";
+                        else
+                            direction = "down";
+                        break;
+                    case "left":
+                        if(rand.nextInt(2)==1)
+                            direction = "right";
+                        else
+                            direction = "up";
+                        break;
+                    case "down":
+                        if(rand.nextInt(2)==1)
+                            direction = "left";
+                        else
+                            direction = "up";
+                        break;
+                    case "up":
+                        if(rand.nextInt(2)==1)
+                            direction = "right";
+                        else
+                            direction = "down";
+                        break;
+                }
                 directionChanger = 0;
             }
             collisionOn = false;
@@ -84,18 +110,24 @@ public class EnemyTest extends Entity {
             if (!collisionOn) {
                 switch (direction) {
                     case "left":
-                        if (worldX > startX) {
+                        //if (worldX > startX) {
                             worldX -= speed;
-                        } else {
-                            direction = "right";
-                        }
+                        //} else {
+                        //    direction = "right";
+                        //}
                         break;
                     case "right":
-                        if (worldX < endX) {
+                        //if (worldX < endX) {
                             worldX += speed;
-                        } else {
-                            direction = "left";
-                        }
+                        //} else {
+                        //    direction = "left";
+                        //}
+                        break;
+                    case "down":
+                        worldY += speed;
+                        break;
+                    case "up":
+                        worldY -= speed;
                         break;
                     case "shoot":
                         break;
@@ -131,6 +163,8 @@ public class EnemyTest extends Entity {
     public void draw(Graphics2D g2) {
         BufferedImage image = switch (direction) {
             case "shoot" -> shoot;
+            case "up" -> up;
+            case "down" -> down;
             case "left" -> left;
             case "right" -> right;
             default -> null;

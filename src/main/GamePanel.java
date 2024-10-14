@@ -69,7 +69,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         aSetter.setNPC();
         et1 = new EnemyTest(this, 25*tileSize,21*tileSize);
-        et2 = new EnemyTest(this, 14*tileSize,20*tileSize);
+        et2 = new EnemyTest(this, 2*tileSize,2*tileSize);
         et3 = new EnemyTest(this, 22*tileSize,45*tileSize);
         se1 = new SmallEnemy(this, 25*tileSize, 25*tileSize);
         se2 = new SmallEnemy(this, 35*tileSize, 34*tileSize);
