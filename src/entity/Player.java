@@ -14,16 +14,14 @@ public class Player extends Entity{
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
         this.kezelo = kezelo;
-        health = 1000;
+        health = 100;
         screenX=gp.screenWidth/2 - (gp.tileSize/2);
         screenY=gp.screenHeight/2 - (gp.tileSize/2);
         solidArea = new Rectangle(8,16,32,32);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         setDefaultValues();
-        try {
-            getPlayerImage();
-        }catch (Exception e){System.out.println("getPlayerImage() is not working");}
+        getPlayerImage();
     }
 
     public void setDefaultValues(){
@@ -42,14 +40,10 @@ public class Player extends Entity{
 
     public void update(){
         if(kezelo.upPressed||kezelo.downPressed||kezelo.leftPressed||kezelo.rightPressed) {
-            if (kezelo.upPressed)
-                direction = "up";
-            if (kezelo.downPressed)
-                direction = "down";
-            if (kezelo.leftPressed)
-                direction = "left";
-            if (kezelo.rightPressed)
-                direction = "right";
+            if (kezelo.upPressed) direction = "up";
+            if (kezelo.downPressed) direction = "down";
+            if (kezelo.leftPressed) direction = "left";
+            if (kezelo.rightPressed) direction = "right";
 
             //Check Tile Collision
             collisionOn = false;
@@ -65,18 +59,10 @@ public class Player extends Entity{
 
             if (!collisionOn) {
                 switch (direction) {
-                    case "up":
-                        worldY -= speed;
-                        break;
-                    case "down":
-                        worldY += speed;
-                        break;
-                    case "left":
-                        worldX -= speed;
-                        break;
-                    case "right":
-                        worldX += speed;
-                        break;
+                    case "up" -> worldY -= speed;
+                    case "down"-> worldY += speed;
+                    case "left" -> worldX -= speed;
+                    case "right" -> worldX += speed;
                 }
             }
         }

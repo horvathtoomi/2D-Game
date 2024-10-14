@@ -19,7 +19,7 @@ public class UserInterface {
         //if(gp.gameState==gp.playState){
             //Do playstate stuff later
         //}
-        if(gp.gameState == gp.pauseState){
+        if(gp.gameState == GamePanel.GameState.PAUSED){
             drawPauseScreen(g2);
         }
     }

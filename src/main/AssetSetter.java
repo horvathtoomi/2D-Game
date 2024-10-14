@@ -28,21 +28,11 @@ public class AssetSetter {
             int x = Integer.parseInt(parts[1]);
             int y = Integer.parseInt(parts[2]);
             switch (name) {
-                case "key":
-                    list.add(new OBJ_Key(gp, x* gp.tileSize, y*gp.tileSize));
-                    break;
-                case "chest":
-                    list.add(new OBJ_Chest(gp, x* gp.tileSize, y* gp.tileSize));
-                    break;
-                case "door":
-                    list.add(new OBJ_Door(gp, x* gp.tileSize, y* gp.tileSize));
-                    break;
-                case "boots":
-                    list.add(new OBJ_Boots(gp, x* gp.tileSize, y* gp.tileSize));
-                    break;
-                default:
-                    System.out.println("Object not found");
-                    break;
+                case "key" -> list.add(new OBJ_Key(gp, x* gp.tileSize, y*gp.tileSize));
+                case "chest" -> list.add(new OBJ_Chest(gp, x* gp.tileSize, y* gp.tileSize));
+                case "door" -> list.add(new OBJ_Door(gp, x* gp.tileSize, y* gp.tileSize));
+                case "boots" -> list.add(new OBJ_Boots(gp, x* gp.tileSize, y* gp.tileSize));
+                default -> System.out.println("Object not found");
             }
         }
         br.close();
@@ -53,7 +43,6 @@ public class AssetSetter {
         wf.worldX = gp.tileSize*21;
         wf.worldY = gp.tileSize*21;
         gp.entities.add(wf);
-
     }
 
 }

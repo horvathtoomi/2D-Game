@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class Entity {
+    String name;
     public int worldX,worldY;
     public int speed, health;
     public int actionLockCounter;

@@ -1,3 +1,4 @@
+
 package main;
 
 import entity.*;
@@ -36,20 +37,13 @@ public class GamePanel extends JPanel implements Runnable {
     Thread gameThread;
 
     public CollisionChecker cChecker=new CollisionChecker(this);
-
     public Player player = new Player(this,inpkez);
-
     public AssetSetter aSetter= new AssetSetter(this);
-
     public ArrayList<Entity> entities = new ArrayList<>();
 
-    public EnemyTest et1,et2,et3;
-    public SmallEnemy se1,se2,se3,se4;
-
     //Game State
-    public int gameState;
-    public final int playState = 1;
-    public final int pauseState = 2;
+    public enum GameState{RUNNING,PAUSED,FINISHED}
+    public GameState gameState;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -64,60 +58,50 @@ public class GamePanel extends JPanel implements Runnable {
             aSetter.setObject();
         }catch(IOException e){
             System.out.println("Object was not set.");
-            e.printStackTrace();
+            e.getCause();
         }
-
         aSetter.setNPC();
-        et1 = new EnemyTest(this, 25*tileSize,21*tileSize);
-        et2 = new EnemyTest(this, 2*tileSize,2*tileSize);
-        et3 = new EnemyTest(this, 22*tileSize,45*tileSize);
-        se1 = new SmallEnemy(this, 25*tileSize, 25*tileSize);
-        se2 = new SmallEnemy(this, 35*tileSize, 34*tileSize);
-        se3 = new SmallEnemy(this, 10*tileSize, 10*tileSize);
-        se4 = new SmallEnemy(this, 20*tileSize, 40*tileSize);
+        addEnemy(new EnemyTest(this, 25 * tileSize, 21 * tileSize));
+        addEnemy(new EnemyTest(this, 22 * tileSize, 45 * tileSize));
+        addEnemy(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
+        addEnemy(new SmallEnemy(this, 35 * tileSize, 34 * tileSize));
+        addEnemy(new GiantEnemy(this,30 * tileSize, 30 * tileSize));
         aSetter.list = new CopyOnWriteArrayList<>(aSetter.list);
-        gameState=playState;
+        gameState=GameState.RUNNING;
+    }
+
+    private void addEnemy(Entity enemy){
+        entities.add(enemy);
     }
 
     public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
     }
-    public void run(){
-        double drawInterval = (double) 1000000000 /FPS;
+    public void run() {
+        double drawInterval = 1_000_000_000.0 / FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
 
-        while(gameThread!=null) {
-            if(player.health>0) {
-                update();
-                repaint();
-                try {
-                    double remainingTime = nextDrawTime - System.nanoTime();
-                    remainingTime /= 1000000;
-                    if (remainingTime < 0)
-                        remainingTime = 0;
-                    Thread.sleep((long) remainingTime);
-                    nextDrawTime += drawInterval;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        while (gameThread != null && player.health > 0) {
+            update();
+            repaint();
+
+            try {
+                double remainingTime = nextDrawTime - System.nanoTime();
+                remainingTime = Math.max(0, remainingTime / 1_000_000);
+                Thread.sleep((long) remainingTime);
+                nextDrawTime += drawInterval;
+            } catch (InterruptedException e) {
+                e.getCause();
             }
         }
     }
 
     public void update() {
-        if(gameState == playState) {
+        if(gameState == GameState.RUNNING) {
             player.update();
-            et1.update();
-            et2.update();
-            et3.update();
-            se1.update();
-            se2.update();
-            se3.update();
-            se4.update();
             for (int i = 0; i < entities.size(); i++) {
                 Entity entity = entities.get(i);
-
                 if (entity != null) {
                     entity.update();
                 }
@@ -130,8 +114,6 @@ public class GamePanel extends JPanel implements Runnable {
                 if (obj != null)
                     obj.update();
         }
-        //if(gameState == pauseState) {
-        //}
     }
 
     public void paintComponent(Graphics g) {
@@ -148,30 +130,8 @@ public class GamePanel extends JPanel implements Runnable {
             if(entity != null)
                 entity.draw(g2);
         player.draw(g2);
-        if(et1 != null) {
-            et1.draw(g2);
-        }
-        if(et2 != null) {
-            et2.draw(g2);
-        }
-        if(et3 != null) {
-            et3.draw(g2);
-        }
-        if(se1 != null) {
-            se1.draw(g2);
-        }
-        if(se2 != null) {
-            se2.draw(g2);
-        }
-        if(se3 != null) {
-            se3.draw(g2);
-        }
-        if(se4 != null) {
-            se4.draw(g2);
-        }
         ui.draw(g2);
         g2.dispose();
     }
-
 
 }
