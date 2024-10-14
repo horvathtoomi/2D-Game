@@ -43,7 +43,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     public ArrayList<Entity> entities = new ArrayList<>();
 
-    public EnemyTest et;
+    public EnemyTest et1,et2,et3;
+    public SmallEnemy se1,se2,se3,se4;
 
     //Game State
     public int gameState;
@@ -67,7 +68,13 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         aSetter.setNPC();
-        et = new EnemyTest(this, 25*tileSize,21*tileSize);
+        et1 = new EnemyTest(this, 25*tileSize,21*tileSize);
+        et2 = new EnemyTest(this, 14*tileSize,20*tileSize);
+        et3 = new EnemyTest(this, 22*tileSize,45*tileSize);
+        se1 = new SmallEnemy(this, 25*tileSize, 25*tileSize);
+        se2 = new SmallEnemy(this, 35*tileSize, 34*tileSize);
+        se3 = new SmallEnemy(this, 10*tileSize, 10*tileSize);
+        se4 = new SmallEnemy(this, 20*tileSize, 40*tileSize);
         aSetter.list = new CopyOnWriteArrayList<>(aSetter.list);
         gameState=playState;
     }
@@ -101,7 +108,13 @@ public class GamePanel extends JPanel implements Runnable {
     public void update() {
         if(gameState == playState) {
             player.update();
-            et.update();
+            et1.update();
+            et2.update();
+            et3.update();
+            se1.update();
+            se2.update();
+            se3.update();
+            se4.update();
             for (int i = 0; i < entities.size(); i++) {
                 Entity entity = entities.get(i);
 
@@ -135,8 +148,26 @@ public class GamePanel extends JPanel implements Runnable {
             if(entity != null)
                 entity.draw(g2);
         player.draw(g2);
-        if(et != null) {
-            et.draw(g2);
+        if(et1 != null) {
+            et1.draw(g2);
+        }
+        if(et2 != null) {
+            et2.draw(g2);
+        }
+        if(et3 != null) {
+            et3.draw(g2);
+        }
+        if(se1 != null) {
+            se1.draw(g2);
+        }
+        if(se2 != null) {
+            se2.draw(g2);
+        }
+        if(se3 != null) {
+            se3.draw(g2);
+        }
+        if(se4 != null) {
+            se4.draw(g2);
         }
         ui.draw(g2);
         g2.dispose();

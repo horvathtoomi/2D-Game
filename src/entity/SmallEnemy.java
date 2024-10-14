@@ -34,7 +34,7 @@ public class SmallEnemy extends Entity{
             try {
                 getSmallEnemyImage();
             } catch (Exception e) {
-                System.out.println("getEntityTestImage() is not working");
+                System.out.println("getSmallEnemy() is not working");
             }
             this.worldX = startX;
             this.worldY = startY;
@@ -127,7 +127,7 @@ public class SmallEnemy extends Entity{
             int startX = (int) (worldX + normalizedDx * gp.tileSize);
             int startY = (int) (worldY + normalizedDy * gp.tileSize);
 
-            gp.entities.add(new EnemyTestAttack(gp, startX, startY, playerWorldX, playerWorldY));
+            gp.entities.add(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
         }
 
         public void draw(Graphics2D g2) {
@@ -140,9 +140,7 @@ public class SmallEnemy extends Entity{
             screenX = worldX - gp.player.worldX + gp.player.screenX;
             screenY = worldY - gp.player.worldY + gp.player.screenY;
             if (screenX > -gp.tileSize && screenX < gp.screenWidth && screenY > -gp.tileSize && screenY < gp.screenHeight) {
-                int width = (int)(2.25 * gp.tileSize);
-                int height = (int)(1.5 * gp.tileSize);
-                g2.drawImage(image, screenX, screenY, width, height, null);
+                g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
             }
         }
 

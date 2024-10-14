@@ -76,7 +76,7 @@ public class Entity {
             bufim = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png")));
             bufim = uTool.scaleImage(bufim, gp.tileSize, gp.tileSize);
 
-        }catch(IOException e){e.printStackTrace();}
+        }catch(IOException e){e.getCause();}
         return bufim;
     }
 
