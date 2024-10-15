@@ -143,7 +143,7 @@ public class Enemy extends Entity{
         int startY = (int) (worldY + normalizedDy * gp.tileSize);
         switch(name){
             case "EnemyTest":
-                gp.entities.add(new EnemyTestAttack(gp, startX, startY, playerWorldX, playerWorldY));
+                gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
                 break;
             case "SmallEnemy":
                 gp.entities.add(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
@@ -152,7 +152,7 @@ public class Enemy extends Entity{
                 gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
                 break;
             default:
-                gp.entities.add(new EnemyTestAttack(gp, startX, startY, playerWorldX, playerWorldY));
+                gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
                 break;
         }
     }

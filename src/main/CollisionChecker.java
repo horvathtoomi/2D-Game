@@ -2,8 +2,7 @@ package main;
 
 import entity.*;
 import object.SuperObject;
-
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CollisionChecker {
 
@@ -123,7 +122,7 @@ public class CollisionChecker {
     }
 
     //Check npc/monster collision
-    public int checkEntity(Entity entity, ArrayList<Entity> second){
+    public int checkEntity(Entity entity, CopyOnWriteArrayList<Entity> second){
         int index=999;
         int it = 0;
         for(Entity target : second) {
