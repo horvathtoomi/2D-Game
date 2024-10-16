@@ -30,10 +30,10 @@ public class Player extends Entity{
     }
 
     public void getPlayerImage(){
-        right = scale("player","jobbra");
-        left = scale("player","balra");
-        down = scale("player","le");
-        up = scale("player","fel");
+        right = scale("player","right");
+        left = scale("player","left");
+        down = scale("player","down");
+        up = scale("player","up");
     }
 
     public void update(){
