@@ -28,10 +28,10 @@ public class AssetSetter {
             int x = Integer.parseInt(parts[1]);
             int y = Integer.parseInt(parts[2]);
             switch (name) {
-                case "key" -> list.add(new OBJ_Key(gp, x* gp.tileSize, y*gp.tileSize));
-                case "chest" -> list.add(new OBJ_Chest(gp, x* gp.tileSize, y* gp.tileSize));
-                case "door" -> list.add(new OBJ_Door(gp, x* gp.tileSize, y* gp.tileSize));
-                case "boots" -> list.add(new OBJ_Boots(gp, x* gp.tileSize, y* gp.tileSize));
+                case "key" -> list.add(new OBJ_Key(gp, x* gp.getTileSize(), y*gp.getTileSize()));
+                case "chest" -> list.add(new OBJ_Chest(gp, x* gp.getTileSize(), y* gp.getTileSize()));
+                case "door" -> list.add(new OBJ_Door(gp, x* gp.getTileSize(), y* gp.getTileSize()));
+                case "boots" -> list.add(new OBJ_Boots(gp, x* gp.getTileSize(), y* gp.getTileSize()));
                 default -> System.out.println("Object not found");
             }
         }
@@ -40,8 +40,8 @@ public class AssetSetter {
 
     public void setNPC(){
         NPC_Wayfarer wf = new NPC_Wayfarer(gp);
-        wf.worldX = gp.tileSize*21;
-        wf.worldY = gp.tileSize*21;
+        wf.setWorldX(gp.getTileSize()*21);
+        wf.setWorldY(gp.getTileSize()*21);
         gp.entities.add(wf);
     }
 

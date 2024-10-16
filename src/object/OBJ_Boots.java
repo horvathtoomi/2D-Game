@@ -4,6 +4,7 @@ import main.GamePanel;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.util.Objects;
 
 public class OBJ_Boots extends SuperObject{
     public OBJ_Boots(GamePanel gp, int x, int y){
@@ -12,7 +13,7 @@ public class OBJ_Boots extends SuperObject{
         this.gp=gp;
         name="boots";
         try {
-            image = ImageIO.read(getClass().getClassLoader().getResourceAsStream("objects/cipo.png"));
+            image = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("objects/cipo.png")));
         }catch(IOException e){e.printStackTrace();}
     }
 }

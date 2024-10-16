@@ -8,15 +8,14 @@ import java.util.Random;
 
 public class Enemy extends Entity{
     public BufferedImage shoot;
-    public int screenX;
-    public int screenY;
-    int directionChanger = 0;
+    private int directionChanger = 0;
     String previousDirection = "right";
     Random rand = new Random();
-    int width, height;
+    private int width, height;
 
     private final int startX;
     private final int shootingRate;
+
     //Duration between shots
     private int shootCooldown;
     private final int SHOOT_COOLDOWN_TIME = 60; // 2 seconds at 60 FPS
@@ -39,13 +38,13 @@ public class Enemy extends Entity{
         } catch (Exception e) {
             System.out.println("getEnemyImage() is not working");
         }
-        this.worldX = startX;
-        this.worldY = startY;
+        setWorldX(startX);
+        setWorldY(startY);
 
         int movementRange = 300;
         this.startX = startX;
 
-        this.speed = 1;
+        setSpeed(1);
         previousDirection = "right";
         direction = "right";
     }
@@ -111,10 +110,10 @@ public class Enemy extends Entity{
             gp.cChecker.checkTile(this);
             if (!collisionOn) {
                 switch (direction) {
-                    case "left" -> worldX -= speed;
-                    case "right" -> worldX += speed;
-                    case "down" -> worldY += speed;
-                    case "up" -> worldY -= speed;
+                    case "left" -> setWorldX(getWorldX() - getSpeed());
+                    case "right" -> setWorldX(getWorldX() + getSpeed());
+                    case "down" -> setWorldY(getWorldY() + getSpeed());
+                    case "up" -> setWorldY(getWorldY() - getSpeed());
                     case "shoot" -> {}
                 }
             }
@@ -128,19 +127,19 @@ public class Enemy extends Entity{
 
 
     public void shoot() {
-        int playerWorldX = gp.player.worldX;
-        int playerWorldY = gp.player.worldY;
+        int playerWorldX = gp.player.getWorldX();
+        int playerWorldY = gp.player.getWorldY();
 
         // Calculate direction
-        int dx = playerWorldX - worldX;
-        int dy = playerWorldY - worldY;
+        int dx = playerWorldX - getWorldX();
+        int dy = playerWorldY - getWorldY();
         double length = Math.sqrt(dx * dx + dy * dy);
         double normalizedDx = dx / length;
         double normalizedDy = dy / length;
 
         // Adjust starting position
-        int startX = (int) (worldX + normalizedDx * gp.tileSize);
-        int startY = (int) (worldY + normalizedDy * gp.tileSize);
+        int startX = (int) (getWorldX() + normalizedDx * gp.getTileSize());
+        int startY = (int) (getWorldY() + normalizedDy * gp.getTileSize());
         switch(name){
             case "EnemyTest":
                 gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
@@ -166,10 +165,9 @@ public class Enemy extends Entity{
             case "right" -> right;
             default -> null;
         };
-        screenX = worldX - gp.player.worldX + gp.player.screenX;
-        screenY = worldY - gp.player.worldY + gp.player.screenY;
-        if (screenX > -gp.tileSize && screenX < gp.screenWidth && screenY > -gp.tileSize && screenY < gp.screenHeight) {
-            g2.drawImage(image, screenX, screenY, width, height, null);
-        }
+        setScreenX(getWorldX() - gp.player.getWorldX() + gp.player.getScreenX());
+        setScreenY(getWorldY() - gp.player.getWorldY() + gp.player.getScreenY());
+        if (getScreenX() > -gp.getTileSize() && getScreenX() < gp.getScreenWidth() && getScreenY() > -gp.getTileSize() && getScreenY() < gp.getScreenHeight())
+            g2.drawImage(image, getScreenX(), getScreenY(), width, height, null);
     }
 }

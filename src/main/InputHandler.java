@@ -2,13 +2,10 @@ package main;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 
 public class InputHandler implements KeyListener {
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed,
-            rightPressed,enterPressed,loadPressed;
-    public boolean gameStarted = false;
+    public boolean upPressed, downPressed, leftPressed,rightPressed,enterPressed,loadPressed;
 
     public InputHandler(GamePanel gp) {
         this.gp =gp;
@@ -27,7 +24,12 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_D -> rightPressed = true;
             case KeyEvent.VK_P -> togglePauseState();
             case KeyEvent.VK_ENTER -> toggleMenuState();
-            case KeyEvent.VK_L -> gp.loadGame();
+            case KeyEvent.VK_L -> {
+                if(gp.gameState==GamePanel.GameState.START||gp.gameState==GamePanel.GameState.FINISHED)
+                    gp.loadGame();
+                else
+                    System.out.println("Can not load game while running");
+            }
             case KeyEvent.VK_O -> {
                 if(gp.gameState==GamePanel.GameState.RUNNING)
                     gp.saveGame();
@@ -57,11 +59,8 @@ public class InputHandler implements KeyListener {
     }
 
     private void toggleMenuState() {
-        if(!gameStarted) {
-            gameStarted = true;
+        if(gp.gameState!=GamePanel.GameState.RUNNING)
             gp.gameState = GamePanel.GameState.RUNNING;
-        }
     }
-
 
 }

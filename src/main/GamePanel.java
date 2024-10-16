@@ -1,4 +1,3 @@
-
 package main;
 
 import entity.*;
@@ -8,28 +7,18 @@ import tile.TileManager;
 import javax.swing.JPanel;
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-
 public class GamePanel extends JPanel implements Runnable {
-    final int OriginalTileSize=16; //16x16-os
-    final int scale = 3;
-    public final int tileSize = OriginalTileSize*scale; //48x48-as
-    public final int maxScreenCol =24/*16*/;
-    public final int maxScreenRow =18/*12*/;
-    public final int screenWidth = maxScreenCol*tileSize; //768 pixel
-    public final int screenHeight = maxScreenRow*tileSize; //576 pixel
-
-    public final int maxWorldCol = 50;
-    public final int maxWorldRow = 50;
-    public final int worldWidth = maxWorldCol*tileSize;
-    public final int worldHeight = maxWorldRow*tileSize;
-    int FPS=60;
-
-
-    Thread gameThread;
+    private final int OriginalTileSize = 16;    //16x16-os
+    private final int scale = 3;    //sad
+    private final int tileSize = OriginalTileSize * scale;  //48x48-as
+    private final int maxScreenCol = 24;    //16
+    private final int maxScreenRow = 18;    //12
+    private final int maxWorldCol = 50;
+    private final int maxWorldRow = 50;
 
     public CollisionChecker cChecker=new CollisionChecker(this);
     public Player player;
@@ -38,17 +27,27 @@ public class GamePanel extends JPanel implements Runnable {
     public TileManager tileman=new TileManager(this);
     public InputHandler inpkez = new InputHandler(this);
     public UserInterface ui;
+    public Thread gameThread;
 
-    //Game State
-    public enum GameState{RUNNING,PAUSED,FINISHED,START}
+    public enum GameState{RUNNING,PAUSED,FINISHED,START} //Game State
     public GameState gameState;
+
+    public int getTileSize() {return tileSize;}
+    public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
+    public int getScreenHeight() {return maxScreenRow*tileSize;} //576 pixel
+    public int getMaxWorldCol() {return maxWorldCol;}
+    public int getMaxWorldRow() {return maxWorldRow;}
+    public int getWorldWidth() {return maxWorldCol * tileSize;}
+    public int getWorldHeight() {return maxWorldRow * tileSize;}
+
 
     public GamePanel() {
         player = new Player(this,inpkez);
         this.entities = new CopyOnWriteArrayList<>();
         this.aSetter = new AssetSetter(this);
         ui=new UserInterface(this);
-        this.setPreferredSize(new Dimension(screenWidth,screenHeight));
+        gameState=GameState.START;
+        this.setPreferredSize(new Dimension(getScreenWidth(),getScreenHeight()));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
         this.addKeyListener(inpkez);
@@ -64,11 +63,8 @@ public class GamePanel extends JPanel implements Runnable {
         }
         aSetter.setNPC();
         addEnemy(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
-        addEnemy(new DragonEnemy(this, 22 * tileSize, 45 * tileSize));
         addEnemy(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
-        addEnemy(new SmallEnemy(this, 35 * tileSize, 34 * tileSize));
         addEnemy(new GiantEnemy(this,30 * tileSize, 30 * tileSize));
-        gameState=GameState.START;
     }
 
     private void addEnemy(Entity enemy){
@@ -81,10 +77,11 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void run() {
-        double drawInterval = 1_000_000_000.0 / FPS;
+        double drawInterval = 1_000_000_000.0 / 60; //Setting the game's FPS
         double nextDrawTime = System.nanoTime() + drawInterval;
-
-        while (gameThread != null && player.health > 0) {
+        while (gameThread != null) {
+            if(player.getHealth()<=0)
+                gameState=GameState.FINISHED;
             switch (gameState) {
                 case START -> handleStartMenuInput();
                 case RUNNING -> update();
@@ -105,35 +102,25 @@ public class GamePanel extends JPanel implements Runnable {
     public void update() {
         if(gameState == GameState.RUNNING) {
             player.update();
-            for (int i = 0; i < entities.size(); i++) {
-                Entity entity = entities.get(i);
-                if (entity != null) {
-                    entity.update();
-                }
-                else {
-                    entities.remove(i);
-                    i--;
-                }
-            }
+            entities.removeIf(Objects::isNull);
+            aSetter.list.removeIf(Objects::isNull);
+            for(Entity e : entities)
+                e.update();
             for (SuperObject obj : aSetter.list)
-                if (obj != null)
-                    obj.update();
+                obj.update();
         }
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        //Tile
         tileman.draw(g2);
-        //Object
+        entities.removeIf(Objects::isNull);
+        aSetter.list.removeIf(Objects::isNull);
         for(SuperObject object : aSetter.list)
-            if (object != null)
-                object.draw(g2, this);
-        //NPC and Entities
+            object.draw(g2, this);
         for(Entity entity : entities)
-            if(entity != null)
-                entity.draw(g2);
+            entity.draw(g2);
         player.draw(g2);
         ui.draw(g2);
         g2.dispose();

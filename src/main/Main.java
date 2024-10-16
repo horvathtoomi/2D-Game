@@ -13,19 +13,7 @@ public class Main {
         window.pack();
         window.setLocationRelativeTo(null);
         window.setVisible(true);
-        int option = JOptionPane.showConfirmDialog(window,
-                "Would you like to load a saved game?",
-                "Load Game",
-                JOptionPane.YES_NO_OPTION);
-
-        if (option == JOptionPane.YES_OPTION) {
-            if (!panel.loadGame()) {
-                // If load fails, start a new game
-                panel.setupGame();
-            }
-        } else {
-            panel.setupGame();
-        }
+        panel.setupGame();
         panel.startGameThread();
     }
 }

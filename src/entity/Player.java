@@ -7,16 +7,14 @@ import java.awt.image.BufferedImage;
 
 public class Player extends Entity{
     InputHandler kezelo;
-    public final int screenX;
-    public final int screenY;
 
 
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
         this.kezelo = kezelo;
-        health = 100;
-        screenX=gp.screenWidth/2 - (gp.tileSize/2);
-        screenY=gp.screenHeight/2 - (gp.tileSize/2);
+        setHealth(100);
+        setScreenX(gp.getScreenWidth()/2 - (gp.getTileSize()/2));
+        setScreenY(gp.getScreenHeight()/2 - (gp.getTileSize()/2));
         solidArea = new Rectangle(8,16,32,32);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
@@ -25,9 +23,9 @@ public class Player extends Entity{
     }
 
     public void setDefaultValues(){
-        worldX=gp.tileSize* 23;
-        worldY=gp.tileSize*21;
-        speed=3;
+        setWorldX(gp.getTileSize() * 23);
+        setWorldY(gp.getTileSize() * 21);
+        setSpeed(3);
         direction = "down";
     }
 
@@ -59,10 +57,10 @@ public class Player extends Entity{
 
             if (!collisionOn) {
                 switch (direction) {
-                    case "up" -> worldY -= speed;
-                    case "down"-> worldY += speed;
-                    case "left" -> worldX -= speed;
-                    case "right" -> worldX += speed;
+                    case "up" -> setWorldY(getWorldY()-getSpeed());
+                    case "down"-> setWorldY(getWorldY()+getSpeed());
+                    case "left" -> setWorldX(getWorldX()-getSpeed());
+                    case "right" -> setWorldX(getWorldX()+getSpeed());
                 }
             }
         }
@@ -88,21 +86,21 @@ public class Player extends Entity{
             case "right" -> right;
             default -> null;
         };
-        int x = screenX;
-        int y = screenY;
-        if(screenX > worldX){
-            x = worldX;
+        int x = getScreenX();
+        int y = getScreenY();
+        if(getScreenX() > getWorldX()){
+            x = getWorldX();
         }
-        if(screenY > worldY){
-            y = worldY;
+        if(getScreenY() > getWorldY()){
+            y = getWorldY();
         }
-        int rightOffset = gp.screenWidth - screenX;
-        if(rightOffset > gp.worldWidth - worldX){
-            x = gp.screenWidth - gp.worldWidth - worldX;
+        int rightOffset = gp.getScreenWidth() - getScreenX();
+        if(rightOffset > gp.getWorldWidth() - getWorldX()){
+            x = gp.getScreenWidth() - gp.getWorldWidth() - getWorldX();
         }
-        int bottomOffset = gp.screenHeight - screenY;
-        if(bottomOffset > gp.worldHeight - worldY){
-            y = gp.screenHeight - gp.worldHeight - worldY;
+        int bottomOffset = gp.getScreenHeight() - getScreenY();
+        if(bottomOffset > gp.getWorldHeight() - getWorldY()){
+            y = gp.getScreenHeight() - gp.getWorldHeight() - getWorldY();
         }
         g2.drawImage(image,x,y,null);
     }

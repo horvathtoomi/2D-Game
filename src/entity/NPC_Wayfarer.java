@@ -9,7 +9,7 @@ public class NPC_Wayfarer extends Entity{
     public NPC_Wayfarer(GamePanel gp) {
         super(gp);
         direction = "down";
-        speed = 1;
+        setSpeed(1);
         getWayfarerImages();
     }
 

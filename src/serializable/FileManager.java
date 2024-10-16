@@ -69,11 +69,11 @@ public class FileManager {
     }
 
     private static void updatePlayerState(Player player, SerializablePlayerState state) {
-        player.worldX = state.worldX;
-        player.worldY = state.worldY;
-        player.speed = state.speed;
+        player.setWorldX(state.worldX);
+        player.setWorldY(state.worldY);
+        player.setSpeed(state.speed);
         player.direction = state.direction;
-        player.health = state.health;
+        player.setHealth(state.health);
         // Update other relevant player fields
     }
 
@@ -84,11 +84,11 @@ public class FileManager {
         }
         Entity entity = creator.apply(gp, state);
         if (entity != null) {
-            entity.worldX = state.worldX;
-            entity.worldY = state.worldY;
-            entity.speed = state.speed;
+            entity.setWorldX(state.worldX);
+            entity.setWorldY(state.worldY);
+            entity.setSpeed(state.speed);
             entity.direction = state.direction;
-            entity.health = state.health;
+            entity.setHealth(state.health);
             // Set other relevant entity fields
         }
         return entity;
@@ -118,11 +118,11 @@ class SerializablePlayerState implements Serializable {
     String direction;
 
     SerializablePlayerState(Player player) {
-        this.worldX = player.worldX;
-        this.worldY = player.worldY;
-        this.speed = player.speed;
+        this.worldX = player.getWorldX();
+        this.worldY = player.getWorldY();
+        this.speed = player.getSpeed();
         this.direction = player.direction;
-        this.health = player.health;
+        this.health = player.getHealth();
         // Add other relevant player state
     }
 }
@@ -136,11 +136,11 @@ class SerializableEntityState implements Serializable {
 
     SerializableEntityState(Entity entity) {
         this.type = entity.getClass().getSimpleName();
-        this.worldX = entity.worldX;
-        this.worldY = entity.worldY;
-        this.speed = entity.speed;
+        this.worldX = entity.getWorldX();
+        this.worldY = entity.getWorldY();
+        this.speed = entity.getSpeed();
         this.direction = entity.direction;
-        this.health = entity.health;
+        this.health = entity.getHealth();
         // Add other relevant entity state
     }
 }
