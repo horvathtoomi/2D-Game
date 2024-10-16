@@ -26,29 +26,28 @@ public class GamePanel extends JPanel implements Runnable {
     public final int maxWorldRow = 50;
     public final int worldWidth = maxWorldCol*tileSize;
     public final int worldHeight = maxWorldRow*tileSize;
-
     int FPS=60;
 
-    public TileManager tileman=new TileManager(this);
-
-    InputHandler inpkez = new InputHandler(this);
-
-    public UserInterface ui=new UserInterface(this);
 
     Thread gameThread;
 
     public CollisionChecker cChecker=new CollisionChecker(this);
-    public Player player = new Player(this,inpkez);
+    public Player player;
     public AssetSetter aSetter;
     public CopyOnWriteArrayList<Entity> entities;
+    public TileManager tileman=new TileManager(this);
+    public InputHandler inpkez = new InputHandler(this);
+    public UserInterface ui;
 
     //Game State
     public enum GameState{RUNNING,PAUSED,FINISHED,START}
     public GameState gameState;
 
     public GamePanel() {
+        player = new Player(this,inpkez);
         this.entities = new CopyOnWriteArrayList<>();
         this.aSetter = new AssetSetter(this);
+        ui=new UserInterface(this);
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
@@ -113,7 +112,7 @@ public class GamePanel extends JPanel implements Runnable {
                 }
                 else {
                     entities.remove(i);
-                    i--;  // Adjust index after removal
+                    i--;
                 }
             }
             for (SuperObject obj : aSetter.list)
@@ -152,12 +151,14 @@ public class GamePanel extends JPanel implements Runnable {
 
     public boolean loadGame() {
         try {
+            gameState = GameState.RUNNING;
             FileManager.loadGameState(this, "save.dat");
             System.out.println("Game loaded successfully.");
             return true;
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Failed to load game: " + e.getMessage());
             e.printStackTrace();
+            resetGame();
             return false;
         }
     }

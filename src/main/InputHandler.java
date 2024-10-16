@@ -27,8 +27,13 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_D -> rightPressed = true;
             case KeyEvent.VK_P -> togglePauseState();
             case KeyEvent.VK_ENTER -> toggleMenuState();
-            case KeyEvent.VK_L -> gp.saveGame();
-            case KeyEvent.VK_O -> gp.loadGame();
+            case KeyEvent.VK_L -> gp.loadGame();
+            case KeyEvent.VK_O -> {
+                if(gp.gameState==GamePanel.GameState.RUNNING)
+                    gp.saveGame();
+                else
+                    System.out.println("You are not running the game yet!");
+            }
         }
     }
 
