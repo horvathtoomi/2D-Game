@@ -2,12 +2,12 @@ package entity;
 
 import main.InputHandler;
 import main.GamePanel;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Player extends Entity{
+public class Player extends Entity {
     InputHandler kezelo;
-
 
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);

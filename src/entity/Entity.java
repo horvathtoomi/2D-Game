@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 
-public class Entity {
+public class Entity{
     String name;
     private int worldX, worldY;
     private int screenX, screenY;

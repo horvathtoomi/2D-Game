@@ -12,6 +12,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class GamePanel extends JPanel implements Runnable {
+
+    //Game Screen settings
     private final int OriginalTileSize = 16;    //16x16-os
     private final int scale = 3;    //sad
     private final int tileSize = OriginalTileSize * scale;  //48x48-as
@@ -26,10 +28,11 @@ public class GamePanel extends JPanel implements Runnable {
     public CopyOnWriteArrayList<Entity> entities;
     public TileManager tileman=new TileManager(this);
     public InputHandler inpkez = new InputHandler(this);
+    public MouseHandler mouseHandler;
     public UserInterface ui;
     public Thread gameThread;
 
-    public enum GameState{RUNNING,PAUSED,FINISHED,START} //Game State
+    public enum GameState{START,RUNNING,PAUSED,FINISHED} //Game State
     public GameState gameState;
 
     public int getTileSize() {return tileSize;}
@@ -51,6 +54,11 @@ public class GamePanel extends JPanel implements Runnable {
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
         this.addKeyListener(inpkez);
+        //
+        mouseHandler=new MouseHandler(this);
+        this.addMouseListener(mouseHandler);
+        this.addMouseMotionListener(mouseHandler);
+        //
         this.setFocusable(true);
     }
 
@@ -80,10 +88,10 @@ public class GamePanel extends JPanel implements Runnable {
         double drawInterval = 1_000_000_000.0 / 60; //Setting the game's FPS
         double nextDrawTime = System.nanoTime() + drawInterval;
         while (gameThread != null) {
-            if(player.getHealth()<=0)
+            if(player.getHealth()<=0 && gameState == GameState.RUNNING)
                 gameState=GameState.FINISHED;
             switch (gameState) {
-                case START -> handleStartMenuInput();
+                case START, FINISHED -> {}
                 case RUNNING -> update();
             }
             repaint();
@@ -138,43 +146,21 @@ public class GamePanel extends JPanel implements Runnable {
 
     public boolean loadGame() {
         try {
-            gameState = GameState.RUNNING;
             FileManager.loadGameState(this, "save.dat");
             System.out.println("Game loaded successfully.");
             return true;
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Failed to load game: " + e.getMessage());
             e.printStackTrace();
-            resetGame();
             return false;
         }
     }
 
     public void resetGame() {
-        // Reset game state to initial values
         player = new Player(this, inpkez);
         entities.clear();
         aSetter.list.clear();
-        setupGame(); // This should reinitialize your game state
-        gameState = GameState.RUNNING;
-    }
-
-    public void handleStartMenuInput() {
-        if (inpkez.enterPressed) {
-            gameState = GameState.RUNNING;
-            setupGame();
-        } else if (inpkez.loadPressed) {
-            if (loadGame()) {
-                gameState = GameState.RUNNING;
-            } else {
-                // If load fails, start a new game
-                setupGame();
-                gameState = GameState.RUNNING;
-            }
-        }
-        // Reset the flags after handling
-        inpkez.enterPressed = false;
-        inpkez.loadPressed = false;
+        setupGame();
     }
 
 }

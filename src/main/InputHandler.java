@@ -22,7 +22,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_S -> downPressed = true;
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
-            case KeyEvent.VK_P -> togglePauseState();
+            case KeyEvent.VK_ESCAPE -> togglePauseState();
             case KeyEvent.VK_ENTER -> toggleMenuState();
             case KeyEvent.VK_L -> {
                 if(gp.gameState==GamePanel.GameState.START||gp.gameState==GamePanel.GameState.FINISHED)
