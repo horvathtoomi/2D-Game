@@ -19,7 +19,7 @@ public class Entity{
     public Rectangle solidArea = new Rectangle(0,0,48,48);
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
-    GamePanel gp;
+    public GamePanel gp;
 
     public int getWorldX() {return worldX;}
     public int getWorldY() {return worldY;}

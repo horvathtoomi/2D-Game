@@ -72,7 +72,7 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter.setNPC();
         addEnemy(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
         addEnemy(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
-        addEnemy(new GiantEnemy(this,30 * tileSize, 30 * tileSize));
+        addEnemy(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
     }
 
     private void addEnemy(Entity enemy){
