@@ -115,6 +115,24 @@ public abstract class Enemy extends Entity{
         }
     }
 
+    public int[] getClosestEnemyCoord(int startX, int startY) {
+        int[] coord = new int[2];
+        int minDist = Integer.MAX_VALUE;
+        int entX = 0, entY= 0;
+        for(Entity ent : gp.entities) {
+            if(!ent.name.equals("NPC_Wayfarer")) {
+                if (((ent.getWorldX()-startX)*(ent.getWorldX()-startX) + (ent.getWorldY()-startY)*(ent.getWorldY()-startY)) <minDist) {
+                    minDist = ((ent.getWorldX()-startX) * (ent.getWorldX()-startX)) + ((ent.getWorldY()-startY) * (ent.getWorldY()-startY));
+                    entX = ent.getWorldX();
+                    entY = ent.getWorldY();
+                }
+            }
+        }
+        coord[0] = entX;
+        coord[1] = entY;
+        return coord;
+    }
+
     protected void followPath() {
         if (pathIndex < path.size()) {
             int[] nextPoint = path.get(pathIndex);
@@ -168,6 +186,10 @@ public abstract class Enemy extends Entity{
                 break;
             case "GiantEnemy":
                 gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
+                break;
+            case "FriendlyEnemy":
+                //VALTOZTATAS SZUKSEGES!
+                gp.entities.add(new FriendlyEnemyAttack(gp, startX, startY, getClosestEnemyCoord(startX,startY)[0], getClosestEnemyCoord(startX,startY)[1]));
                 break;
             default:
                 gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
@@ -249,5 +271,20 @@ class PatrolBehavior implements EnemyBehavior {
             enemy.path = AStar.findPath(enemy.gp, enemy.getWorldX(), enemy.getWorldY(), targetX, targetY);
             enemy.pathIndex = 0;
         }
+    }
+}
+
+class FriendlyBehavior implements EnemyBehavior{
+    protected int startX, startY;
+
+    public FriendlyBehavior(int startX, int startY) {
+        this.startX = startX;
+        this.startY = startY;
+    }
+
+    @Override
+    public void act(Enemy enemy){
+        enemy.path = AStar.findPath(enemy.gp, enemy.getWorldX(), enemy.getWorldY(), enemy.gp.player.getWorldX(), enemy.gp.player.getWorldY());
+        enemy.pathIndex = 0;
     }
 }

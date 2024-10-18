@@ -77,16 +77,16 @@ public class UserInterface {
             if (startScreenButtons.get(i).contains(p)) {
                 switch (i) {
                     case 0 -> {
+                        gp.setupGame();
                         gp.gameState = GamePanel.GameState.RUNNING;
-                        gp.resetGame();
                     }
                     case 1 -> {
                         if (gp.loadGame()) {
                             gp.gameState = GamePanel.GameState.RUNNING;
                         } else {
-                            // If load fails, start a new game
                             gp.setupGame();
                             gp.gameState = GamePanel.GameState.RUNNING;
+                            System.out.println("Load failed, new game initialized");
                         }
                     }
                     case 2 -> System.exit(0);

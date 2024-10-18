@@ -73,6 +73,7 @@ public class GamePanel extends JPanel implements Runnable {
         addEnemy(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
         addEnemy(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
         addEnemy(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
+        addEnemy(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
     }
 
     private void addEnemy(Entity enemy){
@@ -135,8 +136,16 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void saveGame() {
+        String fpath = null;
         try {
-            FileManager.saveGameState(this, "save.dat");
+            System.out.print("Filename: ");
+            fpath = FileManager.getFileName();
+        }catch(IOException e){
+            e.printStackTrace();
+            System.err.println("Wrong filepath");
+        }
+        try {
+            FileManager.saveGameState(this, "res/save/" + fpath);
             System.out.println("Game saved successfully.");
         } catch (IOException e) {
             System.err.println("Failed to save game: " + e.getMessage());
@@ -145,15 +154,27 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public boolean loadGame() {
+        String fpath = null;
         try {
-            FileManager.loadGameState(this, "save.dat");
-            System.out.println("Game loaded successfully.");
-            return true;
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to load game: " + e.getMessage());
+            System.out.print("Filepath: ");
+            fpath = FileManager.getFileName();
+        }catch(IOException e){
             e.printStackTrace();
-            return false;
+            System.err.println("Wrong filepath");
         }
+        if(fpath != null && !fpath.isEmpty()) {
+            try {
+                FileManager.loadGameState(this, "res/save/" + fpath);
+                System.out.println("Game loaded successfully.");
+                return true;
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("Failed to load game: " + e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+        }
+        else
+            return false;
     }
 
     public void resetGame() {

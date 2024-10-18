@@ -11,6 +11,7 @@ public class NPC_Wayfarer extends Entity{
         direction = "down";
         setSpeed(1);
         getWayfarerImages();
+        name = "NPC_Wayfarer";
     }
 
     private void getWayfarerImages(){

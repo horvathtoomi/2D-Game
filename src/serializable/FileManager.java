@@ -50,19 +50,16 @@ public class FileManager {
             updatePlayerState(gp.player, playerState);
 
             List<SerializableEntityState> entityStates = (List<SerializableEntityState>) ois.readObject();
-            gp.entities = new CopyOnWriteArrayList<>(entityStates.stream()
+            gp.entities = entityStates.stream()
                     .map(state -> createEntityFromState(gp, state))
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList()));
-
-            //                    .map(state -> createEntityFromState(gp, state))
-            //                    .filter(Objects::nonNull).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+                    .collect(Collectors
+                    .toCollection(CopyOnWriteArrayList::new));
 
             List<SerializableObjectState> objectStates = (List<SerializableObjectState>) ois.readObject();
-            gp.aSetter.list = new CopyOnWriteArrayList<>(objectStates.stream()
+            gp.aSetter.list = objectStates.stream()
                     .map(state -> createObjectFromState(gp, state))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList()));
+                    .filter(Objects::nonNull).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
 
             gp.gameState = (GamePanel.GameState) ois.readObject();
         }
@@ -108,6 +105,15 @@ public class FileManager {
         }
         return obj;
     }
+
+    public static String getFileName() throws IOException {
+        String path;
+        BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(System.in)));
+        path = br.readLine();
+        return path;
+    }
+
+
 
 }
 
