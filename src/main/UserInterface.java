@@ -78,7 +78,7 @@ public class UserInterface {
                 switch (i) {
                     case 0 -> {
                         gp.gameState = GamePanel.GameState.RUNNING;
-                        gp.setupGame();
+                        gp.resetGame();
                     }
                     case 1 -> {
                         if (gp.loadGame()) {

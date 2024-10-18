@@ -70,12 +70,13 @@ public abstract class Enemy extends Entity{
 
     @Override
     public void update() {
-        // AI behavior update
         updateCounter++;
         if (updateCounter >= UPDATE_INTERVAL) {
             behavior.act(this);
             updateCounter = 0;
         }
+        if (shootCooldown > 0)
+            shootCooldown--;
 
         if (path != null && !path.isEmpty()) {
             followPath();
@@ -89,31 +90,28 @@ public abstract class Enemy extends Entity{
                     case "right" -> setWorldX(getWorldX() + getSpeed());
                     case "down" -> setWorldY(getWorldY() + getSpeed());
                     case "up" -> setWorldY(getWorldY() - getSpeed());
+                    case "shoot" -> {
+                        if (shootCooldown == 0) {
+                            if (shootAnimationTimer == SHOOT_ANIMATION_DURATION / 2) {
+                                shoot();
+                            } else if (shootAnimationTimer == 0) {
+                                shootAnimationTimer = SHOOT_ANIMATION_DURATION;
+                                shootCooldown = SHOOT_COOLDOWN_TIME;
+                            }
+                            shootAnimationTimer--;
+                        } else
+                            direction = previousDirection;
+                    }
                 }
             }
         }
-
         // Shooting logic
         if (random.nextInt(shootingRate) < 1 && shootCooldown == 0) {
-            previousDirection = direction;
+            if(direction.equals("shoot"))
+                previousDirection = "up";
+            else
+                previousDirection = direction;
             direction = "shoot";
-        }
-
-        // Shooting cooldown and animation update
-        if (shootCooldown > 0)
-            shootCooldown--;
-        if (direction.equals("shoot")) {
-            if (shootCooldown == 0) {
-                if (shootAnimationTimer == SHOOT_ANIMATION_DURATION / 2) {
-                    shoot();
-                } else if (shootAnimationTimer == 0) {
-                    shootAnimationTimer = SHOOT_ANIMATION_DURATION;
-                    shootCooldown = SHOOT_COOLDOWN_TIME;
-                }
-                shootAnimationTimer--;
-            } else {
-                direction = previousDirection;
-            }
         }
     }
 
@@ -122,7 +120,6 @@ public abstract class Enemy extends Entity{
             int[] nextPoint = path.get(pathIndex);
             int nextX = nextPoint[0] * gp.getTileSize();
             int nextY = nextPoint[1] * gp.getTileSize();
-
             if (getWorldX() < nextX) {
                 setWorldX(getWorldX() + getSpeed());
                 direction = "right";
@@ -200,11 +197,17 @@ interface EnemyBehavior {
 }
 
 class AggressiveBehavior implements EnemyBehavior {
+    private int motionCounter = 0;
     @Override
     public void act(Enemy enemy) {
-        enemy.path = AStar.findPath(enemy.gp, enemy.getWorldX(), enemy.getWorldY(),
-                enemy.gp.player.getWorldX(), enemy.gp.player.getWorldY());
-        enemy.pathIndex = 0;
+        if(motionCounter>5) {
+            enemy.path = AStar.findPath(enemy.gp, enemy.getWorldX(), enemy.getWorldY(), enemy.gp.player.getWorldX(), enemy.gp.player.getWorldY());
+            enemy.pathIndex = 0;
+            motionCounter = 0;
+        }
+        else {
+            motionCounter++;
+        }
     }
 }
 

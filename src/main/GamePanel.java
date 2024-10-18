@@ -46,8 +46,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     public GamePanel() {
         player = new Player(this,inpkez);
-        this.entities = new CopyOnWriteArrayList<>();
-        this.aSetter = new AssetSetter(this);
+        entities = new CopyOnWriteArrayList<>();
+        aSetter = new AssetSetter(this);
         ui=new UserInterface(this);
         gameState=GameState.START;
         this.setPreferredSize(new Dimension(getScreenWidth(),getScreenHeight()));
@@ -67,7 +67,7 @@ public class GamePanel extends JPanel implements Runnable {
             aSetter.setObject();
         }catch(IOException e){
             System.out.println("Object was not set.");
-            e.getCause();
+            e.printStackTrace();
         }
         aSetter.setNPC();
         addEnemy(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
@@ -157,9 +157,9 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void resetGame() {
-        player = new Player(this, inpkez);
         entities.clear();
         aSetter.list.clear();
+        player = new Player(this, inpkez);
         setupGame();
     }
 
