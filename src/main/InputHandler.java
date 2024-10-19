@@ -5,14 +5,20 @@ import java.awt.event.KeyListener;
 
 public class InputHandler implements KeyListener {
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed,rightPressed,enterPressed,loadPressed;
+    public boolean upPressed, downPressed, leftPressed,rightPressed;
+
 
     public InputHandler(GamePanel gp) {
         this.gp =gp;
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+        if (gp.gameState == GamePanel.GameState.SAVE_DIALOG || gp.gameState == GamePanel.GameState.LOAD_DIALOG) {
+            gp.processInput(e.getKeyChar());
+        }
+    }
+
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -22,16 +28,21 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_S -> downPressed = true;
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
-            case KeyEvent.VK_ESCAPE -> togglePauseState();
+            case KeyEvent.VK_ESCAPE -> {
+                if (gp.gameState == GamePanel.GameState.SAVE || gp.gameState == GamePanel.GameState.LOAD)
+                    gp.gameState = GamePanel.GameState.PAUSED;
+                else
+                    togglePauseState();
+            }
             case KeyEvent.VK_ENTER -> toggleMenuState();
             case KeyEvent.VK_L -> {
-                if(gp.gameState==GamePanel.GameState.START||gp.gameState==GamePanel.GameState.FINISHED)
+                if(gp.gameState==GamePanel.GameState.START||gp.gameState==GamePanel.GameState.FINISHED||gp.gameState==GamePanel.GameState.PAUSED)
                     gp.loadGame();
                 else
                     System.out.println("Can not load game while running");
             }
             case KeyEvent.VK_O -> {
-                if(gp.gameState==GamePanel.GameState.RUNNING)
+                if(gp.gameState==GamePanel.GameState.RUNNING||gp.gameState==GamePanel.GameState.PAUSED)
                     gp.saveGame();
                 else
                     System.out.println("You are not running the game yet!");

@@ -4,7 +4,8 @@ import entity.*;
 import object.*;
 import serializable.FileManager;
 import tile.TileManager;
-import javax.swing.JPanel;
+
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.Objects;
@@ -32,8 +33,11 @@ public class GamePanel extends JPanel implements Runnable {
     public UserInterface ui;
     public Thread gameThread;
 
-    public enum GameState{START,RUNNING,PAUSED,FINISHED} //Game State
+    public enum GameState{START,RUNNING,PAUSED,FINISHED,SAVE_DIALOG, LOAD_DIALOG, SAVE, LOAD} //Game State
     public GameState gameState;
+    public String currentInputText = "";
+    public boolean saveLoadSuccess = false;
+    public String saveLoadMessage = "";
 
     public int getTileSize() {return tileSize;}
     public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
@@ -135,53 +139,135 @@ public class GamePanel extends JPanel implements Runnable {
         g2.dispose();
     }
 
+
+    /*
     public void saveGame() {
-        String fpath = null;
+        System.out.print("Saving pending");
+        gameState = GameState.SAVE_DIALOG;
+        //GETTING FILENAME
         try {
-            System.out.print("Filename: ");
-            fpath = FileManager.getFileName();
-        }catch(IOException e){
-            e.printStackTrace();
-            System.err.println("Wrong filepath");
-        }
-        try {
-            FileManager.saveGameState(this, "res/save/" + fpath);
+            FileManager.saveGameState(this, "res/save/" + filename + ".dat");
             System.out.println("Game saved successfully.");
-        } catch (IOException e) {
-            System.err.println("Failed to save game: " + e.getMessage());
-            e.printStackTrace();
-        }
+        }catch(IOException e){throw new RuntimeException(e);}
     }
 
     public boolean loadGame() {
-        String fpath = null;
+        System.out.print("Load pending");
+        gameState = GameState.LOAD_DIALOG;
+        //GETTING FILENAME
+
         try {
-            System.out.print("Filepath: ");
-            fpath = FileManager.getFileName();
-        }catch(IOException e){
-            e.printStackTrace();
-            System.err.println("Wrong filepath");
+            FileManager.loadGameState(this, "res/save/" + filename + ".dat");
+            System.out.println("Game loaded successfully.");
+            return true;
+        }catch(IOException e){e.printStackTrace();} catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        if(fpath != null && !fpath.isEmpty()) {
+        return false;
+    }
+*/
+
+    public void saveGame() {
+        System.out.println("Saving pending");
+        gameState = GameState.SAVE;
+
+        // GETTING FILENAME
+        String filename = JOptionPane.showInputDialog(this, "Enter a name for your save file:");
+
+        if (filename != null && !filename.trim().isEmpty()) {
             try {
-                FileManager.loadGameState(this, "res/save/" + fpath);
+                File saveDir = new File("res/save");
+                if (!saveDir.exists()) {
+                    saveDir.mkdirs();
+                }
+
+                File saveFile = new File(saveDir, filename + ".dat");
+
+                if (saveFile.exists()) {
+                    int choice = JOptionPane.showConfirmDialog(this,
+                            "A save file with this name already exists. Do you want to overwrite it?",
+                            "Overwrite Save",
+                            JOptionPane.YES_NO_OPTION);
+                    if (choice != JOptionPane.YES_OPTION) {
+                        System.out.println("Save cancelled.");
+                        gameState = GameState.RUNNING;
+                        return;
+                    }
+                }
+
+                FileManager.saveGameState(this, saveFile.getPath());
+                System.out.println("Game saved successfully.");
+                JOptionPane.showMessageDialog(this, "Game saved successfully.");
+            } catch (IOException e) {
+                System.err.println("Error saving game: " + e.getMessage());
+                JOptionPane.showMessageDialog(this, "Error saving game: " + e.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
+                throw new RuntimeException(e);
+            }
+        } else {
+            System.out.println("Save cancelled.");
+        }
+
+        gameState = GameState.RUNNING;
+    }
+
+    public boolean loadGame() {
+        System.out.print("Load pending");
+        gameState = GameState.LOAD;
+
+        // GETTING FILENAME
+        File saveDir = new File("res/save");
+        if (!saveDir.exists() || saveDir.list() == null || saveDir.list().length == 0) {
+            JOptionPane.showMessageDialog(this, "No save files found.", "Load Game", JOptionPane.INFORMATION_MESSAGE);
+            gameState = GameState.RUNNING;
+            return false;
+        }
+
+        String[] saveFiles = saveDir.list((dir, name) -> name.endsWith(".dat"));
+        String selectedFile = (String) JOptionPane.showInputDialog(
+                this,
+                "Choose a save file to load:",
+                "Load Game",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                saveFiles,
+                saveFiles[0]);
+
+        if (selectedFile != null) {
+            try {
+                FileManager.loadGameState(this, new File(saveDir, selectedFile).getPath());
                 System.out.println("Game loaded successfully.");
+                JOptionPane.showMessageDialog(this, "Game loaded successfully.");
+                gameState = GameState.RUNNING;
                 return true;
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Failed to load game: " + e.getMessage());
+                System.err.println("Error loading game: " + e.getMessage());
+                JOptionPane.showMessageDialog(this, "Error loading game: " + e.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
-                return false;
             }
+        } else {
+            System.out.println("Load cancelled.");
         }
-        else
-            return false;
+
+        gameState = GameState.RUNNING;
+        return false;
     }
+
 
     public void resetGame() {
         entities.clear();
         aSetter.list.clear();
         player = new Player(this, inpkez);
         setupGame();
+    }
+
+    public void processInput(char c) {
+        if (c == '\b') {  // Backspace
+            if (!currentInputText.isEmpty()) {
+                currentInputText = currentInputText.substring(0, currentInputText.length() - 1);
+            }
+        } else {
+            currentInputText += c;
+        }
     }
 
 }

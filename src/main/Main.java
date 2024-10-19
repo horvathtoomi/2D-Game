@@ -20,8 +20,6 @@ public class Main {
 
 // TO DO
 /*
-Fejleszteni UI interfacet:
-    1. mentes es betoltes menu
 Enemyk halandok legyenek
     + friendly enemy oli a tobbit
 
