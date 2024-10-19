@@ -113,6 +113,8 @@ public abstract class Enemy extends Entity{
                 previousDirection = direction;
             direction = "shoot";
         }
+        if(getHealth() <= 0)
+            gp.entities.remove(this);
     }
 
     public int[] getClosestEnemyCoord(int startX, int startY) {

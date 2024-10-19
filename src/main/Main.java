@@ -17,10 +17,3 @@ public class Main {
         panel.startGameThread();
     }
 }
-
-// TO DO
-/*
-Enemyk halandok legyenek
-    + friendly enemy oli a tobbit
-
- */

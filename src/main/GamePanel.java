@@ -139,36 +139,11 @@ public class GamePanel extends JPanel implements Runnable {
         g2.dispose();
     }
 
-
-    /*
     public void saveGame() {
-        System.out.print("Saving pending");
-        gameState = GameState.SAVE_DIALOG;
-        //GETTING FILENAME
-        try {
-            FileManager.saveGameState(this, "res/save/" + filename + ".dat");
-            System.out.println("Game saved successfully.");
-        }catch(IOException e){throw new RuntimeException(e);}
-    }
+        System.out.println("---------------");
+        System.out.println("|Saving pending|");
+        System.out.println("---------------");
 
-    public boolean loadGame() {
-        System.out.print("Load pending");
-        gameState = GameState.LOAD_DIALOG;
-        //GETTING FILENAME
-
-        try {
-            FileManager.loadGameState(this, "res/save/" + filename + ".dat");
-            System.out.println("Game loaded successfully.");
-            return true;
-        }catch(IOException e){e.printStackTrace();} catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return false;
-    }
-*/
-
-    public void saveGame() {
-        System.out.println("Saving pending");
         gameState = GameState.SAVE;
 
         // GETTING FILENAME
@@ -210,19 +185,21 @@ public class GamePanel extends JPanel implements Runnable {
         gameState = GameState.RUNNING;
     }
 
-    public boolean loadGame() {
-        System.out.print("Load pending");
+    public void loadGame() {
+        System.out.println("-------------");
+        System.out.println("|Load pending|");
+        System.out.println("-------------");
         gameState = GameState.LOAD;
 
         // GETTING FILENAME
         File saveDir = new File("res/save");
-        if (!saveDir.exists() || saveDir.list() == null || saveDir.list().length == 0) {
+        if (!saveDir.exists() || saveDir.list() == null || Objects.requireNonNull(saveDir.list()).length == 0) {
             JOptionPane.showMessageDialog(this, "No save files found.", "Load Game", JOptionPane.INFORMATION_MESSAGE);
             gameState = GameState.RUNNING;
-            return false;
         }
 
         String[] saveFiles = saveDir.list((dir, name) -> name.endsWith(".dat"));
+        assert saveFiles != null;
         String selectedFile = (String) JOptionPane.showInputDialog(
                 this,
                 "Choose a save file to load:",
@@ -238,18 +215,15 @@ public class GamePanel extends JPanel implements Runnable {
                 System.out.println("Game loaded successfully.");
                 JOptionPane.showMessageDialog(this, "Game loaded successfully.");
                 gameState = GameState.RUNNING;
-                return true;
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error loading game: " + e.getMessage());
                 JOptionPane.showMessageDialog(this, "Error loading game: " + e.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
             }
-        } else {
-            System.out.println("Load cancelled.");
         }
-
+        else
+            System.out.println("Load cancelled.");
         gameState = GameState.RUNNING;
-        return false;
     }
 
 

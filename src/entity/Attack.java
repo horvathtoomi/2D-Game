@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 public class Attack extends Entity {
     int imageChange = 0;
     public BufferedImage image, image1, image2;
-    private final int damage;
+    public final int damage;
     public double dx, dy;
 
     public Attack(GamePanel gp,String name,int damage, int startX, int startY, int targetX, int targetY) {
