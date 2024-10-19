@@ -1,6 +1,11 @@
-package entity;
+package entity.enemy;
 
+import entity.*;
 import entity.algorithm.AStar;
+import entity.attack.DragonEnemyAttack;
+import entity.attack.FriendlyEnemyAttack;
+import entity.attack.GiantEnemyAttack;
+import entity.attack.SmallEnemyAttack;
 import main.GamePanel;
 
 import java.awt.*;
@@ -8,10 +13,10 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.ArrayList;
 
-public abstract class Enemy extends Entity{
+public abstract class Enemy extends Entity {
     public BufferedImage shoot;
     String previousDirection = "right";
-    private int width, height;
+    private final int width, height;
 
     private final int startX;
     private final int shootingRate;
@@ -36,27 +41,24 @@ public abstract class Enemy extends Entity{
     public Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(gp);
         solidArea = new Rectangle(18,12,8,8);
+        random = new Random();
         shootCooldown = SHOOT_COOLDOWN_TIME;
         shootAnimationTimer=SHOOT_ANIMATION_DURATION;
         this.width = width;
         this.height = height;
         this.name=name;
+        this.startX = startX;
+        this.maxHealth = getHealth();
+        this.shootingRate=shootingRate;
         setWorldX(startX);
         setWorldY(startY);
-        updateCounter = 0;
-        this.shootingRate=shootingRate;
-        random = new Random();
-        try {
-            getEnemyImage();
-        } catch (Exception e) {
-            System.out.println("getEnemyImage() is not working");
-        }
-        int movementRange = 300;
-        this.startX = startX;
         setSpeed(1);
+        updateCounter = 0;
         previousDirection = "right";
         direction = "right";
-        this.maxHealth = getHealth();
+        try {
+            getEnemyImage();
+        } catch (Exception e) {System.out.println("getEnemyImage() is not working");}
         initializeBehavior();
     }
 
@@ -70,13 +72,6 @@ public abstract class Enemy extends Entity{
         shoot = scale(name, "shoot");
     }
 
-    public void takeDamage(int damage) {
-        setHealth(getHealth() - damage);
-        if (getHealth() <= 0) {
-            gp.entities.remove(this);
-        }
-    }
-
     @Override
     public void update() {
         if(getHealth() <= 0) {
@@ -88,9 +83,9 @@ public abstract class Enemy extends Entity{
             behavior.act(this);
             updateCounter = 0;
         }
-        if (shootCooldown > 0)
+        if (shootCooldown > 0) {
             shootCooldown--;
-
+        }
         if (path != null && !path.isEmpty()) {
             followPath();
         } else {
@@ -107,13 +102,15 @@ public abstract class Enemy extends Entity{
                         if (shootCooldown == 0) {
                             if (shootAnimationTimer == SHOOT_ANIMATION_DURATION / 2) {
                                 shoot();
-                            } else if (shootAnimationTimer == 0) {
+                            }
+                            else if (shootAnimationTimer == 0) {
                                 shootAnimationTimer = SHOOT_ANIMATION_DURATION;
                                 shootCooldown = SHOOT_COOLDOWN_TIME;
                             }
-                            shootAnimationTimer--;
-                        } else
-                            direction = previousDirection;
+                            else {
+                                shootAnimationTimer--;
+                            }
+                        }
                     }
                 }
             }
@@ -127,6 +124,8 @@ public abstract class Enemy extends Entity{
             direction = "shoot";
         }
     }
+
+
 
     public int[] getClosestEnemyCoord(int startX, int startY) {
         int[] coord = new int[2];
@@ -158,7 +157,6 @@ public abstract class Enemy extends Entity{
                 setWorldX(getWorldX() - getSpeed());
                 direction = "left";
             }
-
             if (getWorldY() < nextY) {
                 setWorldY(getWorldY() + getSpeed());
                 direction = "down";
@@ -179,8 +177,6 @@ public abstract class Enemy extends Entity{
     public void shoot() {
         int playerWorldX = gp.player.getWorldX();
         int playerWorldY = gp.player.getWorldY();
-
-        // Calculate direction
         int dx = playerWorldX - getWorldX();
         int dy = playerWorldY - getWorldY();
         double length = Math.sqrt(dx * dx + dy * dy);
@@ -191,22 +187,11 @@ public abstract class Enemy extends Entity{
         int startX = (int) (getWorldX() + normalizedDx * gp.getTileSize());
         int startY = (int) (getWorldY() + normalizedDy * gp.getTileSize());
         switch(name){
-            case "EnemyTest":
-                gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-                break;
-            case "SmallEnemy":
-                gp.entities.add(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-                break;
-            case "GiantEnemy":
-                gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-                break;
-            case "FriendlyEnemy":
-                //VALTOZTATAS SZUKSEGES!
-                gp.entities.add(new FriendlyEnemyAttack(gp, startX, startY, getClosestEnemyCoord(startX,startY)[0], getClosestEnemyCoord(startX,startY)[1]));
-                break;
-            default:
-                gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-                break;
+            case "EnemyTest" -> gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
+            case "SmallEnemy" -> gp.entities.add(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
+            case "GiantEnemy" -> gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
+            case "FriendlyEnemy" -> gp.entities.add(new FriendlyEnemyAttack(gp, startX, startY, getClosestEnemyCoord(startX,startY)[0], getClosestEnemyCoord(startX,startY)[1]));
+            default -> gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
         }
     }
 
@@ -248,7 +233,7 @@ class AggressiveBehavior implements EnemyBehavior {
     private int motionCounter = 0;
     @Override
     public void act(Enemy enemy) {
-        if(motionCounter>5) {
+        if(motionCounter>10) {
             enemy.path = AStar.findPath(enemy.gp, enemy.getWorldX(), enemy.getWorldY(), enemy.gp.player.getWorldX(), enemy.gp.player.getWorldY());
             enemy.pathIndex = 0;
             motionCounter = 0;

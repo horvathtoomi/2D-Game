@@ -1,5 +1,9 @@
 package serializable;
 
+import entity.enemy.DragonEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
+import entity.npc.NPC_Wayfarer;
 import main.*;
 import object.*;
 import entity.*;
@@ -71,7 +75,6 @@ public class FileManager {
         player.setSpeed(state.speed);
         player.direction = state.direction;
         player.setHealth(state.health);
-        // Update other relevant player fields
     }
 
     private static Entity createEntityFromState(GamePanel gp, SerializableEntityState state) {
@@ -86,7 +89,6 @@ public class FileManager {
             entity.setSpeed(state.speed);
             entity.direction = state.direction;
             entity.setHealth(state.health);
-            // Set other relevant entity fields
         }
         return entity;
     }
@@ -101,19 +103,9 @@ public class FileManager {
             obj.worldX = state.worldX;
             obj.worldY = state.worldY;
             obj.collision = state.collision;
-            // Set other relevant object fields
         }
         return obj;
     }
-
-    public static String getFileName() throws IOException {
-        String path;
-        BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(System.in)));
-        path = br.readLine();
-        return path;
-    }
-
-
 
 }
 
@@ -129,7 +121,6 @@ class SerializablePlayerState implements Serializable {
         this.speed = player.getSpeed();
         this.direction = player.direction;
         this.health = player.getHealth();
-        // Add other relevant player state
     }
 }
 
@@ -147,7 +138,6 @@ class SerializableEntityState implements Serializable {
         this.speed = entity.getSpeed();
         this.direction = entity.direction;
         this.health = entity.getHealth();
-        // Add other relevant entity state
     }
 }
 
@@ -163,7 +153,6 @@ class SerializableObjectState implements Serializable {
         this.worldX = obj.worldX;
         this.worldY = obj.worldY;
         this.collision = obj.collision;
-        // Add other relevant object state
     }
 
 }

@@ -1,10 +1,11 @@
-package entity;
+package entity.npc;
 
+import entity.Entity;
 import main.GamePanel;
 
 import java.util.Random;
 
-public class NPC_Wayfarer extends Entity{
+public class NPC_Wayfarer extends Entity {
 
     public NPC_Wayfarer(GamePanel gp) {
         super(gp);

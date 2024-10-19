@@ -1,6 +1,6 @@
 package main;
 
-import entity.NPC_Wayfarer;
+import entity.npc.NPC_Wayfarer;
 import object.*;
 import java.io.*;
 import java.util.concurrent.CopyOnWriteArrayList;

@@ -1,5 +1,9 @@
-package entity;
+package entity.attack;
 
+import entity.Entity;
+import entity.npc.NPC_Wayfarer;
+import entity.enemy.Enemy;
+import entity.enemy.FriendlyEnemy;
 import main.GamePanel;
 
 public class FriendlyEnemyAttack extends Attack {
@@ -12,8 +16,6 @@ public class FriendlyEnemyAttack extends Attack {
     @Override
     public void update() {
         super.update();
-
-        // Check for collision with enemies
         for (Entity entity : gp.entities) {
             if (entity instanceof Enemy && !(entity instanceof FriendlyEnemy) && !(entity instanceof NPC_Wayfarer)) {
                 if (entity.solidArea.intersects(this.solidArea)) {

@@ -1,5 +1,7 @@
-package entity;
+package entity.attack;
 
+import entity.Entity;
+import entity.enemy.Enemy;
 import main.GamePanel;
 
 import java.awt.*;

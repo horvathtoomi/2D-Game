@@ -1,6 +1,10 @@
 package main;
 
 import entity.*;
+import entity.enemy.DragonEnemy;
+import entity.enemy.FriendlyEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import object.*;
 import serializable.FileManager;
 import tile.TileManager;

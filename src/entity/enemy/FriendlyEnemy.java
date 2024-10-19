@@ -1,5 +1,8 @@
-package entity;
+package entity.enemy;
 
+import entity.*;
+import entity.attack.FriendlyEnemyAttack;
+import entity.npc.NPC_Wayfarer;
 import main.GamePanel;
 
 import java.awt.*;
@@ -24,11 +27,7 @@ public class FriendlyEnemy extends Enemy {
     @Override
     public void update() {
         super.update();
-
-        // Follow the player
         followPlayer();
-
-        // Shoot at enemies
         shootCooldown++;
         if (shootCooldown >= SHOOT_INTERVAL) {
             shootAtNearestEnemy();

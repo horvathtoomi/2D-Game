@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class Entity{
-    String name;
+    public String name;
     private int worldX, worldY;
     private int screenX, screenY;
     private int speed, health;
