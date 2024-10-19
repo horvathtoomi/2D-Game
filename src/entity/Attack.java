@@ -30,20 +30,34 @@ public class Attack extends Entity {
 
     @Override
     public void update() {
-        setWorldX(getWorldX() + (int)dx);
-        setWorldY(getWorldY() + (int)dy);
+        setWorldX(getWorldX() + (int) dx);
+        setWorldY(getWorldY() + (int) dy);
         solidArea.setLocation(getWorldX() + 3, getWorldY() + 4);
 
         if (checkTileCollision()) {
-            gp.entities.set(gp.entities.indexOf(this), null);
+            gp.entities.remove(this);
+            //gp.entities.set(gp.entities.indexOf(this), null);
             return;
         }
 
         Rectangle playerHitbox = new Rectangle(gp.player.getWorldX() + gp.player.solidArea.x, gp.player.getWorldY() + gp.player.solidArea.y, gp.player.solidArea.width, gp.player.solidArea.height); //Width=32, Height=32
-        if (solidArea.intersects(playerHitbox.getBounds()/*playerHitbox*/)) {
+        if (solidArea.intersects(playerHitbox.getBounds())) {
             gp.player.setHealth(gp.player.getHealth() - damage);
-            gp.entities.set(gp.entities.indexOf(this), null);
+            gp.entities.remove(this);
             return;
+        }
+
+        for (Entity entity : gp.entities) {
+            if (entity instanceof Enemy) {
+                Rectangle entityHitbox = new Rectangle(entity.getWorldX() + entity.solidArea.x,
+                        entity.getWorldY() + entity.solidArea.y,
+                        entity.solidArea.width,
+                        entity.solidArea.height);
+                if (solidArea.intersects(entityHitbox)) {
+                    entity.setHealth(entity.getHealth() - damage);
+                    gp.entities.remove(this);
+                }
+            }
         }
         imageChange++;
         if (imageChange > 5) {

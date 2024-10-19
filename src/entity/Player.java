@@ -36,6 +36,7 @@ public class Player extends Entity {
         up = scale("player","up");
     }
 
+   // @Override
     public void update(){
         if(kezelo.upPressed||kezelo.downPressed||kezelo.leftPressed||kezelo.rightPressed) {
             if (kezelo.upPressed) direction = "up";
@@ -78,6 +79,7 @@ public class Player extends Entity {
         //}
     }
 
+    //@Override
     public void draw(Graphics2D g2){
         BufferedImage image = switch (direction) {
             case "up" -> up;

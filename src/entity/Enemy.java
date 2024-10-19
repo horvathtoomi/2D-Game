@@ -29,8 +29,9 @@ public abstract class Enemy extends Entity{
     public ArrayList<int[]> path;
     public int pathIndex;
     protected int updateCounter;
-    protected final int UPDATE_INTERVAL = 60; // Update path every second (assuming 60 FPS)
+    protected final int UPDATE_INTERVAL = 60;// Update path every second (assuming 60 FPS)
 
+    protected int maxHealth;
 
     public Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(gp);
@@ -55,6 +56,7 @@ public abstract class Enemy extends Entity{
         setSpeed(1);
         previousDirection = "right";
         direction = "right";
+        this.maxHealth = getHealth();
         initializeBehavior();
     }
 
@@ -68,8 +70,19 @@ public abstract class Enemy extends Entity{
         shoot = scale(name, "shoot");
     }
 
+    public void takeDamage(int damage) {
+        setHealth(getHealth() - damage);
+        if (getHealth() <= 0) {
+            gp.entities.remove(this);
+        }
+    }
+
     @Override
     public void update() {
+        if(getHealth() <= 0) {
+            gp.entities.remove(this);
+            return;
+        }
         updateCounter++;
         if (updateCounter >= UPDATE_INTERVAL) {
             behavior.act(this);
@@ -113,8 +126,6 @@ public abstract class Enemy extends Entity{
                 previousDirection = direction;
             direction = "shoot";
         }
-        if(getHealth() <= 0)
-            gp.entities.remove(this);
     }
 
     public int[] getClosestEnemyCoord(int startX, int startY) {
@@ -199,6 +210,7 @@ public abstract class Enemy extends Entity{
         }
     }
 
+    @Override
     public void draw(Graphics2D g2) {
         BufferedImage image = switch (direction) {
             case "shoot" -> shoot;
@@ -212,6 +224,18 @@ public abstract class Enemy extends Entity{
         setScreenY(getWorldY() - gp.player.getWorldY() + gp.player.getScreenY());
         if (getScreenX() > -gp.getTileSize() && getScreenX() < gp.getScreenWidth() && getScreenY() > -gp.getTileSize() && getScreenY() < gp.getScreenHeight())
             g2.drawImage(image, getScreenX(), getScreenY(), width, height, null);
+
+        // Draw health bar
+        int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
+        int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
+
+        g2.setColor(Color.BLACK);
+        g2.fillRect(screenX - 1, screenY - 11, gp.getTileSize() + 2, 7);
+        g2.setColor(Color.RED);
+        g2.fillRect(screenX, screenY - 10, gp.getTileSize(), 5);
+        g2.setColor(Color.GREEN);
+        int greenWidth = (int) ((double) getHealth() / maxHealth * gp.getTileSize());
+        g2.fillRect(screenX, screenY - 10, greenWidth, 5);
     }
 }
 
