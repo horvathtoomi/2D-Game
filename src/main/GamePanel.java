@@ -37,7 +37,7 @@ public class GamePanel extends JPanel implements Runnable {
     public UserInterface ui;
     public Thread gameThread;
 
-    public enum GameState{START,RUNNING,PAUSED,FINISHED,SAVE_DIALOG, LOAD_DIALOG, SAVE, LOAD} //Game State
+    public enum GameState{START,RUNNING,PAUSED,FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
     public GameState gameState;
     public String currentInputText = "";
     public boolean saveLoadSuccess = false;

@@ -12,6 +12,7 @@ public class UserInterface {
     ArrayList<Button> endScreenButtons;
     ArrayList<Button> pauseScreenButtons;
     JProgressBar health;
+    ConsoleHandler console;
 
     public UserInterface(GamePanel gp) {
         this.gp = gp;
@@ -26,6 +27,7 @@ public class UserInterface {
         health = new JProgressBar(0, 100);
         health.setStringPainted(true);
         health.setForeground(Color.GREEN);
+        console = new ConsoleHandler(gp);
     }
 
     public void draw(Graphics2D g2) {
@@ -37,7 +39,7 @@ public class UserInterface {
             case FINISHED -> drawGameEndScreen();
             case PAUSED -> drawPauseScreen();
             case RUNNING -> drawPlayerHealthBar();
-            case SAVE_DIALOG, LOAD_DIALOG -> drawSaveLoadDialog();
+            case SAVE, LOAD -> drawSaveLoadDialog();
         }
     }
 
@@ -57,7 +59,7 @@ public class UserInterface {
         g2.drawRect(dialogX, dialogY, dialogWidth, dialogHeight);
 
         // Draw title
-        String title = gp.gameState == GamePanel.GameState.SAVE_DIALOG ? "Save Game" : "Load Game";
+        String title = gp.gameState == GamePanel.GameState.SAVE ? "Save Game" : "Load Game";
         g2.setFont(arial_40);
         int titleX = getXforCenteredText(title);
         g2.drawString(title, titleX, dialogY + 50);
@@ -156,12 +158,19 @@ public class UserInterface {
                         gp.loadGame();
                         gp.gameState = GamePanel.GameState.RUNNING;
                     }
-                    case 3 -> System.exit(0);
+                    case 3 -> {
+                        gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
+                        try {
+                            console.startConsoleInput();
+                        }catch(Exception e) {e.printStackTrace();}
+                    }
+                    case 4 -> System.exit(0);
                 }
                 break;
             }
         }
     }
+
 
     public void handleHover(Point p) {
         ArrayList<Button> hoverButtons = new ArrayList<>();
@@ -206,7 +215,8 @@ public class UserInterface {
         pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY, buttonWidth, buttonHeight, "Resume"));
         pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Save Game"));
         pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Load Game"));
-        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit"));
+        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Console Input"));
+        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 4 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit"));
     }
 
     private void drawPauseScreen() {

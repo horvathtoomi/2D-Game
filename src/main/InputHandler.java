@@ -14,7 +14,7 @@ public class InputHandler implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        if (gp.gameState == GamePanel.GameState.SAVE_DIALOG || gp.gameState == GamePanel.GameState.LOAD_DIALOG) {
+        if (gp.gameState == GamePanel.GameState.SAVE || gp.gameState == GamePanel.GameState.LOAD) {
             gp.processInput(e.getKeyChar());
         }
     }
@@ -28,6 +28,11 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_S -> downPressed = true;
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
+            case KeyEvent.VK_Q -> {
+                if (gp.gameState == GamePanel.GameState.PAUSED) {
+                    gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
+                }
+            }
             case KeyEvent.VK_ESCAPE -> {
                 if (gp.gameState == GamePanel.GameState.SAVE || gp.gameState == GamePanel.GameState.LOAD)
                     gp.gameState = GamePanel.GameState.PAUSED;
