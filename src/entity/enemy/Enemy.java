@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public abstract class Enemy extends Entity {
     public BufferedImage shoot;
-    String previousDirection = "right";
+    String previousDirection;
     private final int width, height;
 
     private final int startX;
@@ -34,13 +34,14 @@ public abstract class Enemy extends Entity {
     public ArrayList<int[]> path;
     public int pathIndex;
     protected int updateCounter;
-    protected final int UPDATE_INTERVAL = 60;// Update path every second (assuming 60 FPS)
+    protected final int UPDATE_INTERVAL = 90;// Update path every second (assuming 60 FPS)
 
     protected int maxHealth;
 
     public Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(gp);
-        solidArea = new Rectangle(18,12,8,8);
+        //solidArea = new Rectangle(18,12,8,8);
+        solidArea = new Rectangle(10,10,width/2,height/2);
         random = new Random();
         shootCooldown = SHOOT_COOLDOWN_TIME;
         shootAnimationTimer=SHOOT_ANIMATION_DURATION;
@@ -75,6 +76,9 @@ public abstract class Enemy extends Entity {
     @Override
     public void update() {
         if(getHealth() <= 0) {
+            System.out.println("---------------------");
+            System.out.println("|" + name + " dies|");
+            System.out.println("---------------------");
             gp.entities.remove(this);
             return;
         }
@@ -99,16 +103,19 @@ public abstract class Enemy extends Entity {
                     case "down" -> setWorldY(getWorldY() + getSpeed());
                     case "up" -> setWorldY(getWorldY() - getSpeed());
                     case "shoot" -> {
-                        if (shootCooldown == 0) {
-                            if (shootAnimationTimer == SHOOT_ANIMATION_DURATION / 2) {
-                                shoot();
-                            }
-                            else if (shootAnimationTimer == 0) {
-                                shootAnimationTimer = SHOOT_ANIMATION_DURATION;
-                                shootCooldown = SHOOT_COOLDOWN_TIME;
-                            }
-                            else {
-                                shootAnimationTimer--;
+                        if(!(this instanceof FriendlyEnemy)){
+                            if (shootCooldown == 0) {
+                                if(shootAnimationTimer==0){
+                                    shootCooldown = SHOOT_COOLDOWN_TIME;
+                                    direction = previousDirection;
+                                    shootAnimationTimer = SHOOT_ANIMATION_DURATION;
+                                }
+                                else if(shootAnimationTimer==SHOOT_ANIMATION_DURATION/2){
+                                    shoot();
+                                    shootAnimationTimer--;
+                                }
+                                else
+                                    shootAnimationTimer--;
                             }
                         }
                     }
@@ -117,10 +124,7 @@ public abstract class Enemy extends Entity {
         }
         // Shooting logic
         if (random.nextInt(shootingRate) < 1 && shootCooldown == 0) {
-            if(direction.equals("shoot"))
-                previousDirection = "up";
-            else
-                previousDirection = direction;
+            previousDirection = direction;
             direction = "shoot";
         }
     }

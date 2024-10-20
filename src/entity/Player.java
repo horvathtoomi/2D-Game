@@ -96,6 +96,7 @@ public class Player extends Entity {
         if(getScreenY() > getWorldY()){
             y = getWorldY();
         }
+        /*
         int rightOffset = gp.getScreenWidth() - getScreenX();
         if(rightOffset > gp.getWorldWidth() - getWorldX()){
             x = gp.getScreenWidth() - gp.getWorldWidth() - getWorldX();
@@ -103,6 +104,15 @@ public class Player extends Entity {
         int bottomOffset = gp.getScreenHeight() - getScreenY();
         if(bottomOffset > gp.getWorldHeight() - getWorldY()){
             y = gp.getScreenHeight() - gp.getWorldHeight() - getWorldY();
+        }
+        */
+        int rightOffset = gp.getScreenWidth() - getScreenX();
+        if (rightOffset > gp.getWorldWidth() - getWorldX()) {
+            x = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
+        }
+        int bottomOffset = gp.getScreenHeight() - getScreenY();
+        if (bottomOffset > gp.getWorldHeight() - getWorldY()) {
+            y = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
         }
         g2.drawImage(image,x,y,null);
     }

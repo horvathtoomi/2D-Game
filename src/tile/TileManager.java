@@ -69,6 +69,7 @@ public class TileManager {
         }catch(Exception e){ e.printStackTrace(); }
     }
 
+    /*
     public void draw(Graphics2D g2){
         int worldCol=0, worldRow=0;
         while(worldCol<gp.getMaxWorldCol() && worldRow<gp.getMaxWorldRow()){
@@ -102,6 +103,48 @@ public class TileManager {
             worldCol++;
             if(worldCol==gp.getMaxWorldCol()){
                 worldCol=0;
+                worldRow++;
+            }
+        }
+    }
+    */
+
+    public void draw(Graphics2D g2) {
+        int worldCol = 0;
+        int worldRow = 0;
+
+        while (worldCol < gp.getMaxWorldCol() && worldRow < gp.getMaxWorldRow()) {
+            int tileNum = mapTileNum[worldCol][worldRow];
+            int worldX = worldCol * gp.getTileSize();
+            int worldY = worldRow * gp.getTileSize();
+            int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
+            int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
+
+            // Adjust these calculations to prevent black screen at map edges
+            if (gp.player.getScreenX() > gp.player.getWorldX()) {
+                screenX = worldX;
+            }
+            if (gp.player.getScreenY() > gp.player.getWorldY()) {
+                screenY = worldY;
+            }
+            int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
+            if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
+                screenX = gp.getScreenWidth() - (gp.getWorldWidth() - worldX);
+            }
+            int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
+            if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
+                screenY = gp.getScreenHeight() - (gp.getWorldHeight() - worldY);
+            }
+
+            // Only draw the tile if it's within the screen bounds
+            if (screenX > -gp.getTileSize() && screenX < gp.getScreenWidth() &&
+                    screenY > -gp.getTileSize() && screenY < gp.getScreenHeight()) {
+                g2.drawImage(tile[tileNum].image, screenX, screenY, null);
+            }
+
+            worldCol++;
+            if (worldCol == gp.getMaxWorldCol()) {
+                worldCol = 0;
                 worldRow++;
             }
         }

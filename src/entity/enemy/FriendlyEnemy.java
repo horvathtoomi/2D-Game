@@ -68,11 +68,9 @@ public class FriendlyEnemy extends Enemy {
     @Override
     public void draw(Graphics2D g2) {
         super.draw(g2);
-
         // Draw health bar
         int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
         int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
-
         g2.setColor(Color.BLACK);
         g2.fillRect(screenX - 1, screenY - 11, gp.getTileSize() + 2, 7);
         g2.setColor(Color.RED);

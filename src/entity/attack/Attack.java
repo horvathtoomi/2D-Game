@@ -38,7 +38,6 @@ public class Attack extends Entity {
 
         if (checkTileCollision()) {
             gp.entities.remove(this);
-            //gp.entities.set(gp.entities.indexOf(this), null);
             return;
         }
 
