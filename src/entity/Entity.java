@@ -20,6 +20,7 @@ public class Entity{
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
     public GamePanel gp;
+    protected int maxHealth;
 
     public int getWorldX() {return worldX;}
     public int getWorldY() {return worldY;}
@@ -28,6 +29,7 @@ public class Entity{
     public int getSpeed() {return speed;}
     public int getHealth() {return health;}
     public String getName(){return name;}
+    public int getMaxHealth(){return maxHealth;}
 
     public void setWorldX(int a) {worldX = a;}
     public void setWorldY(int a) {worldY = a;}
@@ -35,6 +37,7 @@ public class Entity{
     public void setScreenY(int a) {screenY = a;}
     public void setSpeed(int a) {speed = a;}
     public void setHealth(int a) {health = a;}
+    public void setMaxHealth(int a) {maxHealth = a;}
 
     public Entity(GamePanel gp) {
         this.gp = gp;

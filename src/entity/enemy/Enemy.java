@@ -38,7 +38,6 @@ public abstract class Enemy extends Entity {
     protected int updateCounter;
     protected final int UPDATE_INTERVAL = 90;// Update path every second (assuming 60 FPS)
 
-    protected int maxHealth;
 
 
     public Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
@@ -52,7 +51,7 @@ public abstract class Enemy extends Entity {
         this.height = height;
         this.name=name;
         this.startX = startX;
-        this.maxHealth = getHealth();
+        setMaxHealth(getHealth());
         this.shootingRate=shootingRate;
         setWorldX(startX);
         setWorldY(startY);
@@ -175,10 +174,14 @@ public abstract class Enemy extends Entity {
             case "EnemyTest" -> gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
             case "SmallEnemy" -> gp.entities.add(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
             case "GiantEnemy" -> gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-            case "FriendlyEnemy" -> gp.entities.stream()
+            case "FriendlyEnemy" -> {
+                Entity nearestEnemy = gp.entities.stream()
                         .filter(e -> e instanceof Enemy && !(e instanceof FriendlyEnemy))
                         .min(Comparator.comparingDouble(e -> Math.pow(e.getWorldX() - getWorldX(), 2) + Math.pow(e.getWorldY() - getWorldY(), 2)))
-                        .ifPresent(nearestEnemy -> gp.entities.add(new FriendlyEnemyAttack(gp, getWorldX(), getWorldY(), nearestEnemy.getWorldX(), nearestEnemy.getWorldY())));
+                        .orElse(null);
+                if(nearestEnemy != null)
+                    gp.entities.add(new FriendlyEnemyAttack(gp, getWorldX(), getWorldY(), nearestEnemy.getWorldX(), nearestEnemy.getWorldY()));
+            }
             default -> gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
         }
     }
@@ -203,12 +206,12 @@ public abstract class Enemy extends Entity {
         int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
 
         g2.setColor(Color.BLACK);
-        g2.fillRect(screenX - 1, screenY - 11, gp.getTileSize() + 2, 7);
+        g2.fillRect(screenX - 1, screenY - 11, gp.getTileSize() / 100 * getMaxHealth(), 7);
         g2.setColor(Color.RED);
-        g2.fillRect(screenX, screenY - 10, gp.getTileSize(), 5);
+        g2.fillRect(screenX + width-gp.getTileSize(), screenY - 10, gp.getTileSize(), 5);
         g2.setColor(Color.GREEN);
-        int greenWidth = (int) ((double) getHealth() / maxHealth * gp.getTileSize());
-        g2.fillRect(screenX, screenY - 10, greenWidth, 5);
+        int greenWidth = (int) ((double) getHealth() / getMaxHealth() * gp.getTileSize());
+        g2.fillRect(screenX + width-gp.getTileSize(), screenY - 10, greenWidth, 5);
     }
 }
 
@@ -275,15 +278,20 @@ class PatrolBehavior implements EnemyBehavior {
 
 class FriendlyBehavior implements EnemyBehavior{
     protected int startX, startY;
-
+    private int motionCounter = 0;
     public FriendlyBehavior(int startX, int startY) {
         this.startX = startX;
         this.startY = startY;
     }
 
     @Override
-    public void act(Enemy enemy){
-        enemy.path = AStar.findPath(enemy.gp, enemy.getWorldX(), enemy.getWorldY(), enemy.gp.player.getWorldX(), enemy.gp.player.getWorldY());
-        enemy.pathIndex = 0;
+    public void act(Enemy enemy) {
+        if (motionCounter > 10) {
+            enemy.path = AStar.findPath(enemy.gp, enemy.getWorldX(), enemy.getWorldY(), enemy.gp.player.getWorldX(), enemy.gp.player.getWorldY());
+            enemy.pathIndex = 0;
+            motionCounter = 0;
+        }
+        else
+            motionCounter++;
     }
 }

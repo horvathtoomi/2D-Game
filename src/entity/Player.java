@@ -9,14 +9,11 @@ import java.awt.image.BufferedImage;
 public class Player extends Entity {
 
     InputHandler kezelo;
-    private int maxHealth = 100;
-
-    public int getMaxHealth() {return maxHealth;}
-    public void setMaxHealth(int maxHealth) {this.maxHealth = maxHealth;}
 
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
         this.kezelo = kezelo;
+        setMaxHealth(100);
         setHealth(100);
         setScreenX(gp.getScreenWidth()/2 - (gp.getTileSize()/2));
         setScreenY(gp.getScreenHeight()/2 - (gp.getTileSize()/2));
