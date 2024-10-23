@@ -122,10 +122,8 @@ public class GamePanel extends JPanel implements Runnable {
             player.update();
             entities.removeIf(Objects::isNull);
             aSetter.list.removeIf(Objects::isNull);
-            for(Entity e : entities)
-                e.update();
-            for (SuperObject obj : aSetter.list)
-                obj.update();
+            entities.forEach(Entity::update);
+            aSetter.list.forEach(SuperObject::update);
         }
     }
 

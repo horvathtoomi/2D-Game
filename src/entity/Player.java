@@ -2,13 +2,15 @@ package entity;
 
 import main.InputHandler;
 import main.GamePanel;
+import object.SuperObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
-    InputHandler kezelo;
+    private final InputHandler kezelo;
+    private final Inventory inventory;
 
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
@@ -18,6 +20,7 @@ public class Player extends Entity {
         setScreenX(gp.getScreenWidth()/2 - (gp.getTileSize()/2));
         setScreenY(gp.getScreenHeight()/2 - (gp.getTileSize()/2));
         solidArea = new Rectangle(8,16,32,32);
+        inventory = new Inventory();
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         setDefaultValues();
@@ -51,8 +54,10 @@ public class Player extends Entity {
             gp.cChecker.checkTile(this);
 
             //Check Object Colllision
-            int objIndex = gp.cChecker.checkObject(this,true);
-            pickUpObject(objIndex);
+            int objIndex = gp.cChecker.checkObject(this, true);
+            if (objIndex != 999) {
+                interactWithObject(objIndex);
+            }
 
             //Check npc collision
             int npcIndex = gp.cChecker.checkEntity(this,gp.entities);
@@ -70,9 +75,32 @@ public class Player extends Entity {
     }
 
 
-    public void pickUpObject(int index) {
-        //if(index!=999){
-        //}
+    private void interactWithObject(int index) {
+        if (index < gp.aSetter.list.size()) {
+            SuperObject obj = gp.aSetter.list.get(index);
+
+            switch (obj.name) {
+                case "key" -> {
+                    if (!inventory.isFull()) {
+                        inventory.addItem(obj);
+                        gp.aSetter.list.remove(obj);
+                    }
+                }
+                case "door" -> {
+                    if (inventory.hasItem("key")) {
+                        inventory.removeItem("key");
+                        gp.aSetter.list.remove(obj);
+                    }
+                }
+                case "chest" -> {
+                    if (!obj.opened) {
+                        obj.opened = true;
+                        // TODO: Implement item spawning logic here
+                        System.out.println("Chest opened!");
+                    }
+                }
+            }
+        }
     }
 
     public void interractNPC(int idx){
@@ -107,6 +135,7 @@ public class Player extends Entity {
             y = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
         }
         g2.drawImage(image,x,y,null);
+        inventory.draw(g2);
     }
 
 }

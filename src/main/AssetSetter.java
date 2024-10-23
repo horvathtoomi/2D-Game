@@ -15,27 +15,33 @@ public class AssetSetter {
     }
 
     public void setObject() throws IOException {
-        File file = new File("res/assetsetter/assets.txt");
-        if (!file.exists()) {
-            System.out.println("File does not exist or cannot be found: " + file.getAbsolutePath());
-            return;
-        }
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-        String line;
-        while ((line = br.readLine()) != null) {
-            String name = line.substring(0, line.indexOf(' '));
-            String[] parts = line.split(" ");
-            int x = Integer.parseInt(parts[1]);
-            int y = Integer.parseInt(parts[2]);
-            switch (name) {
-                case "key" -> list.add(new OBJ_Key(gp, x* gp.getTileSize(), y*gp.getTileSize()));
-                case "chest" -> list.add(new OBJ_Chest(gp, x* gp.getTileSize(), y* gp.getTileSize()));
-                case "door" -> list.add(new OBJ_Door(gp, x* gp.getTileSize(), y* gp.getTileSize()));
-                case "boots" -> list.add(new OBJ_Boots(gp, x* gp.getTileSize(), y* gp.getTileSize()));
-                default -> System.out.println("Object not found");
+        // Use try-with-resources
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/assetsetter/assets.txt")))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(" ");
+                if (parts.length < 3) continue;
+                String name = parts[0];
+                int x = Integer.parseInt(parts[1]) * gp.getTileSize();
+                int y = Integer.parseInt(parts[2]) * gp.getTileSize();
+
+                createObject(name, x, y);
             }
         }
-        br.close();
+    }
+
+    private void createObject(String name, int x, int y) {
+        SuperObject obj = switch (name) {
+            case "key" -> new OBJ_Key(gp, x, y);
+            case "chest" -> new OBJ_Chest(gp, x, y);
+            case "door" -> new OBJ_Door(gp, x, y);
+            case "boots" -> new OBJ_Boots(gp, x, y);
+            default -> null;
+        };
+
+        if (obj != null) {
+            list.add(obj);
+        }
     }
 
     public void setNPC(){

@@ -11,6 +11,8 @@ public class UserInterface extends JFrame {
     ArrayList<Button> startScreenButtons;
     ArrayList<Button> endScreenButtons;
     ArrayList<Button> pauseScreenButtons;
+
+
     public UserInterface(GamePanel gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -203,8 +205,6 @@ public class UserInterface extends JFrame {
         int y = gp.getTileSize();
         int width = 200;
         int height = 20;
-
-        // Draw black background
 
         // Calculate the width of the red health bar
         int maxHealthBarWidth = (int) ((gp.player.getMaxHealth() / 100.0) * width);

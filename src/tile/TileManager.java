@@ -69,46 +69,6 @@ public class TileManager {
         }catch(Exception e){ e.printStackTrace(); }
     }
 
-    /*
-    public void draw(Graphics2D g2){
-        int worldCol=0, worldRow=0;
-        while(worldCol<gp.getMaxWorldCol() && worldRow<gp.getMaxWorldRow()){
-            int tileNum = mapTileNum[worldCol][worldRow];
-            int worldX = worldCol * gp.getTileSize();
-            int worldY = worldRow * gp.getTileSize();
-            int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
-            int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
-
-            //Stop moving the camera at the edge of the map
-            if(gp.player.getScreenX()>gp.player.getWorldX())
-                screenX = worldX;
-            if(gp.player.getScreenY()>gp.player.getWorldY())
-                screenY = worldY;
-            int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
-
-            if(rightOffset > gp.getWorldWidth() - gp.player.getWorldX())
-                screenX = gp.getScreenWidth() - gp.getWorldWidth() - worldX;
-
-            int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
-
-            if(bottomOffset > gp.getWorldHeight() - gp.player.getWorldY())
-                screenY = gp.getScreenHeight() - gp.getWorldHeight() - worldY;
-
-            if(worldX+gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() && worldX-gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() && worldY+gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() && worldY-gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY())
-                g2.drawImage(tile[tileNum].image,screenX,screenY,null);
-
-            else if(gp.player.getScreenX() > gp.player.getWorldX() || gp.player.getScreenY() > gp.player.getWorldY() || rightOffset > gp.getWorldWidth() - gp.player.getWorldX() || bottomOffset > gp.getWorldHeight() - gp.player.getWorldY())
-                g2.drawImage(tile[tileNum].image,screenX,screenY,null);
-
-            worldCol++;
-            if(worldCol==gp.getMaxWorldCol()){
-                worldCol=0;
-                worldRow++;
-            }
-        }
-    }
-    */
-
     public void draw(Graphics2D g2) {
         int worldCol = 0;
         int worldRow = 0;
