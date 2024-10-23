@@ -27,6 +27,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_Q -> {
                 if (gp.gameState == GamePanel.GameState.PAUSED) {
                     gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
+                    gp.console.startConsoleInput();
                 }
             }
             case KeyEvent.VK_ESCAPE -> {
@@ -71,8 +72,13 @@ public class InputHandler implements KeyListener {
     }
 
     private void toggleMenuState() {
-        if(gp.gameState!=GamePanel.GameState.RUNNING)
+        if (gp.gameState == GamePanel.GameState.PAUSED){
             gp.gameState = GamePanel.GameState.RUNNING;
+        }
+        else if(gp.gameState==GamePanel.GameState.FINISHED) {
+            gp.resetGame();
+            gp.gameState = GamePanel.GameState.RUNNING;
+        }
     }
 
 }

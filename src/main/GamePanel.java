@@ -37,12 +37,10 @@ public class GamePanel extends JPanel implements Runnable {
     public MouseHandler mouseHandler;
     public UserInterface ui;
     public Thread gameThread;
+    public ConsoleHandler console;
 
     public enum GameState{START,RUNNING,PAUSED,FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
     public GameState gameState;
-    public String currentInputText = "";
-    public boolean saveLoadSuccess = false;
-    public String saveLoadMessage = "";
 
     public int getTileSize() {return tileSize;}
     public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
@@ -68,6 +66,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.addMouseListener(mouseHandler);
         this.addMouseMotionListener(mouseHandler);
         //
+        console=new ConsoleHandler(this);
         this.setFocusable(true);
     }
 

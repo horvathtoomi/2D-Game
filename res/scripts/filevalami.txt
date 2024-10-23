@@ -1,0 +1,3 @@
+set valami 1
+set maxhealth 25
+set speed 5

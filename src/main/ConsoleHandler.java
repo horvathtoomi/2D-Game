@@ -26,7 +26,6 @@ public class ConsoleHandler {
             writer.println("Console input is only available in CONSOLE_INPUT state.");
             return;
         }
-
         writer.println("Entering console input mode. Type 'exit' to return to the game.");
         printHelp();
 
@@ -71,10 +70,14 @@ public class ConsoleHandler {
                 }
                 case "set" -> {
                     if (parts.length == 4)
-                        if(parts[1].equals("player")) setGameValue(parts[2], parts[3]);
-                        else setEntity(parts[1], parts[2], Integer.parseInt(parts[3]));
-                    else if (parts.length == 3) setGameValue(parts[1], parts[2]);
-                    else throw new IllegalArgumentException("Invalid format for 'set' command.\n| Wrong Format | set entity arg1 value \n->entity: *Enemy, Player, args: speed,health,maxhealth");
+                        if(parts[1].equals("player"))
+                            setGameValue(parts[2], parts[3]);
+                        else
+                            setEntity(parts[1], parts[2], Integer.parseInt(parts[3]));
+                    else if (parts.length == 3)
+                        setGameValue(parts[1], parts[2]);
+                    else
+                        throw new IllegalArgumentException("Invalid format for 'set' command.\n| Wrong Format | set entity arg1 value \n->entity: *Enemy, Player, args: speed,health,maxhealth");
                 }
                 case "get" -> {
                     if(parts.length == 3) {
@@ -84,11 +87,14 @@ public class ConsoleHandler {
                             default -> writer.println("Unknown command. Type 'help' for a list of available commands.");
                         }
                     }
-                    else if(parts.length == 2) getGameValue(parts[1]);
-                    else throw new IllegalArgumentException("Invalid format for 'set' command.\n| Wrong Format | get entity arg1 \n->entity: *Enemy, Player, args: speed,health\n");
+                    else if(parts.length == 2)
+                        getGameValue(parts[1]);
+                    else
+                        throw new IllegalArgumentException("Invalid format for 'set' command.\n| Wrong Format | get entity arg1 \n->entity: *Enemy, Player, args: speed,health\n");
                 }
                 case "script" -> {
-                    if(parts.length != 2) throw new IllegalArgumentException("Invalid format for 'get' command.\n| Wrong Format | scripts <filename> -> filename.extension");
+                    if(parts.length != 2)
+                        throw new IllegalArgumentException("Invalid format for 'get' command.\n| Wrong Format | scripts <filename> -> filename.extension");
                     runScript(parts[1]);
                 }
                 case "make" -> {
@@ -126,7 +132,7 @@ public class ConsoleHandler {
 
 
     private void createFile(String filename){
-        File saveFile = new File("res/scripts" + filename + ".txt");
+        File saveFile = new File("res/scripts/" + filename + ".txt");
         writer.println("| Entering file creation | type 'end' to exit |");
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(saveFile))) {
             String inputLine;
@@ -201,25 +207,56 @@ public class ConsoleHandler {
     }
 
     private void runScript(String filename) {
-        File scriptFile = new File("res/scripts/"+filename);
+        File scriptFile = new File("res/scripts/"+filename+".txt");
         if (!scriptFile.exists() || !scriptFile.isFile()) {
             writer.println("Error: File not found or not a valid file.");
             return;
         }
         try (BufferedReader fileReader = new BufferedReader(new FileReader(scriptFile))) {
             String line;
+            boolean inMakeMode = false;
+            BufferedWriter fileWriter = null;
+
             while ((line = fileReader.readLine()) != null) {
                 line = line.trim();
-                if(line.equals("exit_game"))
-                    System.exit(0);
-                else if(line.equals("exit"))
-                    abortProcess = true;
-                else if (!line.isEmpty())
-                    processCommand(line);
+
+                if (line.startsWith("make")) {
+                    // Start make mode
+                    String[] parts = line.split("\\s+");
+                    if(parts.length == 2) {
+                        // Create file and enter 'make' mode
+                        File saveFile = new File("res/scripts/" + parts[1] + ".txt");
+                        fileWriter = new BufferedWriter(new FileWriter(saveFile));
+                        inMakeMode = true;
+                        writer.println("| Auto-make mode activated for " + parts[1] + " |");
+                    } else {
+                        writer.println("Invalid make command in script.");
+                        return;
+                    }
+                }
+                else if (inMakeMode && line.equalsIgnoreCase("end")) {
+                    fileWriter.close();
+                    writer.println("| File creation finished |");
+                    inMakeMode = false;
+                }
+                else if (inMakeMode) {
+                    fileWriter.write(line);
+                    fileWriter.newLine();
+                }
+                else {
+                    // Process other commands as usual
+                    if(line.equals("exit_game"))
+                        System.exit(0);
+                    else if(line.equals("exit"))
+                        abortProcess = true;
+                    else if (!line.isEmpty())
+                        processCommand(line);
+                }
             }
+            if (fileWriter != null)
+                fileWriter.close();
         } catch (IOException e) {
             writer.println("An error occurred while reading the script file: " + e.getMessage());
-            return;
         }
         writer.println("|Script executed successfully|");
     }
@@ -227,13 +264,14 @@ public class ConsoleHandler {
     private void printHelp() {
         writer.println("Available commands:");
         writer.println("  help - Show this help message");
-        writer.println("  script <filename> - Run a script");
-        writer.println("  reset - Reset the game");
-        writer.println("  set <variable> <value> - Set a game variable");
-        writer.println("  get <variable> - Get the value of a game variable");
         writer.println("  history - Show command history");
-        writer.println("  exit - Exit console input mode");
-        writer.println("  exit_game - Terminates the game");
+        writer.println("  script <filename> - Run a script");
+        writer.println("  make <filename> - Creates a script");
+        writer.println("  set <variable> <value> - Set a game variable");
+        writer.println("  get <variable> - Get a game variable");
+        writer.println("  reset - Reset the game");
+        writer.println("  save/load <filename> -Saves/Loads a game");
+        writer.println("  exit/exit_game - Exit console input/ Terminates the game");
     }
 
     private void resetGame() {

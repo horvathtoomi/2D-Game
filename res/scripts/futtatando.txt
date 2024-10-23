@@ -1,0 +1,4 @@
+make futtatando2
+get health
+get speed
+exit

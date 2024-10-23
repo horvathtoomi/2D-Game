@@ -11,8 +11,6 @@ public class UserInterface extends JFrame {
     ArrayList<Button> startScreenButtons;
     ArrayList<Button> endScreenButtons;
     ArrayList<Button> pauseScreenButtons;
-    ConsoleHandler console;
-
     public UserInterface(GamePanel gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -23,8 +21,6 @@ public class UserInterface extends JFrame {
         initializeStartScreenButtons();
         initializeEndScreenButtons();
         initializePauseScreenButtons();
-
-        console = new ConsoleHandler(gp);
     }
 
     public void draw(Graphics2D g2) {
@@ -122,7 +118,7 @@ public class UserInterface extends JFrame {
                     case 3 -> {
                         gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
                         try {
-                            console.startConsoleInput();
+                            gp.console.startConsoleInput();
                         }catch(Exception e) {e.printStackTrace();}
                     }
                     case 4 -> System.exit(0);

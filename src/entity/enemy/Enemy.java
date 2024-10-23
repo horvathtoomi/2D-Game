@@ -6,7 +6,6 @@ import entity.attack.DragonEnemyAttack;
 import entity.attack.FriendlyEnemyAttack;
 import entity.attack.GiantEnemyAttack;
 import entity.attack.SmallEnemyAttack;
-import entity.npc.NPC_Wayfarer;
 import main.GamePanel;
 
 import java.awt.*;
@@ -176,7 +175,7 @@ public abstract class Enemy extends Entity {
             case "GiantEnemy" -> gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
             case "FriendlyEnemy" -> {
                 Entity nearestEnemy = gp.entities.stream()
-                        .filter(e -> e instanceof Enemy && !(e instanceof FriendlyEnemy))
+                        .filter(e -> !(e instanceof Player) && !(e instanceof FriendlyEnemy))
                         .min(Comparator.comparingDouble(e -> Math.pow(e.getWorldX() - getWorldX(), 2) + Math.pow(e.getWorldY() - getWorldY(), 2)))
                         .orElse(null);
                 if(nearestEnemy != null)
