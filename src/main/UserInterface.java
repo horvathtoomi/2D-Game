@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class UserInterface {
+public class UserInterface extends JFrame {
     GamePanel gp;
     Graphics2D g2;
     Font arial_40, arial_80B;
@@ -24,9 +24,9 @@ public class UserInterface {
         initializeStartScreenButtons();
         initializeEndScreenButtons();
         initializePauseScreenButtons();
-        health = new JProgressBar(0, 100);
-        health.setStringPainted(true);
-        health.setForeground(Color.GREEN);
+        //health = new JProgressBar(0, 100);
+        //health.setStringPainted(true);
+        //health.setForeground(Color.GREEN);
         console = new ConsoleHandler(gp);
     }
 
@@ -248,26 +248,26 @@ public class UserInterface {
         int height = 20;
 
         // Draw black background
-        g2.setColor(Color.BLACK);
-        g2.fillRect(x, y, width, height);
 
         // Calculate the width of the red health bar
-        int healthBarWidth = (int) ((gp.player.getHealth() / 100.0) * width);
-
+        int maxHealthBarWidth = (int) ((gp.player.getMaxHealth() / 100.0) * width);
+        int normalHealthBarWidth = (int) ((gp.player.getHealth() / 100.0) * width);
+        g2.setColor(Color.BLACK);
+        g2.fillRect(x, y, maxHealthBarWidth, height);
         // Draw red health bar
         g2.setColor(Color.RED);
-        g2.fillRect(x, y, healthBarWidth, height);
+        g2.fillRect(x, y, normalHealthBarWidth, height);
 
         // Draw white border
         g2.setColor(Color.WHITE);
         g2.setStroke(new BasicStroke(2));
-        g2.drawRect(x, y, width, height);
+        g2.drawRect(x, y, maxHealthBarWidth, height);
 
         // Draw HP text
         g2.setFont(new Font("Arial", Font.BOLD, 12));
         g2.setColor(Color.WHITE);
-        String hpText = gp.player.getHealth() + "/100 HP";
-        int textX = x + width / 2 - g2.getFontMetrics().stringWidth(hpText) / 2;
+        String hpText = gp.player.getHealth() + "/" + gp.player.getMaxHealth() +  " HP";
+        int textX = x + maxHealthBarWidth / 2 - g2.getFontMetrics().stringWidth(hpText) / 2;
         int textY = y - 5;
         g2.drawString(hpText, textX, textY);
     }

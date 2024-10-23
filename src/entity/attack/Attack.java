@@ -43,7 +43,7 @@ public class Attack extends Entity {
 
         Rectangle playerHitbox = new Rectangle(gp.player.getWorldX() + gp.player.solidArea.x, gp.player.getWorldY() + gp.player.solidArea.y, gp.player.solidArea.width, gp.player.solidArea.height); //Width=32, Height=32
         if (solidArea.intersects(playerHitbox.getBounds())) {
-            gp.player.setHealth(gp.player.getHealth() - damage);
+            gp.player.setHealth(Math.max(0,gp.player.getHealth()-damage));
             gp.entities.remove(this);
             return;
         }
@@ -55,7 +55,7 @@ public class Attack extends Entity {
                         entity.solidArea.width,
                         entity.solidArea.height);
                 if (solidArea.intersects(entityHitbox)) {
-                    entity.setHealth(entity.getHealth() - damage);
+                    entity.setHealth(Math.max(0,entity.getHealth()-damage));
                     gp.entities.remove(this);
                 }
             }

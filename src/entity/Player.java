@@ -7,7 +7,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
+
     InputHandler kezelo;
+    private int maxHealth = 100;
+
+    public int getMaxHealth() {return maxHealth;}
+    public void setMaxHealth(int maxHealth) {this.maxHealth = maxHealth;}
 
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
@@ -96,16 +101,6 @@ public class Player extends Entity {
         if(getScreenY() > getWorldY()){
             y = getWorldY();
         }
-        /*
-        int rightOffset = gp.getScreenWidth() - getScreenX();
-        if(rightOffset > gp.getWorldWidth() - getWorldX()){
-            x = gp.getScreenWidth() - gp.getWorldWidth() - getWorldX();
-        }
-        int bottomOffset = gp.getScreenHeight() - getScreenY();
-        if(bottomOffset > gp.getWorldHeight() - getWorldY()){
-            y = gp.getScreenHeight() - gp.getWorldHeight() - getWorldY();
-        }
-        */
         int rightOffset = gp.getScreenWidth() - getScreenX();
         if (rightOffset > gp.getWorldWidth() - getWorldX()) {
             x = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());

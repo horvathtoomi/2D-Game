@@ -38,6 +38,7 @@ public abstract class Enemy extends Entity {
 
     protected int maxHealth;
 
+
     public Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(gp);
         //solidArea = new Rectangle(18,12,8,8);
