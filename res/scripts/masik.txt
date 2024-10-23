@@ -1,4 +1,0 @@
-set speed 5
-set maxhealth 400
-set health 400
-script harmadik.txt

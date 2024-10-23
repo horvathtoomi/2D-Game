@@ -26,6 +26,7 @@ public class GamePanel extends JPanel implements Runnable {
     private final int maxScreenRow = 18;    //12
     private final int maxWorldCol = 50;
     private final int maxWorldRow = 50;
+    private final int FPS = 60;
 
     public CollisionChecker cChecker=new CollisionChecker(this);
     public Player player;
@@ -82,6 +83,7 @@ public class GamePanel extends JPanel implements Runnable {
         addEnemy(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
         addEnemy(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
         addEnemy(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
+        addEnemy(new FriendlyEnemy(this, 10 * tileSize,20 * tileSize));
     }
 
     private void addEnemy(Entity enemy){
@@ -94,7 +96,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void run() {
-        double drawInterval = 1_000_000_000.0 / 60; //Setting the game's FPS
+        double drawInterval = 1_000_000_000.0 / FPS; //Setting the game's FPS
         double nextDrawTime = System.nanoTime() + drawInterval;
         while (gameThread != null) {
             if(player.getHealth()<=0 && gameState == GameState.RUNNING)
@@ -236,16 +238,6 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter.list.clear();
         player = new Player(this, inpkez);
         setupGame();
-    }
-
-    public void processInput(char c) {
-        if (c == '\b') {  // Backspace
-            if (!currentInputText.isEmpty()) {
-                currentInputText = currentInputText.substring(0, currentInputText.length() - 1);
-            }
-        } else {
-            currentInputText += c;
-        }
     }
 
 }

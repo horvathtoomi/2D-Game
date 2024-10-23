@@ -1,3 +1,0 @@
-get maxhealth
-get speed
-exit

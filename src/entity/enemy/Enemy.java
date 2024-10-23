@@ -6,10 +6,12 @@ import entity.attack.DragonEnemyAttack;
 import entity.attack.FriendlyEnemyAttack;
 import entity.attack.GiantEnemyAttack;
 import entity.attack.SmallEnemyAttack;
+import entity.npc.NPC_Wayfarer;
 import main.GamePanel;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.ArrayList;
 
@@ -104,20 +106,18 @@ public abstract class Enemy extends Entity {
                     case "down" -> setWorldY(getWorldY() + getSpeed());
                     case "up" -> setWorldY(getWorldY() - getSpeed());
                     case "shoot" -> {
-                        if(!(this instanceof FriendlyEnemy)){
-                            if (shootCooldown == 0) {
-                                if(shootAnimationTimer==0){
-                                    shootCooldown = SHOOT_COOLDOWN_TIME;
-                                    direction = previousDirection;
-                                    shootAnimationTimer = SHOOT_ANIMATION_DURATION;
-                                }
-                                else if(shootAnimationTimer==SHOOT_ANIMATION_DURATION/2){
-                                    shoot();
-                                    shootAnimationTimer--;
-                                }
-                                else
-                                    shootAnimationTimer--;
+                        if (shootCooldown == 0) {
+                            if(shootAnimationTimer==0){
+                                shootCooldown = SHOOT_COOLDOWN_TIME;
+                                direction = previousDirection;
+                                shootAnimationTimer = SHOOT_ANIMATION_DURATION;
                             }
+                            else if(shootAnimationTimer==SHOOT_ANIMATION_DURATION/2){
+                                shoot();
+                                shootAnimationTimer--;
+                            }
+                            else
+                                shootAnimationTimer--;
                         }
                     }
                 }
@@ -128,26 +128,6 @@ public abstract class Enemy extends Entity {
             previousDirection = direction;
             direction = "shoot";
         }
-    }
-
-
-
-    public int[] getClosestEnemyCoord(int startX, int startY) {
-        int[] coord = new int[2];
-        int minDist = Integer.MAX_VALUE;
-        int entX = 0, entY= 0;
-        for(Entity ent : gp.entities) {
-            if(!ent.name.equals("NPC_Wayfarer")) {
-                if (((ent.getWorldX()-startX)*(ent.getWorldX()-startX) + (ent.getWorldY()-startY)*(ent.getWorldY()-startY)) <minDist) {
-                    minDist = ((ent.getWorldX()-startX) * (ent.getWorldX()-startX)) + ((ent.getWorldY()-startY) * (ent.getWorldY()-startY));
-                    entX = ent.getWorldX();
-                    entY = ent.getWorldY();
-                }
-            }
-        }
-        coord[0] = entX;
-        coord[1] = entY;
-        return coord;
     }
 
     protected void followPath() {
@@ -195,7 +175,10 @@ public abstract class Enemy extends Entity {
             case "EnemyTest" -> gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
             case "SmallEnemy" -> gp.entities.add(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
             case "GiantEnemy" -> gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-            case "FriendlyEnemy" -> gp.entities.add(new FriendlyEnemyAttack(gp, startX, startY, getClosestEnemyCoord(startX,startY)[0], getClosestEnemyCoord(startX,startY)[1]));
+            case "FriendlyEnemy" -> gp.entities.stream()
+                        .filter(e -> e instanceof Enemy && !(e instanceof FriendlyEnemy))
+                        .min(Comparator.comparingDouble(e -> Math.pow(e.getWorldX() - getWorldX(), 2) + Math.pow(e.getWorldY() - getWorldY(), 2)))
+                        .ifPresent(nearestEnemy -> gp.entities.add(new FriendlyEnemyAttack(gp, getWorldX(), getWorldY(), nearestEnemy.getWorldX(), nearestEnemy.getWorldY())));
             default -> gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
         }
     }

@@ -13,11 +13,7 @@ public class InputHandler implements KeyListener {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-        if (gp.gameState == GamePanel.GameState.SAVE || gp.gameState == GamePanel.GameState.LOAD) {
-            gp.processInput(e.getKeyChar());
-        }
-    }
+    public void keyTyped(KeyEvent e) {}
 
 
     @Override

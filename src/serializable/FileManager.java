@@ -36,15 +36,8 @@ public class FileManager {
     public static void saveGameState(GamePanel gp, String filename) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
             oos.writeObject(new SerializablePlayerState(gp.player));
-            oos.writeObject(new ArrayList<>(gp.entities.stream()
-                    .filter(Objects::nonNull)
-                    .map(SerializableEntityState::new)
-                    .collect(Collectors.toList())));
-            oos.writeObject(new ArrayList<>(gp.aSetter.list.stream()
-                    .filter(Objects::nonNull)
-                    .map(SerializableObjectState::new)
-                    .collect(Collectors.toList())));
-            oos.writeObject(gp.gameState);
+            oos.writeObject(new ArrayList<>(gp.entities.stream().filter(Objects::nonNull).map(SerializableEntityState::new).collect(Collectors.toList())));
+            oos.writeObject(new ArrayList<>(gp.aSetter.list.stream().filter(Objects::nonNull).map(SerializableObjectState::new).collect(Collectors.toList())));
         }
     }
 
@@ -52,20 +45,10 @@ public class FileManager {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
             SerializablePlayerState playerState = (SerializablePlayerState) ois.readObject();
             updatePlayerState(gp.player, playerState);
-
             List<SerializableEntityState> entityStates = (List<SerializableEntityState>) ois.readObject();
-            gp.entities = entityStates.stream()
-                    .map(state -> createEntityFromState(gp, state))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors
-                    .toCollection(CopyOnWriteArrayList::new));
-
+            gp.entities = entityStates.stream().map(state -> createEntityFromState(gp, state)).filter(Objects::nonNull).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             List<SerializableObjectState> objectStates = (List<SerializableObjectState>) ois.readObject();
-            gp.aSetter.list = objectStates.stream()
-                    .map(state -> createObjectFromState(gp, state))
-                    .filter(Objects::nonNull).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
-
-            gp.gameState = (GamePanel.GameState) ois.readObject();
+            gp.aSetter.list = objectStates.stream().map(state -> createObjectFromState(gp, state)).filter(Objects::nonNull).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
         }
     }
 

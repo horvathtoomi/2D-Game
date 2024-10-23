@@ -11,7 +11,6 @@ public class UserInterface extends JFrame {
     ArrayList<Button> startScreenButtons;
     ArrayList<Button> endScreenButtons;
     ArrayList<Button> pauseScreenButtons;
-    JProgressBar health;
     ConsoleHandler console;
 
     public UserInterface(GamePanel gp) {
@@ -24,9 +23,7 @@ public class UserInterface extends JFrame {
         initializeStartScreenButtons();
         initializeEndScreenButtons();
         initializePauseScreenButtons();
-        //health = new JProgressBar(0, 100);
-        //health.setStringPainted(true);
-        //health.setForeground(Color.GREEN);
+
         console = new ConsoleHandler(gp);
     }
 
@@ -39,42 +36,6 @@ public class UserInterface extends JFrame {
             case FINISHED -> drawGameEndScreen();
             case PAUSED -> drawPauseScreen();
             case RUNNING -> drawPlayerHealthBar();
-            case SAVE, LOAD -> drawSaveLoadDialog();
-        }
-    }
-
-    public void drawSaveLoadDialog() {
-        // Draw a semi-transparent black overlay
-        g2.setColor(new Color(0, 0, 0, 200));
-        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-
-        // Draw dialog box
-        int dialogWidth = 400;
-        int dialogHeight = 200;
-        int dialogX = gp.getScreenWidth() / 2 - dialogWidth / 2;
-        int dialogY = gp.getScreenHeight() / 2 - dialogHeight / 2;
-        g2.setColor(Color.WHITE);
-        g2.fillRect(dialogX, dialogY, dialogWidth, dialogHeight);
-        g2.setColor(Color.BLACK);
-        g2.drawRect(dialogX, dialogY, dialogWidth, dialogHeight);
-
-        // Draw title
-        String title = gp.gameState == GamePanel.GameState.SAVE ? "Save Game" : "Load Game";
-        g2.setFont(arial_40);
-        int titleX = getXforCenteredText(title);
-        g2.drawString(title, titleX, dialogY + 50);
-
-        // Draw input field
-        g2.setFont(new Font("Arial", Font.PLAIN, 20));
-        g2.drawString("Enter file name:", dialogX + 20, dialogY + 100);
-        g2.drawRect(dialogX + 20, dialogY + 120, dialogWidth - 40, 30);
-        g2.drawString(gp.currentInputText, dialogX + 25, dialogY + 142);
-
-        // Draw message
-        if (!gp.saveLoadMessage.isEmpty()) {
-            g2.setFont(new Font("Arial", Font.PLAIN, 16));
-            g2.setColor(gp.saveLoadSuccess ? Color.GREEN : Color.RED);
-            g2.drawString(gp.saveLoadMessage, dialogX + 20, dialogY + 180);
         }
     }
 
