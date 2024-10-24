@@ -61,60 +61,72 @@ public class CollisionChecker {
         }
     }
 
-    public int checkObject(Entity entity, boolean is_a_player){
-        int index=999;
+    public int checkObject(Entity entity, boolean isPlayer) {
+        int index = 999;
         int it = 0;
-        for(SuperObject aut : gp.aSetter.list) {
-            if (aut != null) {
-                //Get entity's solid area
+
+        for(SuperObject obj : gp.aSetter.list) {
+            if (obj != null) {
+                // Get entity's solid area position
                 entity.solidArea.x = entity.getWorldX() + entity.solidArea.x;
                 entity.solidArea.y = entity.getWorldY() + entity.solidArea.y;
-                //Get the object's solid area position
-                aut.solidArea.x = aut.worldX + aut.solidArea.x;
-                aut.solidArea.y = aut.worldY + aut.solidArea.y;
+
+                // Get object's solid area position
+                obj.solidArea.x = obj.worldX + obj.solidArea.x;
+                obj.solidArea.y = obj.worldY + obj.solidArea.y;
 
                 switch (entity.direction) {
-                    case "up":
+                    case "up" -> {
                         entity.solidArea.y -= entity.getSpeed();
-                        if (entity.solidArea.intersects(aut.solidArea)) {
-                            if (aut.collision)
+                        if (entity.solidArea.intersects(obj.solidArea)) {
+                            if (obj.collision) {
                                 entity.collisionOn = true;
-                            if (is_a_player)
+                            }
+                            if (isPlayer) {
                                 index = it;
+                            }
                         }
-                        break;
-                    case "down":
+                    }
+                    case "down" -> {
                         entity.solidArea.y += entity.getSpeed();
-                        if (entity.solidArea.intersects(aut.solidArea)) {
-                            if (aut.collision)
+                        if (entity.solidArea.intersects(obj.solidArea)) {
+                            if (obj.collision) {
                                 entity.collisionOn = true;
-                            if (is_a_player)
+                            }
+                            if (isPlayer) {
                                 index = it;
+                            }
                         }
-                            break;
-                    case "left":
+                    }
+                    case "left" -> {
                         entity.solidArea.x -= entity.getSpeed();
-                        if (entity.solidArea.intersects(aut.solidArea)) {
-                            if (aut.collision)
+                        if (entity.solidArea.intersects(obj.solidArea)) {
+                            if (obj.collision) {
                                 entity.collisionOn = true;
-                            if (is_a_player)
+                            }
+                            if (isPlayer) {
                                 index = it;
+                            }
                         }
-                            break;
-                    case "right":
+                    }
+                    case "right" -> {
                         entity.solidArea.x += entity.getSpeed();
-                        if (entity.solidArea.intersects(aut.solidArea)) {
-                            if (aut.collision)
+                        if (entity.solidArea.intersects(obj.solidArea)) {
+                            if (obj.collision) {
                                 entity.collisionOn = true;
-                            if (is_a_player)
+                            }
+                            if (isPlayer) {
                                 index = it;
+                            }
                         }
-                            break;
+                    }
                 }
+
+                // Reset positions
                 entity.solidArea.x = entity.solidAreaDefaultX;
                 entity.solidArea.y = entity.solidAreaDefaultY;
-                aut.solidArea.x = aut.solidAreaDefaultX;
-                aut.solidArea.y = aut.solidAreaDefaultY;
+                obj.solidArea.x = obj.solidAreaDefaultX;
+                obj.solidArea.y = obj.solidAreaDefaultY;
             }
             it++;
         }

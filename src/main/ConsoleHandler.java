@@ -1,21 +1,27 @@
 package main;
 
+import entity.Entity;
+import entity.enemy.DragonEnemy;
+import entity.enemy.FriendlyEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
+import object.OBJ_Boots;
+import object.OBJ_Chest;
+import object.OBJ_Door;
+import object.OBJ_Key;
 import serializable.FileManager;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ConsoleHandler {
     private final GamePanel gp;
-    private final List<String> commandHistory;
     private final BufferedReader reader;
     private final PrintWriter writer;
     public boolean abortProcess;
 
     public ConsoleHandler(GamePanel gp) {
         this.gp = gp;
-        this.commandHistory = new ArrayList<>();
         this.reader = new BufferedReader(new InputStreamReader(System.in));
         this.writer = new PrintWriter(System.out, true);
         abortProcess = false;
@@ -27,7 +33,7 @@ public class ConsoleHandler {
             return;
         }
         writer.println("Entering console input mode. Type 'exit' to return to the game.");
-        printHelp();
+        printHelp(" ");
 
         String command;
         try {
@@ -47,15 +53,24 @@ public class ConsoleHandler {
     }
 
     private void processCommand(String command) {
-        commandHistory.add(command);
         String[] parts = command.split("\\s+");
         try {
             switch (parts[0]) {
-                case "help" -> printHelp();
+                case "help" -> {
+                    if(parts.length < 2)
+                        printHelp(" ");
+                    else
+                        printHelp(parts[1]);
+                }
                 case "reset" -> resetGame();
                 case "exit" -> abortProcess = true;
                 case "exit_game" -> System.exit(0);
-                case "history" -> printCommandHistory();
+                case "remove" -> {
+                    if(parts.length == 2)
+                        removeEntities(parts[1]);
+                    else
+                        throw new IllegalArgumentException("Invalid format! remove <entity_name>");
+                }
                 case "save" -> {
                     if(parts.length == 2)
                         saveFile(parts[1]);
@@ -72,6 +87,8 @@ public class ConsoleHandler {
                     if (parts.length == 4)
                         if(parts[1].equals("player"))
                             setGameValue(parts[2], parts[3]);
+                        else if(parts[1].equals("entity"))
+                            setAll(parts[2], Integer.parseInt(parts[3]));
                         else
                             setEntity(parts[1], parts[2], Integer.parseInt(parts[3]));
                     else if (parts.length == 3)
@@ -92,6 +109,15 @@ public class ConsoleHandler {
                     else
                         throw new IllegalArgumentException("Invalid format for 'set' command.\n| Wrong Format | get entity arg1 \n->entity: *Enemy, Player, args: speed,health\n");
                 }
+                case "add" -> {
+                    if(parts.length == 4)
+                        add(parts[1], Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
+                    else
+                        throw new IllegalArgumentException("""
+                                Invalid format for 'add' | add <entity/object> X Y
+                                entity: Giant-,Small-,Dragon-,Friendly-Enemy
+                                object: chest,door,key,boots""");
+                }
                 case "script" -> {
                     if(parts.length != 2)
                         throw new IllegalArgumentException("Invalid format for 'get' command.\n| Wrong Format | scripts <filename> -> filename.extension");
@@ -105,6 +131,38 @@ public class ConsoleHandler {
                 default -> writer.println("Unknown command. Type 'help' for a list of available commands.");
             }
         } catch (IllegalArgumentException e) {writer.println("Error: " + e.getMessage());}
+    }
+
+    private void removeEntities(String entityType) {
+        int count = 0;
+        for (Entity entity : new ArrayList<>(gp.entities)) {
+            if (entity.getClass().getSimpleName().equalsIgnoreCase(entityType)) {
+                gp.entities.remove(entity);
+                count++;
+            }
+        }
+        if(count != 0)
+            writer.println("Removed " + count + " entities of type " + entityType);
+        else
+            writer.println("No such entity as: " + entityType);
+    }
+
+    private void add(String obj, int x, int y) {
+        if(!((x<50 && x>1) && (y<50 && y>1))){
+            writer.println("Coordinates must be [2:49]");
+            return;
+        }
+        obj = obj.toLowerCase();
+        switch(obj){
+            case "giantenemy" -> gp.addEnemy(new GiantEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "smallenemy" -> gp.addEnemy(new SmallEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "friendlyenemy" -> gp.addEnemy(new FriendlyEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "dragonenemy" -> gp.addEnemy(new DragonEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "key" -> gp.addObject(new OBJ_Key(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "door" -> gp.addObject(new OBJ_Door(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "boots" -> gp.addObject(new OBJ_Boots(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "chest" -> gp.addObject(new OBJ_Chest(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+        }
     }
 
     private void saveFile(String filename) {
@@ -150,6 +208,31 @@ public class ConsoleHandler {
         } catch (IOException e) {
             writer.println("An error occurred while writing to the file: " + e.getMessage());
         }
+    }
+
+    private void setAll(String attribute, int value){
+        if(attribute.equals("speed")) {
+            if (value > 8 || value < 0) {
+                writer.println("Value not valid! (0:8)");
+                return;
+            }
+            for(Entity entity : gp.entities)
+                entity.setSpeed(value);
+        }
+        else if(attribute.equals("health")) {
+            if (value > 5000 || value < 0) {
+                writer.println("Value not valid! (0:5000)");
+                return;
+            }
+            else {
+                for(Entity entity : gp.entities)
+                    entity.setHealth(value);
+            }
+        }
+        else {
+            throw new IllegalArgumentException("Unknown attribute: " + attribute);
+        }
+        writer.println("Every entity's " + attribute + " set to: " + value);
     }
 
     private void setEntity(String name, String attribute, int value) {
@@ -261,17 +344,28 @@ public class ConsoleHandler {
         writer.println("|Script executed successfully|");
     }
 
-    private void printHelp() {
-        writer.println("Available commands:");
-        writer.println("  help - Show this help message");
-        writer.println("  history - Show command history");
-        writer.println("  script <filename> - Run a script");
-        writer.println("  make <filename> - Creates a script");
-        writer.println("  set <variable> <value> - Set a game variable");
-        writer.println("  get <variable> - Get a game variable");
-        writer.println("  reset - Reset the game");
-        writer.println("  save/load <filename> -Saves/Loads a game");
-        writer.println("  exit/exit_game - Exit console input/ Terminates the game");
+    private void printHelp(String command) {
+        switch(command){
+            case "script" -> writer.println("Script use: script <filename> without extension");
+            case "make" -> writer.println("Make use: make <filename> without extension");
+            case "set" -> writer.println("Set use: set <entity_name> <value>\n" +
+                    "Where entity_name: <blank>,<entity>,<GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>");
+            case "get" -> writer.println("Get use: get <entity_name>\n" +
+                    "Where entity_name: <blank>,<GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>");
+            case "add" -> writer.println("Add use: add <entity/obejct> <x> <y>\n" +
+                    "Where entity/obejct: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>");
+            case "remove" -> writer.println("Remove use: remove <entity_name>\n" +
+                    "Where entity_name: <GiantEnemy> <SmallEnemy> <DragonEnemy> <FriendlyEnemy>");
+            case "reset" -> writer.println("Reset use: reset -resets the game");
+            case "save" -> writer.println("Save use: save <filename> without extension");
+            case "load" -> writer.println("Load use: load <filename> without extension");
+            case "exit" -> writer.println("Exit use: exit - exits console mode");
+            case "exit_game" -> writer.println("Exits game");
+            default -> {
+                writer.println("script/make/set/get/add\nreset/save/load/exit/exit_game/remove");
+                writer.println("Use 'help <command>' from above commands");
+            }
+        }
     }
 
     private void resetGame() {
@@ -330,12 +424,6 @@ public class ConsoleHandler {
             case "speed" -> writer.println("Player speed: " + gp.player.getSpeed());
             default -> throw new IllegalArgumentException("Unknown variable: " + variable);
         }
-    }
-
-    private void printCommandHistory() {
-        writer.println("Command history:");
-        for (int i = 0; i < commandHistory.size(); i++)
-            writer.printf("%d: %s%n", i + 1, commandHistory.get(i));
     }
 
 }

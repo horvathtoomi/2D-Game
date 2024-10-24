@@ -55,7 +55,7 @@ public class GamePanel extends JPanel implements Runnable {
         player = new Player(this,inpkez);
         entities = new CopyOnWriteArrayList<>();
         aSetter = new AssetSetter(this);
-        ui=new UserInterface(this);
+        ui = new UserInterface(this);
         gameState=GameState.START;
         this.setPreferredSize(new Dimension(getScreenWidth(),getScreenHeight()));
         this.setBackground(Color.BLACK);
@@ -85,9 +85,10 @@ public class GamePanel extends JPanel implements Runnable {
         addEnemy(new FriendlyEnemy(this, 10 * tileSize,20 * tileSize));
     }
 
-    private void addEnemy(Entity enemy){
+    public void addEnemy(Entity enemy){
         entities.add(enemy);
     }
+    public void addObject(SuperObject obj) {aSetter.list.add(obj);}
 
     public void startGameThread() {
         gameThread = new Thread(this);

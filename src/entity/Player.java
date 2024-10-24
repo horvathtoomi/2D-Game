@@ -11,6 +11,10 @@ public class Player extends Entity {
 
     private final InputHandler kezelo;
     private final Inventory inventory;
+    private static final int INTERACTION_COOLDOWN = 20; // frames
+    private int interactionTimer = 0;
+
+    public Inventory getInventory() {return inventory;}
 
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
@@ -43,6 +47,9 @@ public class Player extends Entity {
 
    // @Override
     public void update(){
+        if(interactionTimer > 0){
+            interactionTimer--;
+        }
         if(kezelo.upPressed||kezelo.downPressed||kezelo.leftPressed||kezelo.rightPressed) {
             if (kezelo.upPressed) direction = "up";
             if (kezelo.downPressed) direction = "down";
@@ -55,8 +62,9 @@ public class Player extends Entity {
 
             //Check Object Colllision
             int objIndex = gp.cChecker.checkObject(this, true);
-            if (objIndex != 999) {
+            if (objIndex != 999 && interactionTimer == 0) {
                 interactWithObject(objIndex);
+                interactionTimer = INTERACTION_COOLDOWN;
             }
 
             //Check npc collision
@@ -89,14 +97,22 @@ public class Player extends Entity {
                 case "door" -> {
                     if (inventory.hasItem("key")) {
                         inventory.removeItem("key");
-                        gp.aSetter.list.remove(obj);
+                        gp.aSetter.list.get(index).image=gp.aSetter.list.get(index).image2;
                     }
                 }
                 case "chest" -> {
                     if (!obj.opened) {
                         obj.opened = true;
-                        // TODO: Implement item spawning logic here
-                        System.out.println("Chest opened!");
+                        int offsetX = obj.worldX + gp.getTileSize()/2;
+                        int offsetY = obj.worldY + gp.getTileSize()/2;
+                        gp.aSetter.spawnItemFromChest(offsetX, offsetY);
+                    }
+                }
+                case "boots" -> {
+                    if (!inventory.isFull()) {
+                        inventory.addItem(obj);
+                        gp.aSetter.list.remove(obj);
+                        setSpeed(getSpeed() + 1); // Boots increase speed
                     }
                 }
             }

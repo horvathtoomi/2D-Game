@@ -3,15 +3,19 @@ package main;
 import entity.npc.NPC_Wayfarer;
 import object.*;
 import java.io.*;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AssetSetter {
     GamePanel gp;
     public CopyOnWriteArrayList<SuperObject> list;
+    private final String[] possibleChestItems = {"key", "boots"};
+    private final Random rand;
 
     public AssetSetter(GamePanel gp) {
         this.gp = gp;
         list = new CopyOnWriteArrayList<>();
+        rand = new Random();
     }
 
     public void setObject() throws IOException {
@@ -41,6 +45,21 @@ public class AssetSetter {
 
         if (obj != null) {
             list.add(obj);
+        }
+    }
+
+    public void spawnItemFromChest(int x, int y) {
+        String randomItem = possibleChestItems[rand.nextInt(possibleChestItems.length)];
+        SuperObject newItem = null;
+
+        // Create the new item
+        switch (randomItem) {
+            case "key" -> newItem = new OBJ_Key(gp, x, y);
+            case "boots" -> newItem = new OBJ_Boots(gp, x, y);
+        }
+
+        if (newItem != null) {
+            list.add(newItem);
         }
     }
 

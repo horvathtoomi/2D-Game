@@ -40,33 +40,27 @@ public class UserInterface extends JFrame {
     private void drawStartScreen() {
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-
         g2.setColor(Color.WHITE);
         g2.setFont(arial_80B);
         String title = "2D Game";
         int x = getXforCenteredText(title);
         int y = gp.getScreenHeight() / 4;
         g2.drawString(title, x, y);
-
-        for (Button button : startScreenButtons) {
+        for (Button button : startScreenButtons)
             button.draw(g2);
-        }
     }
 
     private void drawGameEndScreen() {
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-
         g2.setColor(Color.RED);
         g2.setFont(arial_80B);
         String gameOverText = "GAME OVER";
         int x = getXforCenteredText(gameOverText);
         int y = gp.getScreenHeight() / 4;
         g2.drawString(gameOverText, x, y);
-
-        for (Button button : endScreenButtons) {
+        for (Button button : endScreenButtons)
             button.draw(g2);
-        }
     }
 
     public void handleStartScreenClick(Point p) {

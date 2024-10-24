@@ -1,0 +1,6 @@
+set entity speed 1
+set entity health 500
+set player speed 4
+set player health 500
+get health
+exit

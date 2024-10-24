@@ -1,5 +1,6 @@
 package entity;
 
+import object.OBJ_Key;
 import object.SuperObject;
 import java.awt.*;
 import java.util.ArrayList;
@@ -20,8 +21,26 @@ public class Inventory {
         return false;
     }
 
-    public boolean removeItem(SuperObject item) {return items.remove(item);}
-    public boolean removeItem(String itemName) {return items.removeIf(item -> item.name.equals(itemName));}
+    public boolean removeItem(SuperObject item) {
+        for(int i=0;i<items.size();i++){
+            if(item instanceof OBJ_Key){
+                items.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeItem(String itemName) {
+        for(int i=0;i<items.size();i++){
+            if(items.get(i).name.equals(itemName)){
+                items.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean hasItem(String itemName) {return items.stream().anyMatch(item -> item.name.equals(itemName));}
 
     public void draw(Graphics2D g2) {

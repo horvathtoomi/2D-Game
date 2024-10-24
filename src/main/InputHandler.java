@@ -79,6 +79,10 @@ public class InputHandler implements KeyListener {
             gp.resetGame();
             gp.gameState = GamePanel.GameState.RUNNING;
         }
+        else if(gp.gameState==GamePanel.GameState.START) {
+            gp.setupGame();
+            gp.gameState = GamePanel.GameState.RUNNING;
+        }
     }
 
 }
