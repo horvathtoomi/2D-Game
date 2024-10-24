@@ -1,5 +1,10 @@
 package main;
 
+import entity.Entity;
+import entity.enemy.DragonEnemy;
+import entity.enemy.FriendlyEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import entity.npc.NPC_Wayfarer;
 import object.*;
 import java.io.*;

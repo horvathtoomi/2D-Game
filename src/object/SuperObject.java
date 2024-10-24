@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 
 public abstract class SuperObject{
     public GamePanel gp;
-    public BufferedImage image, image2;
+    public BufferedImage image, image1, image2;
     public String name;
     public boolean collision = false;
     public boolean opened = false;
@@ -28,8 +28,9 @@ public abstract class SuperObject{
         this.worldY = y;
         this.name = name;
         try {
-            image = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("objects/" + imageName +".png")));
+            image1 = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("objects/" + imageName +".png")));
         } catch(IOException e) {e.printStackTrace();}
+        image = image1;
     }
 
     public void draw(Graphics2D g2, GamePanel gp) {
