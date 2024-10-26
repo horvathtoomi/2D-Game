@@ -10,11 +10,4 @@ public class OBJ_Door extends SuperObject{
         collision = true;
     }
 
-    @Override
-    public void update(){
-        super.update();
-        if(image==image2)
-            collision = false;
-    }
-
 }

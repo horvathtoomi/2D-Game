@@ -1,6 +1,37 @@
-set entity speed 1
-set entity health 500
-set player speed 4
-set player health 500
-get health
-exit
+aasd
+asd
+asd
+asd
+asd
+asd
+asd
+as
+da
+sd
+asd
+asd
+asd
+asd
+as
+da
+sda
+sd
+asd
+asd
+as
+da
+sda
+sdas
+d
+asd
+asd
+as
+da
+sda
+sd
+asd
+as
+das
+da
+ds
+ad

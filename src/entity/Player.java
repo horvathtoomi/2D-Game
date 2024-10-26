@@ -1,11 +1,14 @@
 package entity;
 
+import entity.enemy.Enemy;
 import main.InputHandler;
 import main.GamePanel;
 import object.SuperObject;
+import object.Weapon;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class Player extends Entity {
 
@@ -13,6 +16,12 @@ public class Player extends Entity {
     private final Inventory inventory;
     private static final int INTERACTION_COOLDOWN = 20; // frames
     private int interactionTimer = 0;
+    ///////////////////////////
+    private Weapon equippedWeapon;
+    private java.util.ArrayList<Weapon> weapons;
+    private int selectedWeaponIndex = 0;
+    BufferedImage up_attack, down_attack, left_attack, right_attack;
+    ///////////////////////////
 
     public Inventory getInventory() {return inventory;}
 
@@ -25,6 +34,9 @@ public class Player extends Entity {
         setScreenY(gp.getScreenHeight()/2 - (gp.getTileSize()/2));
         solidArea = new Rectangle(8,16,32,32);
         inventory = new Inventory();
+        ////////////////////////
+        weapons = new ArrayList<>();
+        ////////////////////////
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         setDefaultValues();
@@ -88,21 +100,25 @@ public class Player extends Entity {
             SuperObject obj = gp.aSetter.list.get(index);
 
             switch (obj.name) {
-                case "key" -> {
+                case "key", "sword" -> {
                     if (!inventory.isFull()) {
                         inventory.addItem(obj);
                         gp.aSetter.list.remove(obj);
                     }
                 }
                 case "door" -> {
-                    if (inventory.hasItem("key")) {
-                        inventory.removeItem("key");
-                        gp.aSetter.list.get(index).image=gp.aSetter.list.get(index).image2;
+                    if(gp.aSetter.list.get(index).collision) {
+                        if (inventory.hasItem("key")) {
+                            inventory.removeItem("key");
+                            gp.aSetter.list.get(index).collision = false;
+                            gp.aSetter.list.get(index).image = gp.aSetter.list.get(index).image2;
+                        }
                     }
                 }
                 case "chest" -> {
                     if (!obj.opened) {
-                        obj.opened = true;
+                        gp.aSetter.list.get(index).image=gp.aSetter.list.get(index).image2;
+                        gp.aSetter.list.get(index).opened = true;
                         int offsetX = obj.worldX + gp.getTileSize()/2;
                         int offsetY = obj.worldY + gp.getTileSize()/2;
                         gp.aSetter.spawnItemFromChest(offsetX, offsetY);
@@ -112,12 +128,82 @@ public class Player extends Entity {
                     if (!inventory.isFull()) {
                         inventory.addItem(obj);
                         gp.aSetter.list.remove(obj);
-                        setSpeed(getSpeed() + 1); // Boots increase speed
+                        if(!inventory.hasItem("boots"))
+                            setSpeed(getSpeed() + 1); // Boots increase speed
                     }
                 }
             }
         }
     }
+//////////////////////////////////////////////////////////////////////////////////
+    public void equipWeapon(Weapon weapon) {
+        if (weapons.size() < inventory.getMaxSize()) {
+            weapons.add(weapon);
+            if (equippedWeapon == null) {
+                equippedWeapon = weapon;
+            }
+        }
+    }
+
+    public void switchWeapon() {
+        if (weapons.size() > 0) {
+            selectedWeaponIndex = (selectedWeaponIndex + 1) % weapons.size();
+            equippedWeapon = weapons.get(selectedWeaponIndex);
+        }
+    }
+
+    public void attack() {
+        if (equippedWeapon != null && equippedWeapon.canAttack()) {
+            equippedWeapon.startAttack();
+
+            // Get attack area based on player direction and weapon range
+            Rectangle attackArea = getAttackArea();
+
+            // Check for enemies in range
+            for (Entity entity : gp.entities) {
+                if (entity instanceof Enemy) {
+                    Rectangle enemyHitbox = new Rectangle(
+                            entity.getWorldX() + entity.solidArea.x,
+                            entity.getWorldY() + entity.solidArea.y,
+                            entity.solidArea.width,
+                            entity.solidArea.height
+                    );
+
+                    if (attackArea.intersects(enemyHitbox)) {
+                        // Deal damage
+                        int damage = equippedWeapon.getDamage();
+                        entity.setHealth(entity.getHealth() - damage);
+
+                        // Create damage number effect
+                        gp.addDamageNumber(entity.getWorldX(), entity.getWorldY(), damage);
+                    }
+                }
+            }
+        }
+    }
+
+    private Rectangle getAttackArea() {
+        int areaX = getWorldX();
+        int areaY = getWorldY();
+        int tileSize = gp.getTileSize();
+        int range = equippedWeapon.getRange() * tileSize;
+
+        switch (direction) {
+            case "up":
+                areaY -= range;
+                return new Rectangle(areaX, areaY, tileSize, range);
+            case "down":
+                return new Rectangle(areaX, areaY + tileSize, tileSize, range);
+            case "left":
+                areaX -= range;
+                return new Rectangle(areaX, areaY, range, tileSize);
+            case "right":
+                return new Rectangle(areaX + tileSize, areaY, range, tileSize);
+            default:
+                return new Rectangle(areaX, areaY, tileSize, tileSize);
+        }
+    }
+//////////////////////////////////////////////////////////////////////////////////
 
     public void interractNPC(int idx){
         //if(idx!=999){
@@ -127,13 +213,26 @@ public class Player extends Entity {
 
     //@Override
     public void draw(Graphics2D g2){
-        BufferedImage image = switch (direction) {
-            case "up" -> up;
-            case "down" -> down;
-            case "left" -> left;
-            case "right" -> right;
-            default -> null;
-        };
+        BufferedImage image = null;
+        if (equippedWeapon != null && equippedWeapon.isAttacking()) {
+            // Use attack animation frame
+            image = switch (direction) {
+                case "up" -> up_attack;
+                case "down" -> down_attack;
+                case "left" -> left_attack;
+                case "right" -> right_attack;
+                default -> null;
+            };
+        } else {
+            // Use normal movement frame
+            image = switch (direction) {
+                case "up" -> up;
+                case "down" -> down;
+                case "left" -> left;
+                case "right" -> right;
+                default -> null;
+            };
+        }
         int x = getScreenX();
         int y = getScreenY();
         if(getScreenX() > getWorldX()){

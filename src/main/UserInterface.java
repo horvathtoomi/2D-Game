@@ -222,5 +222,4 @@ public class UserInterface extends JFrame {
         int textY = y - 5;
         g2.drawString(hpText, textX, textY);
     }
-
 }

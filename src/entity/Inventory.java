@@ -13,6 +13,8 @@ public class Inventory {
         items = new ArrayList<>(maxSize);
     }
 
+    public int getMaxSize(){return maxSize;}
+
     public boolean addItem(SuperObject item) {
         if (items.size() < maxSize) {
             items.add(item);

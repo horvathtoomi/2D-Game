@@ -13,6 +13,7 @@ import serializable.FileManager;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class ConsoleHandler {
     private final GamePanel gp;
@@ -67,7 +68,10 @@ public class ConsoleHandler {
                 case "exit_game" -> System.exit(0);
                 case "remove" -> {
                     if(parts.length == 2)
-                        removeEntities(parts[1]);
+                        if(parts[1].equalsIgnoreCase("all"))
+                            removeEntities(parts[1],true);
+                        else
+                            removeEntities(parts[1],false);
                     else
                         throw new IllegalArgumentException("Invalid format! remove <entity_name>");
                 }
@@ -133,12 +137,18 @@ public class ConsoleHandler {
         } catch (IllegalArgumentException e) {writer.println("Error: " + e.getMessage());}
     }
 
-    private void removeEntities(String entityType) {
+    private void removeEntities(String entityType, boolean removeAll) {
         int count = 0;
         for (Entity entity : new ArrayList<>(gp.entities)) {
-            if (entity.getClass().getSimpleName().equalsIgnoreCase(entityType)) {
+            if(removeAll) {
                 gp.entities.remove(entity);
                 count++;
+            }
+            else {
+                if (entity.getClass().getSimpleName().equalsIgnoreCase(entityType)) {
+                    gp.entities.remove(entity);
+                    count++;
+                }
             }
         }
         if(count != 0)
@@ -242,24 +252,18 @@ public class ConsoleHandler {
                 writer.println("Value not valid! (0:8)");
                 return;
             }
-            for(int i=0;i<gp.entities.size();i++) {
-                if (gp.entities.get(i).getName().toLowerCase().equals(name)) {
-                    gp.entities.get(i).setSpeed(value);
-                    nameidx = i;
-                }
-            }
+          nameidx = IntStream.range(0, gp.entities.size())
+                    .filter(i -> gp.entities.get(i).getName().equalsIgnoreCase(name))
+                    .peek(i -> gp.entities.get(i).setSpeed(value)).findFirst().orElse(-1);
         }
         else if(attribute.equals("health")) {
             if (value > 5000 || value < 0) {
                 writer.println("Value not valid! (0:5000)");
                 return;
             } else {
-                for (int i = 0; i < gp.entities.size(); i++) {
-                    if (gp.entities.get(i).getName().toLowerCase().equals(name)) {
-                        gp.entities.get(i).setHealth(value);
-                        nameidx = i;
-                    }
-                }
+                nameidx = IntStream.range(0, gp.entities.size())
+                        .filter(i -> gp.entities.get(i).getName().equalsIgnoreCase(name))
+                        .peek(i -> gp.entities.get(i).setHealth(value)).findFirst().orElse(-1);
             }
         }
         else {
@@ -355,7 +359,7 @@ public class ConsoleHandler {
             case "add" -> writer.println("Add use: add <entity/obejct> <x> <y>\n" +
                     "Where entity/obejct: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>");
             case "remove" -> writer.println("Remove use: remove <entity_name>\n" +
-                    "Where entity_name: <GiantEnemy> <SmallEnemy> <DragonEnemy> <FriendlyEnemy>");
+                    "Where entity_name: <all> <GiantEnemy> <SmallEnemy> <DragonEnemy> <FriendlyEnemy>");
             case "reset" -> writer.println("Reset use: reset -resets the game");
             case "save" -> writer.println("Save use: save <filename> without extension");
             case "load" -> writer.println("Load use: load <filename> without extension");

@@ -5,7 +5,7 @@ import java.awt.event.KeyListener;
 
 public class InputHandler implements KeyListener {
     GamePanel gp;
-    public boolean upPressed, downPressed, leftPressed,rightPressed;
+    public boolean upPressed, downPressed, leftPressed,rightPressed, attackPressed;
 
 
     public InputHandler(GamePanel gp) {
@@ -24,6 +24,8 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_S -> downPressed = true;
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
+            case KeyEvent.VK_E -> attackPressed = true;
+            case KeyEvent.VK_F -> gp.player.switchWeapon();
             case KeyEvent.VK_Q -> {
                 if (gp.gameState == GamePanel.GameState.PAUSED) {
                     gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
@@ -60,6 +62,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_S -> downPressed = false;
             case KeyEvent.VK_A -> leftPressed = false;
             case KeyEvent.VK_D -> rightPressed = false;
+            case KeyEvent.VK_E -> attackPressed = false;
         }
     }
 

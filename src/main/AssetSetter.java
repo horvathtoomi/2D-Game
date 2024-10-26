@@ -1,20 +1,18 @@
 package main;
 
-import entity.Entity;
-import entity.enemy.DragonEnemy;
-import entity.enemy.FriendlyEnemy;
-import entity.enemy.GiantEnemy;
-import entity.enemy.SmallEnemy;
+
 import entity.npc.NPC_Wayfarer;
 import object.*;
+
 import java.io.*;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+
 public class AssetSetter {
     GamePanel gp;
     public CopyOnWriteArrayList<SuperObject> list;
-    private final String[] possibleChestItems = {"key", "boots"};
+    private final String[] possibleChestItems = {"key", "boots", "sword"};
     private final Random rand;
 
     public AssetSetter(GamePanel gp) {
@@ -56,16 +54,28 @@ public class AssetSetter {
     public void spawnItemFromChest(int x, int y) {
         String randomItem = possibleChestItems[rand.nextInt(possibleChestItems.length)];
         SuperObject newItem = null;
-
         // Create the new item
         switch (randomItem) {
             case "key" -> newItem = new OBJ_Key(gp, x, y);
             case "boots" -> newItem = new OBJ_Boots(gp, x, y);
+            case "sword" -> newItem = createRandomSword(x,y);
         }
-
         if (newItem != null) {
             list.add(newItem);
         }
+    }
+
+    private Weapon createRandomSword(int x, int y) {
+        int damageBonus = rand.nextInt(11) -5;
+        return new OBJ_Sword(gp, x, y, 20 + damageBonus);
+    }
+
+    public WeaponRarity determineWeaponRarity(){
+        int roll = rand.nextInt(100);
+        if(roll < 60) return WeaponRarity.COMMON;
+        if(roll < 85) return WeaponRarity.UNCOMMON;
+        if(roll < 95) return WeaponRarity.RARE;
+        return WeaponRarity.LEGENDARY;
     }
 
     public void setNPC(){

@@ -1,0 +1,18 @@
+package object;
+
+import java.awt.*;
+
+public enum WeaponRarity {
+    COMMON(1.0f, Color.GRAY),
+    UNCOMMON(1.2f, Color.GREEN),
+    RARE(1.5f, Color.BLUE),
+    LEGENDARY(2.0f, Color.ORANGE);
+
+    public final float damageMultiplier;
+    public final Color color;
+
+    WeaponRarity(float damageMultiplier, Color color) {
+        this.damageMultiplier = damageMultiplier;
+        this.color = color;
+    }
+}

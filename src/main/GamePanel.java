@@ -1,6 +1,7 @@
 package main;
 
 import entity.*;
+import entity.algorithm.DamageNumber;
 import entity.enemy.DragonEnemy;
 import entity.enemy.FriendlyEnemy;
 import entity.enemy.GiantEnemy;
@@ -12,9 +13,9 @@ import tile.TileManager;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 
 public class GamePanel extends JPanel implements Runnable {
 
@@ -42,6 +43,8 @@ public class GamePanel extends JPanel implements Runnable {
     public enum GameState{START,RUNNING,PAUSED,FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
     public GameState gameState;
 
+    private ArrayList<DamageNumber> damageNumbers = new ArrayList<DamageNumber>();
+
     public int getTileSize() {return tileSize;}
     public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
     public int getScreenHeight() {return maxScreenRow*tileSize;} //576 pixel
@@ -68,6 +71,10 @@ public class GamePanel extends JPanel implements Runnable {
         //
         console=new ConsoleHandler(this);
         this.setFocusable(true);
+    }
+
+    public void addDamageNumber(int x, int y, int damage){
+        damageNumbers.add(new DamageNumber(this,x,y,damage));
     }
 
     public void setupGame(){
@@ -123,6 +130,7 @@ public class GamePanel extends JPanel implements Runnable {
             player.update();
             entities.removeIf(Objects::isNull);
             aSetter.list.removeIf(Objects::isNull);
+            damageNumbers.removeIf(dn -> !dn.update());
             entities.forEach(Entity::update);
             aSetter.list.forEach(SuperObject::update);
         }
@@ -138,6 +146,8 @@ public class GamePanel extends JPanel implements Runnable {
             object.draw(g2, this);
         for(Entity entity : entities)
             entity.draw(g2);
+        for(DamageNumber dn : damageNumbers)
+            dn.draw(g2);
         player.draw(g2);
         ui.draw(g2);
         g2.dispose();
