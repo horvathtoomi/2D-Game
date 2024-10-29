@@ -1,5 +1,0 @@
-get health
-get speed
-exit
-make run
-exit_game

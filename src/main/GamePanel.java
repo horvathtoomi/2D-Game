@@ -6,6 +6,7 @@ import entity.enemy.DragonEnemy;
 import entity.enemy.FriendlyEnemy;
 import entity.enemy.GiantEnemy;
 import entity.enemy.SmallEnemy;
+import main.console.ConsoleHandler;
 import object.*;
 import serializable.FileManager;
 import tile.TileManager;
@@ -40,10 +41,12 @@ public class GamePanel extends JPanel implements Runnable {
     public Thread gameThread;
     public ConsoleHandler console;
 
-    public enum GameState{START,RUNNING,PAUSED,FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
+    public enum GameState{START,DIFFICULTY_SCREEN,RUNNING,PAUSED,FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
+    public enum GameDifficulty{EASY,MEDIUM,HARD,IMPOSSIBLE}
     public GameState gameState;
+    public GameDifficulty difficulty;
 
-    private ArrayList<DamageNumber> damageNumbers = new ArrayList<DamageNumber>();
+    private ArrayList<DamageNumber> damageNumbers = new ArrayList<>();
 
     public int getTileSize() {return tileSize;}
     public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
@@ -60,6 +63,7 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter = new AssetSetter(this);
         ui = new UserInterface(this);
         gameState=GameState.START;
+        difficulty=GameDifficulty.EASY;
         this.setPreferredSize(new Dimension(getScreenWidth(),getScreenHeight()));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
@@ -81,15 +85,13 @@ public class GamePanel extends JPanel implements Runnable {
         try{
             aSetter.setObject();
         }catch(IOException e){
-            System.out.println("Object was not set.");
-            e.printStackTrace();
+            System.out.println("Object was not set." + e.getCause());
         }
         aSetter.setNPC();
         addEnemy(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
         addEnemy(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
         addEnemy(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
         addEnemy(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
-        addEnemy(new FriendlyEnemy(this, 10 * tileSize,20 * tileSize));
     }
 
     public void addEnemy(Entity enemy){
@@ -228,11 +230,9 @@ public class GamePanel extends JPanel implements Runnable {
                 FileManager.loadGameState(this, new File(saveDir, selectedFile).getPath());
                 System.out.println("Game loaded successfully.");
                 JOptionPane.showMessageDialog(this, "Game loaded successfully.");
-                gameState = GameState.RUNNING;
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error loading game: " + e.getMessage());
                 JOptionPane.showMessageDialog(this, "Error loading game: " + e.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
             }
         }
         else

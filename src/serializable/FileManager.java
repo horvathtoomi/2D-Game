@@ -9,7 +9,6 @@ import object.*;
 import entity.*;
 import object.SuperObject;
 
-import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public class FileManager {
 
     public static void saveGameState(GamePanel gp, String filename) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
-            oos.writeObject(new SerializablePlayerState(gp.player));
+            oos.writeObject(new SerializablePlayerState(gp.player, gp.difficulty));
             oos.writeObject(new ArrayList<>(gp.entities.stream().filter(Objects::nonNull).map(SerializableEntityState::new).collect(Collectors.toList())));
             oos.writeObject(new ArrayList<>(gp.aSetter.list.stream().filter(Objects::nonNull).map(SerializableObjectState::new).collect(Collectors.toList())));
         }
@@ -47,6 +46,7 @@ public class FileManager {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
             SerializablePlayerState playerState = (SerializablePlayerState) ois.readObject();
             updatePlayerState(gp.player, playerState);
+            gp.difficulty = playerState.difficulty;
             List<SerializableEntityState> entityStates = (List<SerializableEntityState>) ois.readObject();
             gp.entities = entityStates.stream().map(state -> createEntityFromState(gp, state)).filter(Objects::nonNull).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             List<SerializableObjectState> objectStates = (List<SerializableObjectState>) ois.readObject();
@@ -99,13 +99,15 @@ class SerializablePlayerState implements Serializable {
     private static final long serialVersionUID = 1L;
     int worldX, worldY, speed, health;
     String direction;
+    GamePanel.GameDifficulty difficulty;
 
-    SerializablePlayerState(Player player) {
+    SerializablePlayerState(Player player, GamePanel.GameDifficulty difficulty) {
         this.worldX = player.getWorldX();
         this.worldY = player.getWorldY();
         this.speed = player.getSpeed();
         this.direction = player.direction;
         this.health = player.getHealth();
+        this.difficulty = difficulty;
     }
 }
 

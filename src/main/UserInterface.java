@@ -11,6 +11,7 @@ public class UserInterface extends JFrame {
     ArrayList<Button> startScreenButtons;
     ArrayList<Button> endScreenButtons;
     ArrayList<Button> pauseScreenButtons;
+    ArrayList<Button> difficultyScreenButtons;
 
 
     public UserInterface(GamePanel gp) {
@@ -20,9 +21,11 @@ public class UserInterface extends JFrame {
         startScreenButtons = new ArrayList<>();
         endScreenButtons = new ArrayList<>();
         pauseScreenButtons = new ArrayList<>();
+        difficultyScreenButtons = new ArrayList<>();
         initializeStartScreenButtons();
         initializeEndScreenButtons();
         initializePauseScreenButtons();
+        initializeDifficultyScreenButtons();
     }
 
     public void draw(Graphics2D g2) {
@@ -31,6 +34,7 @@ public class UserInterface extends JFrame {
         g2.setColor(Color.BLACK);
         switch (gp.gameState) {
             case START -> drawStartScreen();
+            case DIFFICULTY_SCREEN -> drawDifficultyScreen();
             case FINISHED -> drawGameEndScreen();
             case PAUSED -> drawPauseScreen();
             case RUNNING -> drawPlayerHealthBar();
@@ -50,6 +54,19 @@ public class UserInterface extends JFrame {
             button.draw(g2);
     }
 
+    private void drawDifficultyScreen() {
+        g2.setColor(Color.BLACK);
+        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
+        g2.setColor(Color.WHITE);
+        g2.setFont(arial_80B);
+        String title = "SET DIFFICULTY";
+        int x = getXforCenteredText(title);
+        int y = gp.getScreenHeight() / 4;
+        g2.drawString(title, x, y);
+        for (Button button : difficultyScreenButtons)
+            button.draw(g2);
+    }
+
     private void drawGameEndScreen() {
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
@@ -63,19 +80,61 @@ public class UserInterface extends JFrame {
             button.draw(g2);
     }
 
+    private void drawPauseScreen() {
+        // Draw a semi-transparent black overlay
+        g2.setColor(new Color(0, 0, 0, 200));
+        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
+        g2.setColor(Color.WHITE);
+        g2.setFont(arial_80B);
+        String pauseText = "PAUSED";
+        int x = getXforCenteredText(pauseText);
+        int y = gp.getScreenHeight() / 4;
+        g2.drawString(pauseText, x, y);
+        for (Button button : pauseScreenButtons) {
+            button.draw(g2);
+        }
+    }
+
     public void handleStartScreenClick(Point p) {
         for (int i = 0; i < startScreenButtons.size(); i++) {
             if (startScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> {
-                        gp.setupGame();
-                        gp.gameState = GamePanel.GameState.RUNNING;
-                    }
+                    case 0 -> gp.gameState = GamePanel.GameState.DIFFICULTY_SCREEN;
                     case 1 -> {
                         gp.loadGame();
                         gp.gameState = GamePanel.GameState.RUNNING;
                     }
                     case 2 -> System.exit(0);
+                }
+                break;
+            }
+        }
+    }
+
+    public void handleDifficultyScreenClick(Point p) {
+        for (int i = 0; i < difficultyScreenButtons.size(); i++) {
+            if (difficultyScreenButtons.get(i).contains(p)) {
+                switch (i) {
+                    case 0 -> {
+                        gp.difficulty = GamePanel.GameDifficulty.EASY;
+                        gp.setupGame();
+                        gp.gameState = GamePanel.GameState.RUNNING;
+                    }
+                    case 1 -> {
+                        gp.difficulty = GamePanel.GameDifficulty.MEDIUM;
+                        gp.setupGame();
+                        gp.gameState = GamePanel.GameState.RUNNING;
+                    }
+                    case 2 -> {
+                        gp.difficulty = GamePanel.GameDifficulty.HARD;
+                        gp.setupGame();
+                        gp.gameState = GamePanel.GameState.RUNNING;
+                    }
+                    case 3 -> {
+                        gp.difficulty = GamePanel.GameDifficulty.IMPOSSIBLE;
+                        gp.setupGame();
+                        gp.gameState = GamePanel.GameState.RUNNING;
+                    }
                 }
                 break;
             }
@@ -115,7 +174,9 @@ public class UserInterface extends JFrame {
                         gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
                         try {
                             gp.console.startConsoleInput();
-                        }catch(Exception e) {e.printStackTrace();}
+                        }catch(Exception e) {
+                            System.out.println("Console input error: " + e.getMessage());
+                        }
                     }
                     case 4 -> System.exit(0);
                 }
@@ -129,6 +190,7 @@ public class UserInterface extends JFrame {
         ArrayList<Button> hoverButtons = new ArrayList<>();
         switch (gp.gameState) {
             case START -> hoverButtons.addAll(startScreenButtons);
+            case DIFFICULTY_SCREEN -> hoverButtons.addAll(difficultyScreenButtons);
             case PAUSED -> hoverButtons.addAll(pauseScreenButtons);
             case FINISHED -> hoverButtons.addAll(endScreenButtons);
         }
@@ -148,6 +210,17 @@ public class UserInterface extends JFrame {
         startScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY, buttonWidth, buttonHeight, "Start Game"));
         startScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Load Game"));
         startScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Quit"));
+    }
+
+    private void initializeDifficultyScreenButtons(){
+        int buttonWidth = 150;
+        int buttonHeight = 50;
+        int startY = gp.getScreenHeight() / 2;
+
+        difficultyScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2 - buttonWidth, startY, buttonWidth, buttonHeight, "EASY"));
+        difficultyScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2 - buttonWidth, startY + buttonHeight + 20, buttonWidth, buttonHeight, "MEDIUM"));
+        difficultyScreenButtons.add(new Button(gp.getScreenWidth()/2 + buttonWidth/2, startY, buttonWidth, buttonHeight, "HARD"));
+        difficultyScreenButtons.add(new Button(gp.getScreenWidth()/2 + buttonWidth/2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "IMPOSSIBLE"));
     }
 
     private void initializeEndScreenButtons() {
@@ -170,23 +243,6 @@ public class UserInterface extends JFrame {
         pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Load Game"));
         pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Console Input"));
         pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 4 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit"));
-    }
-
-    private void drawPauseScreen() {
-        // Draw a semi-transparent black overlay
-        g2.setColor(new Color(0, 0, 0, 200));
-        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-
-        g2.setColor(Color.WHITE);
-        g2.setFont(arial_80B);
-        String pauseText = "PAUSED";
-        int x = getXforCenteredText(pauseText);
-        int y = gp.getScreenHeight() / 4;
-        g2.drawString(pauseText, x, y);
-
-        for (Button button : pauseScreenButtons) {
-            button.draw(g2);
-        }
     }
 
     private int getXforCenteredText(String text){

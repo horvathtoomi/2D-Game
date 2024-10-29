@@ -1,15 +1,18 @@
 package main;
 
+import main.console.ConsoleHandler;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class InputHandler implements KeyListener {
     GamePanel gp;
     public boolean upPressed, downPressed, leftPressed,rightPressed, attackPressed;
-
+    private final ConsoleHandler consoleHandler;
 
     public InputHandler(GamePanel gp) {
         this.gp =gp;
+        consoleHandler = new ConsoleHandler(gp);
     }
 
     @Override
@@ -29,7 +32,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_Q -> {
                 if (gp.gameState == GamePanel.GameState.PAUSED) {
                     gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
-                    gp.console.startConsoleInput();
+                    consoleHandler.startConsoleInput();
                 }
             }
             case KeyEvent.VK_ESCAPE -> {
@@ -69,8 +72,12 @@ public class InputHandler implements KeyListener {
     private void togglePauseState() {
         if (gp.gameState == GamePanel.GameState.RUNNING) {
             gp.gameState = GamePanel.GameState.PAUSED;
-        } else if (gp.gameState == GamePanel.GameState.PAUSED) {
+        }
+        else if (gp.gameState == GamePanel.GameState.PAUSED) {
             gp.gameState = GamePanel.GameState.RUNNING;
+        }
+        else if(gp.gameState==GamePanel.GameState.DIFFICULTY_SCREEN){
+            gp.gameState=GamePanel.GameState.START;
         }
     }
 
@@ -78,13 +85,8 @@ public class InputHandler implements KeyListener {
         if (gp.gameState == GamePanel.GameState.PAUSED){
             gp.gameState = GamePanel.GameState.RUNNING;
         }
-        else if(gp.gameState==GamePanel.GameState.FINISHED) {
-            gp.resetGame();
-            gp.gameState = GamePanel.GameState.RUNNING;
-        }
-        else if(gp.gameState==GamePanel.GameState.START) {
-            gp.setupGame();
-            gp.gameState = GamePanel.GameState.RUNNING;
+        else if(gp.gameState==GamePanel.GameState.FINISHED || gp.gameState==GamePanel.GameState.START) {
+            gp.gameState = GamePanel.GameState.DIFFICULTY_SCREEN;
         }
     }
 

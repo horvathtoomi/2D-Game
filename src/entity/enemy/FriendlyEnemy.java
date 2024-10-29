@@ -5,7 +5,7 @@ import main.GamePanel;
 public class FriendlyEnemy extends Enemy {
 
     public FriendlyEnemy(GamePanel gp, int startX, int startY) {
-        super(gp, "FriendlyEnemy", startX, startY, gp.getTileSize(), gp.getTileSize(), 50);
+        super(gp, "FriendlyEnemy", startX, startY, gp.getTileSize(), gp.getTileSize(), -10);
         setHealth(80);
         maxHealth = 80;
     }

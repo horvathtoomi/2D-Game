@@ -13,6 +13,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     public void mouseClicked(MouseEvent e) {
         switch (gp.gameState) {
             case START -> gp.ui.handleStartScreenClick(e.getPoint());
+            case DIFFICULTY_SCREEN -> gp.ui.handleDifficultyScreenClick(e.getPoint());
             case FINISHED -> gp.ui.handleGameOverClick(e.getPoint());
             case PAUSED -> gp.ui.handlePauseScreenClick(e.getPoint());
         }

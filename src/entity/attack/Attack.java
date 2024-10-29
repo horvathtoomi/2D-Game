@@ -10,24 +10,42 @@ import java.awt.image.BufferedImage;
 public class Attack extends Entity {
     int imageChange = 0;
     public BufferedImage image, image1, image2;
-    public final int damage;
+    public int damage;
     public double dx, dy;
+    private final int[] diffAttackSpeed = {4, 6, 8, 10};
 
     public Attack(GamePanel gp,String name,int damage, int startX, int startY, int targetX, int targetY) {
         super(gp);
         setWorldX(startX);
         setWorldY(startY);
         this.name = name;
-        this.damage = damage;
-        // Calculate direction
         double angle = Math.atan2(targetY - startY, targetX - startX);
-        double speed = 6;
-        dx = Math.cos(angle) * speed;
-        dy = Math.sin(angle) * speed;
+        initializeDamage(damage);
+        initializeSpeed();
+        dx = Math.cos(angle) * getSpeed();
+        dy = Math.sin(angle) * getSpeed();
         image1 = scale("objects",name+"1");
         image2 = scale("objects",name+"2");
         image = image1;
         solidArea = new Rectangle(getWorldX() + 3, getWorldY() + 4, 30, 30);
+    }
+
+    private void initializeDamage(int extra){
+        switch(gp.difficulty){
+            case EASY -> this.damage = 30 + extra;
+            case MEDIUM -> this.damage = 50 + extra;
+            case HARD -> this.damage = 99 + extra;
+            case IMPOSSIBLE -> this.damage = 200 + extra;
+        }
+    }
+
+    private void initializeSpeed(){
+        switch(gp.difficulty){
+            case EASY -> setSpeed(diffAttackSpeed[0]);
+            case MEDIUM -> setSpeed(diffAttackSpeed[1]);
+            case HARD -> setSpeed(diffAttackSpeed[2]);
+            case IMPOSSIBLE -> setSpeed(diffAttackSpeed[3]);
+        }
     }
 
     @Override

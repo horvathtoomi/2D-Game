@@ -213,8 +213,8 @@ public class Player extends Entity {
 
     //@Override
     public void draw(Graphics2D g2){
-        BufferedImage image = null;
-        if (equippedWeapon != null && equippedWeapon.isAttacking()) {
+        BufferedImage image;
+        if (equippedWeapon != null) {
             // Use attack animation frame
             image = switch (direction) {
                 case "up" -> up_attack;

@@ -8,8 +8,8 @@ import main.GamePanel;
 public class FriendlyEnemyAttack extends Attack {
 
     public FriendlyEnemyAttack(GamePanel gp, int startX, int startY, int targetX, int targetY) {
-        super(gp, "FriendlyEnemyAttack", 20, startX, startY, targetX, targetY);
-        setSpeed(8);
+        super(gp, "FriendlyEnemyAttack", 10, startX, startY, targetX, targetY);
+        setSpeed(getSpeed()+2);
     }
 
     @Override
