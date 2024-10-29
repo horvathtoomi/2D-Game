@@ -28,11 +28,14 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
             case KeyEvent.VK_E -> attackPressed = true;
-            case KeyEvent.VK_F -> gp.player.switchWeapon();
+            case KeyEvent.VK_F -> gp.player.getInventory().rotate();
             case KeyEvent.VK_Q -> {
                 if (gp.gameState == GamePanel.GameState.PAUSED) {
                     gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
                     consoleHandler.startConsoleInput();
+                }
+                else if(gp.gameState == GamePanel.GameState.RUNNING) {
+                    gp.player.getInventory().drop();
                 }
             }
             case KeyEvent.VK_ESCAPE -> {

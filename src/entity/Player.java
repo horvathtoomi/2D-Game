@@ -3,8 +3,7 @@ package entity;
 import entity.enemy.Enemy;
 import main.InputHandler;
 import main.GamePanel;
-import object.SuperObject;
-import object.Weapon;
+import object.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -16,6 +15,10 @@ public class Player extends Entity {
     private final Inventory inventory;
     private static final int INTERACTION_COOLDOWN = 20; // frames
     private int interactionTimer = 0;
+    private BufferedImage up_key, up_boots, up_sword,
+            down_key, down_boots, down_sword,
+            left_key, left_boots, left_sword,
+            right_key, right_boots, right_sword;
     ///////////////////////////
     private Weapon equippedWeapon;
     private java.util.ArrayList<Weapon> weapons;
@@ -23,46 +26,58 @@ public class Player extends Entity {
     BufferedImage up_attack, down_attack, left_attack, right_attack;
     ///////////////////////////
 
-    public Inventory getInventory() {return inventory;}
+    public Inventory getInventory() {
+        return inventory;
+    }
 
     public Player(GamePanel panel, InputHandler kezelo) {
         super(panel);
         this.kezelo = kezelo;
         setMaxHealth(100);
         setHealth(100);
-        setScreenX(gp.getScreenWidth()/2 - (gp.getTileSize()/2));
-        setScreenY(gp.getScreenHeight()/2 - (gp.getTileSize()/2));
-        solidArea = new Rectangle(8,16,32,32);
-        inventory = new Inventory();
-        ////////////////////////
+        setScreenX(gp.getScreenWidth() / 2 - (gp.getTileSize() / 2));
+        setScreenY(gp.getScreenHeight() / 2 - (gp.getTileSize() / 2));
+        solidArea = new Rectangle(8, 16, 32, 32);
+        inventory = new Inventory(gp);
         weapons = new ArrayList<>();
-        ////////////////////////
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         setDefaultValues();
         getPlayerImage();
     }
 
-    public void setDefaultValues(){
+    public void setDefaultValues() {
         setWorldX(gp.getTileSize() * 23);
         setWorldY(gp.getTileSize() * 21);
         setSpeed(3);
         direction = "down";
     }
 
-    public void getPlayerImage(){
-        right = scale("player","right");
-        left = scale("player","left");
-        down = scale("player","down");
-        up = scale("player","up");
+    public void getPlayerImage() {
+        right = scale("player", "rigth");
+        right_key = scale("player", "rigth_key");
+        right_boots = scale("player", "rigth_boots");
+        right_sword = scale("player", "rigth_sword");
+        left = scale("player", "left");
+        left_key = scale("player", "left_key");
+        left_boots = scale("player", "left_boots");
+        left_sword = scale("player", "left_sword");
+        down = scale("player", "down");
+        down_key = scale("player", "down_key");
+        down_boots = scale("player", "down_boots");
+        down_sword = scale("player", "down_sword");
+        up = scale("player", "up");
+        up_key = scale("player", "up_key");
+        up_boots = scale("player", "up_boots");
+        up_sword = scale("player", "up_sword");
     }
 
-   // @Override
-    public void update(){
-        if(interactionTimer > 0){
+    // @Override
+    public void update() {
+        if (interactionTimer > 0) {
             interactionTimer--;
         }
-        if(kezelo.upPressed||kezelo.downPressed||kezelo.leftPressed||kezelo.rightPressed) {
+        if (kezelo.upPressed || kezelo.downPressed || kezelo.leftPressed || kezelo.rightPressed) {
             if (kezelo.upPressed) direction = "up";
             if (kezelo.downPressed) direction = "down";
             if (kezelo.leftPressed) direction = "left";
@@ -80,15 +95,15 @@ public class Player extends Entity {
             }
 
             //Check npc collision
-            int npcIndex = gp.cChecker.checkEntity(this,gp.entities);
+            int npcIndex = gp.cChecker.checkEntity(this, gp.entities);
             interractNPC(npcIndex);
 
             if (!collisionOn) {
                 switch (direction) {
-                    case "up" -> setWorldY(getWorldY()-getSpeed());
-                    case "down"-> setWorldY(getWorldY()+getSpeed());
-                    case "left" -> setWorldX(getWorldX()-getSpeed());
-                    case "right" -> setWorldX(getWorldX()+getSpeed());
+                    case "up" -> setWorldY(getWorldY() - getSpeed());
+                    case "down" -> setWorldY(getWorldY() + getSpeed());
+                    case "left" -> setWorldX(getWorldX() - getSpeed());
+                    case "right" -> setWorldX(getWorldX() + getSpeed());
                 }
             }
         }
@@ -107,8 +122,8 @@ public class Player extends Entity {
                     }
                 }
                 case "door" -> {
-                    if(gp.aSetter.list.get(index).collision) {
-                        if (inventory.hasItem("key")) {
+                    if (gp.aSetter.list.get(index).collision) {
+                        if (inventory.equalsKey()) {
                             inventory.removeItem("key");
                             gp.aSetter.list.get(index).collision = false;
                             gp.aSetter.list.get(index).image = gp.aSetter.list.get(index).image2;
@@ -117,10 +132,10 @@ public class Player extends Entity {
                 }
                 case "chest" -> {
                     if (!obj.opened) {
-                        gp.aSetter.list.get(index).image=gp.aSetter.list.get(index).image2;
+                        gp.aSetter.list.get(index).image = gp.aSetter.list.get(index).image2;
                         gp.aSetter.list.get(index).opened = true;
-                        int offsetX = obj.worldX + gp.getTileSize()/2;
-                        int offsetY = obj.worldY + gp.getTileSize()/2;
+                        int offsetX = obj.worldX + gp.getTileSize() / 2;
+                        int offsetY = obj.worldY + gp.getTileSize() / 2;
                         gp.aSetter.spawnItemFromChest(offsetX, offsetY);
                     }
                 }
@@ -128,14 +143,15 @@ public class Player extends Entity {
                     if (!inventory.isFull()) {
                         inventory.addItem(obj);
                         gp.aSetter.list.remove(obj);
-                        if(!inventory.hasItem("boots"))
+                        if (!inventory.hasItem("boots"))
                             setSpeed(getSpeed() + 1); // Boots increase speed
                     }
                 }
             }
         }
     }
-//////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////////////////////////
     public void equipWeapon(Weapon weapon) {
         if (weapons.size() < inventory.getMaxSize()) {
             weapons.add(weapon);
@@ -146,7 +162,7 @@ public class Player extends Entity {
     }
 
     public void switchWeapon() {
-        if (weapons.size() > 0) {
+        if (!weapons.isEmpty()) {
             selectedWeaponIndex = (selectedWeaponIndex + 1) % weapons.size();
             equippedWeapon = weapons.get(selectedWeaponIndex);
         }
@@ -188,43 +204,59 @@ public class Player extends Entity {
         int tileSize = gp.getTileSize();
         int range = equippedWeapon.getRange() * tileSize;
 
-        switch (direction) {
-            case "up":
+        return switch (direction) {
+            case "up" -> {
                 areaY -= range;
-                return new Rectangle(areaX, areaY, tileSize, range);
-            case "down":
-                return new Rectangle(areaX, areaY + tileSize, tileSize, range);
-            case "left":
+                yield new Rectangle(areaX, areaY, tileSize, range);
+            }
+            case "down" -> new Rectangle(areaX, areaY + tileSize, tileSize, range);
+            case "left" -> {
                 areaX -= range;
-                return new Rectangle(areaX, areaY, range, tileSize);
-            case "right":
-                return new Rectangle(areaX + tileSize, areaY, range, tileSize);
-            default:
-                return new Rectangle(areaX, areaY, tileSize, tileSize);
-        }
+                yield new Rectangle(areaX, areaY, range, tileSize);
+            }
+            case "right" -> new Rectangle(areaX + tileSize, areaY, range, tileSize);
+            default -> new Rectangle(areaX, areaY, tileSize, tileSize);
+        };
     }
 //////////////////////////////////////////////////////////////////////////////////
 
-    public void interractNPC(int idx){
+    public void interractNPC(int idx) {
         //if(idx!=999){
-           //System.out.println("interaction w an NPC!");
+        //System.out.println("interaction w an NPC!");
         //}
     }
 
-    //@Override
-    public void draw(Graphics2D g2){
-        BufferedImage image;
-        if (equippedWeapon != null) {
-            // Use attack animation frame
-            image = switch (direction) {
-                case "up" -> up_attack;
-                case "down" -> down_attack;
-                case "left" -> left_attack;
-                case "right" -> right_attack;
-                default -> null;
-            };
+    private BufferedImage getStateImage() {
+        BufferedImage image = up;
+        if (inventory.getCurrent() != null) {
+            if (inventory.getCurrent() instanceof OBJ_Key) {
+                image = switch(direction){
+                    case "up" -> up_key;
+                    case "down" -> down_key;
+                    case "left" -> left_key;
+                    case "right" -> right_key;
+                    default -> null;
+                };
+            }
+            else if(inventory.getCurrent() instanceof OBJ_Boots) {
+                image = switch(direction){
+                    case "up" -> up_boots;
+                    case "down" -> down_boots;
+                    case "left" -> left_boots;
+                    case "right" -> right_boots;
+                    default -> null;
+                };
+            }
+            else if(inventory.getCurrent() instanceof OBJ_Sword) {
+                image = switch(direction){
+                    case "up" -> up_sword;
+                    case "down" -> down_sword;
+                    case "left" -> left_sword;
+                    case "right" -> right_sword;
+                    default -> null;
+                };
+            }
         } else {
-            // Use normal movement frame
             image = switch (direction) {
                 case "up" -> up;
                 case "down" -> down;
@@ -233,6 +265,12 @@ public class Player extends Entity {
                 default -> null;
             };
         }
+        return image;
+    }
+
+    //@Override
+    public void draw(Graphics2D g2){
+        BufferedImage image = getStateImage();
         int x = getScreenX();
         int y = getScreenY();
         if(getScreenX() > getWorldX()){
