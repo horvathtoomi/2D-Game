@@ -54,6 +54,10 @@ public class InputHandler implements KeyListener {
                 else
                     System.out.println("You are not running the game yet!");
             }
+            case KeyEvent.VK_1 -> startByKey(GamePanel.GameDifficulty.EASY);
+            case KeyEvent.VK_2 -> startByKey(GamePanel.GameDifficulty.MEDIUM);
+            case KeyEvent.VK_3 -> startByKey(GamePanel.GameDifficulty.HARD);
+            case KeyEvent.VK_4 -> startByKey(GamePanel.GameDifficulty.IMPOSSIBLE);
         }
     }
 
@@ -67,6 +71,12 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_D -> rightPressed = false;
             case KeyEvent.VK_E -> attackPressed = false;
         }
+    }
+
+    private void startByKey(GamePanel.GameDifficulty diff){
+        gp.difficulty = diff;
+        gp.resetGame();
+        gp.gameState = GamePanel.GameState.RUNNING;
     }
 
     private void togglePauseState() {

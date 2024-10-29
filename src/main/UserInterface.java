@@ -115,27 +115,13 @@ public class UserInterface extends JFrame {
         for (int i = 0; i < difficultyScreenButtons.size(); i++) {
             if (difficultyScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> {
-                        gp.difficulty = GamePanel.GameDifficulty.EASY;
-                        gp.setupGame();
-                        gp.gameState = GamePanel.GameState.RUNNING;
-                    }
-                    case 1 -> {
-                        gp.difficulty = GamePanel.GameDifficulty.MEDIUM;
-                        gp.setupGame();
-                        gp.gameState = GamePanel.GameState.RUNNING;
-                    }
-                    case 2 -> {
-                        gp.difficulty = GamePanel.GameDifficulty.HARD;
-                        gp.setupGame();
-                        gp.gameState = GamePanel.GameState.RUNNING;
-                    }
-                    case 3 -> {
-                        gp.difficulty = GamePanel.GameDifficulty.IMPOSSIBLE;
-                        gp.setupGame();
-                        gp.gameState = GamePanel.GameState.RUNNING;
-                    }
+                    case 0 -> gp.difficulty = GamePanel.GameDifficulty.EASY;
+                    case 1 -> gp.difficulty = GamePanel.GameDifficulty.MEDIUM;
+                    case 2 -> gp.difficulty = GamePanel.GameDifficulty.HARD;
+                    case 3 -> gp.difficulty = GamePanel.GameDifficulty.IMPOSSIBLE;
                 }
+                gp.setupGame();
+                gp.gameState = GamePanel.GameState.RUNNING;
                 break;
             }
         }
@@ -165,12 +151,16 @@ public class UserInterface extends JFrame {
             if (pauseScreenButtons.get(i).contains(p)) {
                 switch (i) {
                     case 0 -> gp.gameState = GamePanel.GameState.RUNNING;
-                    case 1 -> gp.saveGame();
-                    case 2 -> {
+                    case 1 -> {
+                        gp.resetGame();
+                        gp.gameState = GamePanel.GameState.DIFFICULTY_SCREEN;
+                    }
+                    case 2 -> gp.saveGame();
+                    case 3 -> {
                         gp.loadGame();
                         gp.gameState = GamePanel.GameState.RUNNING;
                     }
-                    case 3 -> {
+                    case 4 -> {
                         gp.gameState = GamePanel.GameState.CONSOLE_INPUT;
                         try {
                             gp.console.startConsoleInput();
@@ -178,13 +168,12 @@ public class UserInterface extends JFrame {
                             System.out.println("Console input error: " + e.getMessage());
                         }
                     }
-                    case 4 -> System.exit(0);
+                    case 5 -> System.exit(0);
                 }
                 break;
             }
         }
     }
-
 
     public void handleHover(Point p) {
         ArrayList<Button> hoverButtons = new ArrayList<>();
@@ -239,10 +228,11 @@ public class UserInterface extends JFrame {
         int startY = gp.getScreenHeight() / 2 - (2 * buttonHeight + 30);
 
         pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY, buttonWidth, buttonHeight, "Resume"));
-        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Save Game"));
-        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Load Game"));
-        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Console Input"));
-        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 4 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit"));
+        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "New Game"));
+        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Save Game"));
+        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Load Game"));
+        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 4 * (buttonHeight + 20), buttonWidth, buttonHeight, "Console Input"));
+        pauseScreenButtons.add(new Button(gp.getScreenWidth()/2 - buttonWidth/2, startY + 5 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit"));
     }
 
     private int getXforCenteredText(String text){
