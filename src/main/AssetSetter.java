@@ -82,7 +82,7 @@ public class AssetSetter {
         NPC_Wayfarer wf = new NPC_Wayfarer(gp);
         wf.setWorldX(gp.getTileSize()*21);
         wf.setWorldY(gp.getTileSize()*21);
-        gp.entities.add(wf);
+        gp.addEntity(wf);
     }
 
 }

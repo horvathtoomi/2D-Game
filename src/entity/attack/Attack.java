@@ -6,6 +6,7 @@ import main.GamePanel;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Attack extends Entity {
     int imageChange = 0;
@@ -31,7 +32,7 @@ public class Attack extends Entity {
     }
 
     private void initializeDamage(int extra){
-        switch(gp.difficulty){
+        switch(gp.getGameDifficulty()){
             case EASY -> this.damage = 30 + extra;
             case MEDIUM -> this.damage = 50 + extra;
             case HARD -> this.damage = 99 + extra;
@@ -40,7 +41,7 @@ public class Attack extends Entity {
     }
 
     private void initializeSpeed(){
-        switch(gp.difficulty){
+        switch(gp.getGameDifficulty()){
             case EASY -> setSpeed(diffAttackSpeed[0]);
             case MEDIUM -> setSpeed(diffAttackSpeed[1]);
             case HARD -> setSpeed(diffAttackSpeed[2]);
@@ -55,18 +56,18 @@ public class Attack extends Entity {
         solidArea.setLocation(getWorldX() + 3, getWorldY() + 4);
 
         if (checkTileCollision()) {
-            gp.entities.remove(this);
+            gp.removeEnemy(this);
             return;
         }
 
         Rectangle playerHitbox = new Rectangle(gp.player.getWorldX() + gp.player.solidArea.x, gp.player.getWorldY() + gp.player.solidArea.y, gp.player.solidArea.width, gp.player.solidArea.height); //Width=32, Height=32
         if (solidArea.intersects(playerHitbox.getBounds())) {
             gp.player.setHealth(Math.max(0,gp.player.getHealth()-damage));
-            gp.entities.remove(this);
+            gp.removeEnemy(this);
             return;
         }
 
-        for (Entity entity : gp.entities) {
+        for (Entity entity : gp.getEntity()) {
             if (entity instanceof Enemy) {
                 Rectangle entityHitbox = new Rectangle(entity.getWorldX() + entity.solidArea.x,
                         entity.getWorldY() + entity.solidArea.y,
@@ -74,7 +75,7 @@ public class Attack extends Entity {
                         entity.solidArea.height);
                 if (solidArea.intersects(entityHitbox)) {
                     entity.setHealth(Math.max(0,entity.getHealth()-damage));
-                    gp.entities.remove(this);
+                    gp.removeEnemy(this);
                 }
             }
         }

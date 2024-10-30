@@ -66,7 +66,7 @@ public abstract class Enemy extends Entity {
     }
 
     private void initializeValues(int plusShootingRate){
-        switch(gp.difficulty){
+        switch(gp.getGameDifficulty()){
             case EASY -> {
                 setSpeed(diffSpeed[0]);
                 this.shootingRate = diffShootingRate[0] + plusShootingRate;
@@ -103,7 +103,7 @@ public abstract class Enemy extends Entity {
             System.out.println("---------------------");
             System.out.println("|" + name + " dies|");
             System.out.println("---------------------");
-            gp.entities.remove(this);
+            gp.removeEnemy(this);
             return;
         }
         updateCounter++;
@@ -193,14 +193,14 @@ public abstract class Enemy extends Entity {
         int startX = (int) (getWorldX() + normalizedDx * gp.getTileSize());
         int startY = (int) (getWorldY() + normalizedDy * gp.getTileSize());
         switch(name){
-            case "SmallEnemy" -> gp.entities.add(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-            case "GiantEnemy" -> gp.entities.add(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
+            case "SmallEnemy" -> gp.addEntity(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
+            case "GiantEnemy" -> gp.addEntity(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
             case "FriendlyEnemy" ->
-                gp.entities.stream()
+                gp.getEntity().stream()
                         .filter(e -> !(e instanceof Player) && !(e instanceof FriendlyEnemy))
                         .min(Comparator.comparingDouble(e -> Math.pow(e.getWorldX() - getWorldX(), 2) + Math.pow(e.getWorldY() - getWorldY(), 2)))
-                        .ifPresent(nearestEnemy -> gp.entities.add(new FriendlyEnemyAttack(gp, getWorldX(), getWorldY(), nearestEnemy.getWorldX(), nearestEnemy.getWorldY())));
-            default -> gp.entities.add(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
+                        .ifPresent(nearestEnemy -> gp.addEntity(new FriendlyEnemyAttack(gp, getWorldX(), getWorldY(), nearestEnemy.getWorldX(), nearestEnemy.getWorldY())));
+            default -> gp.addEntity(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
         }
     }
 

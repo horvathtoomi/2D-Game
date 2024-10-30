@@ -1,11 +1,11 @@
 package main.console;
 
 
-import main.GamePanel;
-
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import main.GamePanel;
+import main.logger.GameLogger;
 
 public class ConsoleHandler {
     private final GamePanel gp;
@@ -14,6 +14,7 @@ public class ConsoleHandler {
     private final Commands commands;
     public boolean abortProcess;
     private final Map<String, Command> commandMap;
+    private final String LOG_CONTEXT = "[CONSOLE HANDLER]";
 
     public ConsoleHandler(GamePanel gp) {
         this.gp = gp;
@@ -35,20 +36,20 @@ public class ConsoleHandler {
             }
         });
 
-        map.put("reset", _ -> {
+        map.put("reset", name -> {
             gp.resetGame();
-            writer.println("Game has been reset.");
+            GameLogger.info(LOG_CONTEXT, "GAME HAS BEEN RESET");
         });
 
-        map.put("exit", _ -> abortProcess = true);
+        map.put("exit", name -> abortProcess = true);
 
-        map.put("exit_game", _ -> System.exit(0));
+        map.put("exit_game", name -> System.exit(0));
 
         map.put("remove", args -> {
             if (args.length == 2) {
                 commands.removeEntities(args[1], args[1].equalsIgnoreCase("all"));
             } else {
-                throw new IllegalArgumentException("Invalid format! remove <entity_name>");
+                GameLogger.error(LOG_CONTEXT, "Invalid format! Use help remove", new IllegalArgumentException());
             }
         });
 
@@ -56,7 +57,7 @@ public class ConsoleHandler {
             if (args.length == 2) {
                 commands.saveFile(args[1]);
             } else {
-                throw new IllegalArgumentException("Invalid format! save <filename.extension>");
+                GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help save'");
             }
         });
 
@@ -64,44 +65,45 @@ public class ConsoleHandler {
             if (args.length == 2) {
                 commands.loadFile(args[1]);
             } else {
-                throw new IllegalArgumentException("Invalid format! load <filename.extension>");
+                GameLogger.error(LOG_CONTEXT, "Invalid format! Use help load", new IllegalArgumentException());
             }
         });
 
         map.put("set", args -> {
-            if (args.length == 4) {
-                if (args[1].equals("player")) {
-                    commands.setGameValue(args[2], args[3]);
-                } else if (args[1].equals("entity")) {
-                    commands.setAll(args[2], Integer.parseInt(args[3]));
-                } else {
-                    commands.setEntity(args[1], args[2], Integer.parseInt(args[3]));
+            switch (args.length) {
+                case 4 -> {
+                    if (args[1].equals("player")) {
+                        commands.setGameValue(args[2], args[3]);
+                    } else if (args[1].equals("entity")) {
+                        commands.setAll(args[2], Integer.parseInt(args[3]));
+                    } else {
+                        commands.setEntity(args[1], args[2], Integer.parseInt(args[3]));
+                    }
                 }
-            } else if (args.length == 3) {
-                commands.setGameValue(args[1], args[2]);
-            } else {
-                throw new IllegalArgumentException("""
-                    Invalid format for 'set' command.
-                    | Wrong Format | set entity arg1 value
-                    ->entity: *Enemy, Player, args: speed,health,maxhealth""");
+                case 3 -> commands.setGameValue(args[1], args[2]);
+                default -> GameLogger.warn(LOG_CONTEXT,"""
+                        Invalid format for 'set' command.
+                        | Wrong Format | set entity arg1 value
+                        ->entity: *Enemy, Player, args: speed,health,maxhealth""");
             }
         });
 
         map.put("get", args -> {
-            if (args.length == 3) {
-                switch (args[1]) {
-                    case "player" -> commands.getGameValue(args[2]);
-                    case "smallenemy", "giantenemy", "dragonenemy", "friendlyenemy" ->
+            switch (args.length) {
+                case 3 -> {
+                    switch (args[1]) {
+                        case "player" -> commands.getGameValue(args[2]);
+                        case "smallenemy", "giantenemy", "dragonenemy", "friendlyenemy" ->
                             commands.getEntity(args[1], args[2]);
-                    default -> writer.println("Unknown command. Type 'help' for a list of available commands.");
+                        default -> GameLogger.warn(LOG_CONTEXT, "Unknown command! Use 'help'");
+                    }
                 }
-            } else if (args.length == 2) {
-                commands.getGameValue(args[1]);
-            } else {
-                throw new IllegalArgumentException("""
-                    Invalid format for 'get' command.
-                    | Wrong Format | get entity arg1
-                    ->entity: *Enemy, Player, args: speed,health""");
+                case 2 -> commands.getGameValue(args[1]);
+                default ->
+                        GameLogger.warn(LOG_CONTEXT,"""
+                        Invalid format for 'get' command.
+                        | Wrong Format | get entity arg1
+                        ->entity: *Enemy, Player, args: speed, health""");
             }
         });
 
@@ -109,7 +111,7 @@ public class ConsoleHandler {
             if (args.length == 4) {
                 commands.add(args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]));
             } else {
-                throw new IllegalArgumentException("""
+                GameLogger.warn(LOG_CONTEXT,"""
                     Invalid format for 'add'
                     | add <entity/object> X Y
                     entity: Giant-,Small-,Dragon-,Friendly-Enemy
@@ -121,7 +123,7 @@ public class ConsoleHandler {
             if (args.length == 2) {
                 commands.runScript(args[1]);
             } else {
-                throw new IllegalArgumentException("Invalid format for 'script' command.\n| Wrong Format | scripts <filename> -> filename.extension");
+                GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help'");
             }
         });
 
@@ -129,7 +131,7 @@ public class ConsoleHandler {
             if (args.length == 2) {
                 commands.createFile(args[1], reader);
             } else {
-                throw new IllegalArgumentException("Invalid format for 'make' command.\n| Wrong Format | make <filename>");
+                GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help'");
             }
         });
 
@@ -137,11 +139,11 @@ public class ConsoleHandler {
     }
 
     public void startConsoleInput() {
-        if (gp.gameState != GamePanel.GameState.CONSOLE_INPUT) {
-            writer.println("Console input is only available in CONSOLE_INPUT state.");
+        if (gp.getGameState() != GamePanel.GameState.CONSOLE_INPUT) {
+            GameLogger.warn(LOG_CONTEXT, "Only available in CONSOLE_INPUT state");
             return;
         }
-        writer.println("Entering console input mode. Type 'exit' to return to the game.");
+        GameLogger.info(LOG_CONTEXT, "ENTERING CONSOLE INPUT. TYPE 'exit' to return");
         printHelp();
 
         String input;
@@ -150,12 +152,12 @@ public class ConsoleHandler {
                 executeCommand(input.trim());
             }
         } catch (IOException e) {
-            writer.println("An error occurred while reading input: " + e.getMessage());
+            GameLogger.warn(LOG_CONTEXT, "Error occured while reading input: " + e.getMessage());
         }
 
         abortProcess = false;
-        gp.gameState = GamePanel.GameState.PAUSED;
-        writer.println("Exiting console input mode. Returning to PAUSED state.");
+        gp.setGameState(GamePanel.GameState.PAUSED);
+        GameLogger.info(LOG_CONTEXT, "EXITING CONSOLE INPUT MODE");
     }
 
     public void executeCommand(String input) {
@@ -167,29 +169,27 @@ public class ConsoleHandler {
         if (command != null) {
             try {
                 command.execute(parts);
-            } catch (IllegalArgumentException e) {
-                writer.println("Error: " + e.getMessage());
-            } catch (Exception e) {
-                writer.println("An error occurred while executing the command: " + e.getMessage());
+            } catch (IllegalArgumentException exc) {
+                GameLogger.error(LOG_CONTEXT, "COMMAND EXECUTION DID NOT SUCCEED", exc);
             }
         } else {
-            writer.println("Unknown command. Type 'help' for a list of available commands.");
+            GameLogger.warn(LOG_CONTEXT, "UNKNOWN COMMAND, USE 'help'");
         }
     }
 
     private void printHelp() {
-        writer.println("""
+        GameLogger.info(LOG_CONTEXT, """
             Available commands:
-            - help [command]   : Show help for a specific command or list all commands
-            - reset            : Reset the game
-            - exit             : Exit console mode
-            - exit_game        : Exit the game
-            - remove <entity>  : Remove entities
-            - save/load <file> : Save/Load game state
-            - set/get ...      : Set/Get various game values
-            - add ...          : Add entities or objects
-            - script <file>    : Run a script file
-            - make <file>      : Create a new script file
+            \t- help [command]   : Show help for a specific command or list all commands
+            \t- reset            : Reset the game
+            \t- exit             : Exit console mode
+            \t- exit_game        : Exit the game
+            \t- remove <entity>  : Remove entities
+            \t- save/load <file> : Save/Load game state
+            \t- set/get ...      : Set/Get various game values
+            \t- add ...          : Add entities or objects
+            \t- script <file>    : Run a script file
+            \t- make <file>      : Create a new script file
             Type 'help <command>' for more details about a specific command.""");
     }
 }

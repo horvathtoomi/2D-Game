@@ -1,53 +1,49 @@
 package main;
 
 import entity.*;
-import entity.algorithm.DamageNumber;
-import entity.enemy.DragonEnemy;
-import entity.enemy.FriendlyEnemy;
-import entity.enemy.GiantEnemy;
-import entity.enemy.SmallEnemy;
-import main.console.ConsoleHandler;
-import object.*;
-import serializable.FileManager;
-import tile.TileManager;
-
-import javax.swing.*;
+import entity.enemy.*;
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.swing.*;
+import main.console.ConsoleHandler;
+import main.logger.GameLogger;
+import object.*;
+import tile.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
 
     //Game Screen settings
-    private final int OriginalTileSize = 16;    //16x16-os
-    private final int scale = 3;    //sad
-    private final int tileSize = OriginalTileSize * scale;  //48x48-as
-    private final int maxScreenCol = 24;    //16
+    private static final int OriginalTileSize = 16;    //16x16-os
+    private static final int scale = 3;
+    private static final int tileSize = OriginalTileSize * scale;  //48x48-as
+    private static final int maxScreenCol = 24;    //16
     private final int maxScreenRow = 18;    //12
     private final int maxWorldCol = 50;
     private final int maxWorldRow = 50;
     private final int FPS = 60;
 
-    public CollisionChecker cChecker=new CollisionChecker(this);
+    public final transient CollisionChecker cChecker=new CollisionChecker(this);
     public Player player;
     public AssetSetter aSetter;
-    public CopyOnWriteArrayList<Entity> entities;
+    private CopyOnWriteArrayList<Entity> entities;
     public TileManager tileman=new TileManager(this);
-    public InputHandler inpkez = new InputHandler(this);
-    public MouseHandler mouseHandler;
+    public final transient InputHandler inpkez = new InputHandler(this);
+    public final transient MouseHandler mouseHandler;
     public UserInterface ui;
-    public Thread gameThread;
-    public ConsoleHandler console;
+    public transient Thread gameThread;
+    public final transient ConsoleHandler console;
+    private static final String LOG_CONTEXT = "GamePanel";
 
-    public enum GameState{START,DIFFICULTY_SCREEN,RUNNING,PAUSED,FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
-    public enum GameDifficulty{EASY,MEDIUM,HARD,IMPOSSIBLE}
-    public GameState gameState;
-    public GameDifficulty difficulty;
+    public enum GameState {START, DIFFICULTY_SCREEN, RUNNING,PAUSED, FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
+    public enum GameDifficulty {EASY, MEDIUM, HARD, IMPOSSIBLE}
+    private GameState gameState;
+    private GameDifficulty difficulty;
 
-    private ArrayList<DamageNumber> damageNumbers = new ArrayList<>();
 
+    public GameState getGameState(){return gameState;}
+    public GameDifficulty getGameDifficulty(){return difficulty;}
     public int getTileSize() {return tileSize;}
     public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
     public int getScreenHeight() {return maxScreenRow*tileSize;} //576 pixel
@@ -55,49 +51,53 @@ public class GamePanel extends JPanel implements Runnable {
     public int getMaxWorldRow() {return maxWorldRow;}
     public int getWorldWidth() {return maxWorldCol * tileSize;}
     public int getWorldHeight() {return maxWorldRow * tileSize;}
+    public CopyOnWriteArrayList<Entity> getEntity() {return entities;}
 
+    public void setGameState(GameState state){gameState = state;}
+    public void setGameDifficulty(GameDifficulty diff){difficulty = diff;}
+    public void setEntities(CopyOnWriteArrayList<Entity> entities){this.entities = entities;}
+
+    public void addEntity(Entity ent){
+        entities.add(ent);
+    }
+    public void addObject(SuperObject obj) {aSetter.list.add(obj);}
+    public void removeEnemy(Entity ent) {entities.remove(ent);}
 
     public GamePanel() {
+        GameLogger.info(LOG_CONTEXT, "|INITIALIZING GAMEPANEL|");
         player = new Player(this,inpkez);
         entities = new CopyOnWriteArrayList<>();
         aSetter = new AssetSetter(this);
         ui = new UserInterface(this);
-        gameState=GameState.START;
-        difficulty=GameDifficulty.EASY;
+        mouseHandler=new MouseHandler(this);
+        console=new ConsoleHandler(this);
+        setGamePanel();
+    }
+
+    private void setGamePanel(){
+        gameState = GameState.START;
+        difficulty = GameDifficulty.EASY;
         this.setPreferredSize(new Dimension(getScreenWidth(),getScreenHeight()));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
         this.addKeyListener(inpkez);
-        //
-        mouseHandler=new MouseHandler(this);
         this.addMouseListener(mouseHandler);
         this.addMouseMotionListener(mouseHandler);
-        //
-        console=new ConsoleHandler(this);
         this.setFocusable(true);
-    }
-
-    public void addDamageNumber(int x, int y, int damage){
-        damageNumbers.add(new DamageNumber(this,x,y,damage));
     }
 
     public void setupGame(){
         try{
             aSetter.setObject();
         }catch(IOException e){
-            System.out.println("Object was not set." + e.getCause());
+            GameLogger.error(LOG_CONTEXT, "|FAILED TO INITIALIZE THE GAME|", e);
         }
         aSetter.setNPC();
-        addEnemy(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
-        addEnemy(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
-        addEnemy(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
-        addEnemy(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
+        addEntity(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
+        addEntity(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
+        addEntity(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
+        addEntity(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
     }
-
-    public void addEnemy(Entity enemy){
-        entities.add(enemy);
-    }
-    public void addObject(SuperObject obj) {aSetter.list.add(obj);}
 
     public void startGameThread() {
         gameThread = new Thread(this);
@@ -105,15 +105,14 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void run() {
+        GameLogger.info(LOG_CONTEXT, "|STARTING GAME LOOP|");
         double drawInterval = 1_000_000_000.0 / FPS; //Setting the game's FPS
         double nextDrawTime = System.nanoTime() + drawInterval;
         while (gameThread != null) {
             if(player.getHealth()<=0 && gameState == GameState.RUNNING)
                 gameState=GameState.FINISHED;
-            switch (gameState) {
-                case START, FINISHED -> {}
-                case RUNNING -> update();
-            }
+            else if(gameState == GameState.RUNNING)
+                update();
             repaint();
 
             try {
@@ -132,7 +131,6 @@ public class GamePanel extends JPanel implements Runnable {
             player.update();
             entities.removeIf(Objects::isNull);
             aSetter.list.removeIf(Objects::isNull);
-            damageNumbers.removeIf(dn -> !dn.update());
             entities.forEach(Entity::update);
             aSetter.list.forEach(SuperObject::update);
         }
@@ -148,98 +146,10 @@ public class GamePanel extends JPanel implements Runnable {
             object.draw(g2, this);
         for(Entity entity : entities)
             entity.draw(g2);
-        for(DamageNumber dn : damageNumbers)
-            dn.draw(g2);
         player.draw(g2);
         ui.draw(g2);
         g2.dispose();
     }
-
-    public void saveGame() {
-        System.out.println("---------------");
-        System.out.println("|Saving pending|");
-        System.out.println("---------------");
-
-        gameState = GameState.SAVE;
-
-        // GETTING FILENAME
-        String filename = JOptionPane.showInputDialog(this, "Enter a name for your save file:");
-
-        if (filename != null && !filename.trim().isEmpty()) {
-            try {
-                File saveDir = new File("res/save");
-                if (!saveDir.exists()) {
-                    saveDir.mkdirs();
-                }
-
-                File saveFile = new File(saveDir, filename + ".dat");
-
-                if (saveFile.exists()) {
-                    int choice = JOptionPane.showConfirmDialog(this,
-                            "A save file with this name already exists. Do you want to overwrite it?",
-                            "Overwrite Save",
-                            JOptionPane.YES_NO_OPTION);
-                    if (choice != JOptionPane.YES_OPTION) {
-                        System.out.println("Save cancelled.");
-                        gameState = GameState.RUNNING;
-                        return;
-                    }
-                }
-
-                FileManager.saveGameState(this, saveFile.getPath());
-                System.out.println("Game saved successfully.");
-                JOptionPane.showMessageDialog(this, "Game saved successfully.");
-            } catch (IOException e) {
-                System.err.println("Error saving game: " + e.getMessage());
-                JOptionPane.showMessageDialog(this, "Error saving game: " + e.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
-                throw new RuntimeException(e);
-            }
-        } else {
-            System.out.println("Save cancelled.");
-        }
-
-        gameState = GameState.RUNNING;
-    }
-
-    public void loadGame() {
-        System.out.println("-------------");
-        System.out.println("|Load pending|");
-        System.out.println("-------------");
-        gameState = GameState.LOAD;
-
-        // GETTING FILENAME
-        File saveDir = new File("res/save");
-        if (!saveDir.exists() || saveDir.list() == null || Objects.requireNonNull(saveDir.list()).length == 0) {
-            JOptionPane.showMessageDialog(this, "No save files found.", "Load Game", JOptionPane.INFORMATION_MESSAGE);
-            gameState = GameState.RUNNING;
-        }
-
-        String[] saveFiles = saveDir.list((dir, name) -> name.endsWith(".dat"));
-        assert saveFiles != null;
-        String selectedFile = (String) JOptionPane.showInputDialog(
-                this,
-                "Choose a save file to load:",
-                "Load Game",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                saveFiles,
-                saveFiles[0]);
-
-        if (selectedFile != null) {
-            try {
-                FileManager.loadGameState(this, new File(saveDir, selectedFile).getPath());
-                System.out.println("Game loaded successfully.");
-                JOptionPane.showMessageDialog(this, "Game loaded successfully.");
-            } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Error loading game: " + e.getMessage());
-                JOptionPane.showMessageDialog(this, "Error loading game: " + e.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-        else
-            System.out.println("Load cancelled.");
-        gameState = GameState.RUNNING;
-    }
-
 
     public void resetGame() {
         entities.clear();

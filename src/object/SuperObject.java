@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 import main.GamePanel;
-import main.UtilityTool;
 
 import javax.imageio.ImageIO;
 
@@ -20,7 +19,6 @@ public abstract class SuperObject{
     public Rectangle solidArea = new Rectangle(0,0,48,48);
     public int solidAreaDefaultX = 0;
     public int solidAreaDefaultY = 0;
-    UtilityTool uTool = new UtilityTool();
 
     protected SuperObject(GamePanel gp, int x, int y, String name, String imageName) {
         this.gp = gp;

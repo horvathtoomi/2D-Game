@@ -1,0 +1,26 @@
+[2024-10-31 00:29:41.023] [INFO] [LogWorker-1] GamePanel: |INITIALIZING GAMEPANEL|
+[2024-10-31 00:29:41.445] [INFO] [LogWorker-2] GamePanel: |STARTING GAME LOOP|
+[2024-10-31 00:29:46.271] [INFO] [LogWorker-1] [CONSOLE HANDLER]: ENTERING CONSOLE INPUT. TYPE 'exit' to return
+[2024-10-31 00:29:46.271] [INFO] [LogWorker-2] [CONSOLE HANDLER]: Available commands:
+	- help [command]   : Show help for a specific command or list all commands
+	- reset            : Reset the game
+	- exit             : Exit console mode
+	- exit_game        : Exit the game
+	- remove <entity>  : Remove entities
+	- save/load <file> : Save/Load game state
+	- set/get ...      : Set/Get various game values
+	- add ...          : Add entities or objects
+	- script <file>    : Run a script file
+	- make <file>      : Create a new script file
+Type 'help <command>' for more details about a specific command.
+[2024-10-31 00:29:54.150] [WARNING] [LogWorker-2] [CONSOLE HANDLER]: Invalid format for 'add'
+| add <entity/object> X Y
+entity: Giant-,Small-,Dragon-,Friendly-Enemy
+object: chest,door,key,boots
+[2024-10-31 00:30:03.227] [INFO] [LogWorker-2] [COMMANDS]: Entering script creation |type 'end' to exit|
+[2024-10-31 00:30:27.939] [INFO] [LogWorker-1] [COMMANDS]: ujfile created and saved successfully.
+[2024-10-31 00:30:33.975] [INFO] [LogWorker-2] [COMMANDS]: Player speed: 3
+[2024-10-31 00:30:33.975] [INFO] [LogWorker-2] [COMMANDS]: Player health: 100
+[2024-10-31 00:30:33.976] [INFO] [LogWorker-1] [COMMANDS]: Every entity's speed set to: 5
+[2024-10-31 00:30:33.976] [INFO] [LogWorker-2] [COMMANDS]: ujfile created successfully.
+[2024-10-31 00:31:02.135] [INFO] [LogWorker-1] [CONSOLE HANDLER]: EXITING CONSOLE INPUT MODE

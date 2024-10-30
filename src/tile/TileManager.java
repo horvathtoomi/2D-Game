@@ -66,7 +66,9 @@ public class TileManager {
                 }
             }
             br.close();
-        }catch(Exception e){ e.printStackTrace(); }
+        }catch(Exception e){
+            System.out.println("Error: " + e.getCause());
+        }
     }
 
     public void draw(Graphics2D g2) {

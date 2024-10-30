@@ -1,5 +1,7 @@
 package main;
 
+import main.logger.GameLogger;
+
 import java.awt.event.*;
 
 public class MouseHandler implements MouseListener, MouseMotionListener {
@@ -11,11 +13,12 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        switch (gp.gameState) {
+        switch (gp.getGameState()) {
             case START -> gp.ui.handleStartScreenClick(e.getPoint());
             case DIFFICULTY_SCREEN -> gp.ui.handleDifficultyScreenClick(e.getPoint());
             case FINISHED -> gp.ui.handleGameOverClick(e.getPoint());
             case PAUSED -> gp.ui.handlePauseScreenClick(e.getPoint());
+            default -> GameLogger.error("[MOUSE HANDLER]","Unexpected Error", new IllegalArgumentException("State not found"));
         }
     }
 
