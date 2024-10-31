@@ -2,6 +2,8 @@ package entity;
 
 import main.GamePanel;
 import main.UtilityTool;
+import main.logger.GameLogger;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -95,7 +97,8 @@ public class Entity{
             bufim = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png")));
             bufim = uTool.scaleImage(bufim, gp.getTileSize(), gp.getTileSize());
         }catch(IOException e){
-            e.getCause();}
+            GameLogger.error("[ENTITY]", "Failed to load image: " + e.getMessage(), e);
+        }
         return bufim;
     }
 

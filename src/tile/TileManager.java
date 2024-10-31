@@ -2,6 +2,8 @@ package tile;
 
 import main.GamePanel;
 import main.UtilityTool;
+import main.logger.GameLogger;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.BufferedReader;
@@ -43,7 +45,9 @@ public class TileManager {
             tile[idx].image=ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("tiles/" + imagePath + ".png")));
             tile[idx].image = uTool.scaleImage(tile[idx].image,gp.getTileSize(),gp.getTileSize());
             tile[idx].collision=collision;
-        }catch(IOException e){e.getCause();}
+        }catch(IOException e){
+            GameLogger.error("[TILE MANAGER]", "Failed to setup Map", e);
+        }
     }
 
     public void loadMap(String address){
@@ -67,7 +71,7 @@ public class TileManager {
             }
             br.close();
         }catch(Exception e){
-            System.out.println("Error: " + e.getCause());
+            GameLogger.error("[TILE MANAGER]", "Failed to load map: " + address, e);
         }
     }
 

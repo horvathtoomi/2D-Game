@@ -2,6 +2,7 @@ package main;
 
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
+import object.Weapon;
 import serializable.FileManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -29,7 +30,11 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_S -> downPressed = true;
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
-            case KeyEvent.VK_E -> attackPressed = true;
+            case KeyEvent.VK_E -> {
+                if(gp.player.getInventory().getCurrent() instanceof Weapon){
+                    gp.player.attack();
+                }
+            }
             case KeyEvent.VK_F -> gp.player.getInventory().rotate();
             case KeyEvent.VK_Q -> {
                 if (gp.getGameState() == GamePanel.GameState.PAUSED) {

@@ -57,6 +57,7 @@ public final class GameLogger {
         }
     }
 
+
     // Static facade methods for logging
     public static void gameState(String context, Supplier<String> messageSupplier) {
         getInstance().gameState(() -> context + ": " + messageSupplier.get());

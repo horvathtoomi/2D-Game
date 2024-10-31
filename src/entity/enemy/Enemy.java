@@ -219,7 +219,10 @@ public abstract class Enemy extends Entity {
         if (getScreenX() > -gp.getTileSize() && getScreenX() < gp.getScreenWidth() && getScreenY() > -gp.getTileSize() && getScreenY() < gp.getScreenHeight())
             g2.drawImage(image, getScreenX(), getScreenY(), width, height, null);
 
-        // Draw health bar
+        drawHealthBar(g2);
+    }
+
+    private void drawHealthBar(Graphics2D g2) {
         int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
         int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
 
@@ -231,6 +234,7 @@ public abstract class Enemy extends Entity {
         int greenWidth = (int) ((double) getHealth() / getMaxHealth() * gp.getTileSize());
         g2.fillRect(screenX + width-gp.getTileSize(), screenY - 10, greenWidth, 5);
     }
+
 }
 
 

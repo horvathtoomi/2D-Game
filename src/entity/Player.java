@@ -11,12 +11,15 @@ public class Player extends Entity {
 
     private final InputHandler kezelo;
     private final Inventory inventory;
-    private static final int INTERACTION_COOLDOWN = 20; // frames
+    private static final int INTERACTION_COOLDOWN = 30; // frames
+    private static final int ATTACK_COOLDOWN = 30;
     private int interactionTimer = 0;
+    private int attackTimer = 0;
     private BufferedImage up_key, up_boots, up_sword,
             down_key, down_boots, down_sword,
             left_key, left_boots, left_sword,
-            right_key, right_boots, right_sword;
+            right_key, right_boots, right_sword,
+            attack_up, attack_down, attack_left, attack_rigth;
 
     public Inventory getInventory() {
         return inventory;
@@ -61,6 +64,11 @@ public class Player extends Entity {
         up_key = scale("player", "up_key");
         up_boots = scale("player", "up_boots");
         up_sword = scale("player", "up_sword");
+        attack_up = scale("player", "attack_up");
+        attack_down = scale("player", "attack_down");
+        attack_left = scale("player", "attack_left");
+        attack_rigth = scale("player", "attack_rigth");
+
     }
 
     public void update() {
@@ -175,7 +183,11 @@ public class Player extends Entity {
         return image;
     }
 
-    //@Override
+    public void attack(){
+
+    }
+
+    @Override
     public void draw(Graphics2D g2){
         BufferedImage image = getStateImage();
         int x = getScreenX();
@@ -194,7 +206,17 @@ public class Player extends Entity {
         if (bottomOffset > gp.getWorldHeight() - getWorldY()) {
             y = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
         }
-        g2.drawImage(image,x,y,null);
+
+        if(image == attack_up)
+            g2.drawImage(image,x,y - 48,null);
+        else if(image == attack_down)
+            g2.drawImage(image,x,y + 48,null);
+        else if(image == attack_left)
+            g2.drawImage(image,x - 48,y,null);
+        else if(image == attack_rigth)
+            g2.drawImage(image,x + 48,y,null);
+        else
+            g2.drawImage(image, x, y, null);
         inventory.draw(g2);
     }
 

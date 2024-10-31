@@ -122,8 +122,8 @@ public class UserInterface extends JFrame {
                     case 2 -> gp.setGameDifficulty(GamePanel.GameDifficulty.HARD);
                     case 3 -> gp.setGameDifficulty(GamePanel.GameDifficulty.IMPOSSIBLE);
                 }
-                gp.setupGame();
                 gp.setGameState(GamePanel.GameState.RUNNING);
+                gp.resetGame();
                 break;
             }
         }
@@ -133,10 +133,7 @@ public class UserInterface extends JFrame {
         for (int i = 0; i < endScreenButtons.size(); i++) {
             if (endScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> {
-                        gp.resetGame();
-                        gp.setGameState(GamePanel.GameState.RUNNING);
-                    }
+                    case 0 -> gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
                     case 1 -> {
                         FileManager.loadGame(gp);
                         gp.setGameState(GamePanel.GameState.RUNNING);
@@ -153,15 +150,6 @@ public class UserInterface extends JFrame {
             if (pauseScreenButtons.get(i).contains(p)) {
                 switch (i) {
                     case 0 -> gp.setGameState(GamePanel.GameState.RUNNING);
-                    case 3 -> {
-                        gp.resetGame();
-                        gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
-                    }
-                    case 4 -> FileManager.saveGame(gp);
-                    case 5 -> {
-                        FileManager.loadGame(gp);
-                        gp.setGameState(GamePanel.GameState.RUNNING);
-                    }
                     case 1 -> {
                         gp.setGameState(GamePanel.GameState.CONSOLE_INPUT);
                         try {
@@ -171,6 +159,15 @@ public class UserInterface extends JFrame {
                         }
                     }
                     case 2 -> System.exit(0);
+                    case 3 -> {
+                        gp.resetGame();
+                        gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
+                    }
+                    case 4 -> FileManager.saveGame(gp);
+                    case 5 -> {
+                        FileManager.loadGame(gp);
+                        gp.setGameState(GamePanel.GameState.RUNNING);
+                    }
                 }
                 break;
             }

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import main.GamePanel;
+import main.logger.GameLogger;
 
 import javax.imageio.ImageIO;
 
@@ -27,7 +28,9 @@ public abstract class SuperObject{
         this.name = name;
         try {
             image1 = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("objects/" + imageName +".png")));
-        } catch(IOException e) {e.printStackTrace();}
+        } catch(IOException e) {
+            GameLogger.error("[SUPER OBJECT]", "Failed to get image: " + e.getMessage(), e);
+        }
         image = image1;
     }
 
@@ -45,7 +48,9 @@ public abstract class SuperObject{
         BufferedImage ima = null;
         try {
             ima = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("objects/" + filename +".png")));
-        } catch(IOException e) {e.printStackTrace();}
+        } catch(IOException e) {
+            GameLogger.error("[SUPER OBJECT]", "Failed to scale image: " + e.getMessage(), e);
+        }
         return ima;
     }
 
