@@ -14,11 +14,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import main.*;
+import main.logger.GameLogger;
 import object.*;
 
 import javax.swing.*;
 
 public class FileManager {
+
+    private static final String LOG_CONTEXT = "[FILE MANAGER]";
 
     private FileManager(){}
 
@@ -39,8 +42,8 @@ public class FileManager {
     public static void saveGameState(GamePanel gp, String filename) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
             oos.writeObject(new SerializablePlayerState(gp.player, gp.getGameDifficulty()));
-            oos.writeObject(new ArrayList<>(gp.getEntity().stream().filter(Objects::nonNull).map(SerializableEntityState::new).collect(Collectors.toList())));
-            oos.writeObject(new ArrayList<>(gp.aSetter.list.stream().filter(Objects::nonNull).map(SerializableObjectState::new).collect(Collectors.toList())));
+            oos.writeObject(new ArrayList<>(gp.getEntity().stream().filter(Objects::nonNull).map(SerializableEntityState::new).toList()));
+            oos.writeObject(new ArrayList<>(gp.aSetter.list.stream().filter(Objects::nonNull).map(SerializableObjectState::new).toList()));
         }
     }
 
@@ -95,10 +98,7 @@ public class FileManager {
     }
 
     public static void saveGame(GamePanel gp) {
-        System.out.println("---------------");
-        System.out.println("|Saving pending|");
-        System.out.println("---------------");
-
+        GameLogger.info(LOG_CONTEXT, "SAVING PENDING");
         gp.setGameState(GamePanel.GameState.SAVE);
 
         // GETTING FILENAME
@@ -119,30 +119,28 @@ public class FileManager {
                             "Overwrite Save",
                             JOptionPane.YES_NO_OPTION);
                     if (choice != JOptionPane.YES_OPTION) {
-                        System.out.println("Save cancelled.");
+                        GameLogger.info(LOG_CONTEXT, "SAVE CANCELLED");
                         gp.setGameState(GamePanel.GameState.RUNNING);
                         return;
                     }
                 }
 
                 FileManager.saveGameState(gp, saveFile.getPath());
-                System.out.println("Game saved successfully.");
+                GameLogger.info(LOG_CONTEXT, "GAME SAVED SUCCESSFULLY");
                 JOptionPane.showMessageDialog(gp, "Game saved successfully.");
             } catch (IOException e) {
-                System.err.println("Error saving game: " + e.getMessage());
+                GameLogger.error(LOG_CONTEXT, "ERROR SAVING GAME: " + e.getMessage(), null);
                 JOptionPane.showMessageDialog(gp, "Error saving game: " + e.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
-                throw new RuntimeException(e);
+                throw new IllegalArgumentException(e);
             }
         } else {
-            System.out.println("Save cancelled.");
+            GameLogger.warn(LOG_CONTEXT, "SAVE CANCELLED");
         }
         gp.setGameState(GamePanel.GameState.RUNNING);
     }
 
     public static void loadGame(GamePanel gp) {
-        System.out.println("-------------");
-        System.out.println("|Load pending|");
-        System.out.println("-------------");
+        GameLogger.info(LOG_CONTEXT, "LOAD PENDING");
         gp.setGameState(GamePanel.GameState.LOAD);
 
         // GETTING FILENAME
@@ -159,15 +157,15 @@ public class FileManager {
         if (selectedFile != null) {
             try {
                 FileManager.loadGameState(gp, new File(saveDir, selectedFile).getPath());
-                System.out.println("Game loaded successfully.");
+                GameLogger.info(LOG_CONTEXT, "GAME LOADED SUCCESSFULLY.");
                 JOptionPane.showMessageDialog(gp, "Game loaded successfully.");
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Error loading game: " + e.getMessage());
+                GameLogger.error(LOG_CONTEXT, "ERROR LOADING GAME: " + e.getMessage(), null);
                 JOptionPane.showMessageDialog(gp, "Error loading game: " + e.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         else
-            System.out.println("Load cancelled.");
+            GameLogger.warn(LOG_CONTEXT, "LOAD CANCELLED");
         gp.setGameState(GamePanel.GameState.RUNNING);
     }
 
@@ -178,7 +176,10 @@ public class FileManager {
 class SerializablePlayerState implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    int worldX, worldY, speed, health;
+    int worldX;
+    int worldY;
+    int speed;
+    int health;
     String direction;
     GamePanel.GameDifficulty difficulty;
 
@@ -196,7 +197,10 @@ class SerializableEntityState implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     String type;
-    int worldX, worldY, speed, health;
+    int worldX;
+    int worldY;
+    int speed;
+    int health;
     String direction;
 
     SerializableEntityState(Entity entity) {
@@ -213,7 +217,8 @@ class SerializableObjectState implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     String name;
-    int worldX, worldY;
+    int worldX;
+    int worldY;
     boolean collision;
 
     SerializableObjectState(SuperObject obj) {

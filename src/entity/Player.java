@@ -183,8 +183,18 @@ public class Player extends Entity {
         return image;
     }
 
-    public void attack(){
 
+    /**
+     *
+     * GET THE DIRECTION OF THE ATTACK
+     * CREATE A HITBOX FOR THE WEAPON
+     *
+     * **/
+    public void attack(){
+        if(!(getInventory().getCurrent() instanceof Weapon)) {
+            return;
+        }
+        //DO SOMETHING
     }
 
     @Override

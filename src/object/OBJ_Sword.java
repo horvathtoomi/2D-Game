@@ -1,8 +1,10 @@
 package object;
 
 import main.GamePanel;
+import main.logger.GameLogger;
 
 import java.awt.*;
+import java.io.IOException;
 
 public class OBJ_Sword extends Weapon {
 
@@ -18,18 +20,7 @@ public class OBJ_Sword extends Weapon {
             image2 = scale("sword2");
             image = image1;
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void update() {
-        super.update();
-        // Update weapon animation
-        if (isAttacking()) {
-            image = image2;
-        } else {
-            image = image1;
+            GameLogger.error("[OBJ_SWORD]", "ERROR OCCURED WHILE GETTING IMAGE", new IOException(e.getMessage()));
         }
     }
 

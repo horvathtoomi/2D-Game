@@ -113,8 +113,7 @@ public final class LogSystem {
             logger.setLevel(Level.ALL);
 
         } catch (IOException e) {
-            System.err.println("Failed to initialize logger: " + e.getMessage());
-            throw new RuntimeException(e);
+            GameLogger.error("[LOG SYSTEM", "FAILED TO INITIALIZE LOGGER: " + e.getMessage(), new RuntimeException(e));
         }
     }
 
