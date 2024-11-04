@@ -61,6 +61,7 @@ public class Commands {
             case "door" -> gp.addObject(new OBJ_Door(gp,x * gp.getTileSize(),y * gp.getTileSize()));
             case "boots" -> gp.addObject(new OBJ_Boots(gp,x * gp.getTileSize(),y * gp.getTileSize()));
             case "chest" -> gp.addObject(new OBJ_Chest(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "sword" -> gp.addObject(new OBJ_Sword(gp,x * gp.getTileSize(),y * gp.getTileSize(), 50));
             default -> GameLogger.warn(LOG_CONTEXT, "Unknown command or object: " + obj);
         }
     }
@@ -169,7 +170,7 @@ public class Commands {
                     Where entity_name: <blank>,<GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>""");
             case "add" -> GameLogger.info(LOG_CONTEXT,"""
                     Add use: add <entity/object> <x> <y>
-                    Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>""");
+                    Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>,<sword>""");
             case "remove" -> GameLogger.info(LOG_CONTEXT,"""
                     Remove use: remove <entity_name>
                     Where entity_name: <all> <GiantEnemy> <SmallEnemy> <DragonEnemy> <FriendlyEnemy>""");

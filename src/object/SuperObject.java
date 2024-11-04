@@ -14,27 +14,29 @@ public abstract class SuperObject{
     public GamePanel gp;
     public BufferedImage image, image1, image2;
     public String name;
+    private static final String LOG_CONTEXT = "[SUPER OBJECT]";
 
-    private final int MAX_DURABILITY;
-    private int durability;
-    public int usageDamage = 0;
+    private int MAX_DURABILITY;
+    private int durability = 100;
+    private int usageDamage = 0;
+    public int worldX, worldY;
+    public int solidAreaDefaultX = 0;
+    public int solidAreaDefaultY = 0;
 
     public boolean collision = false;
     public boolean opened = false;
-    public int worldX, worldY;
     public Rectangle solidArea = new Rectangle(0,0,48,48);
-    public int solidAreaDefaultX = 0;
-    public int solidAreaDefaultY = 0;
-    private static final String LOG_CONTEXT = "[SUPER OBJECT]";
 
 
     public int getWorldX(){return worldX;}
     public int getWorldY(){return worldY;}
     public int getMaxDurability(){return MAX_DURABILITY;}
     public int getDurability(){return durability;}
+    public int getUsageDamage(){return usageDamage;}
 
     public void setWorldX(int x){worldX = x;}
     public void setWorldY(int y){worldY = y;}
+    public void setMaxDurability(int a) {MAX_DURABILITY = a;}
     public void setDurability(int a){durability = a;}
     public void setUsageDamage(int a){usageDamage = a;}
 
@@ -49,8 +51,6 @@ public abstract class SuperObject{
             GameLogger.error(LOG_CONTEXT, "Failed to get image: " + e.getMessage(), e);
         }
         image = image1;
-        MAX_DURABILITY = 60 * gp.getFPS();
-        durability = MAX_DURABILITY;
     }
 
     public void use(){}

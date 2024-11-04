@@ -33,6 +33,7 @@ public abstract class Enemy extends Entity {
     private final int[] diffSpeed = {1,2,3,4};
     private final int[] diffShootingRate = {200, 150, 100, 50};
     private static final String LOG_CONTEXT = "[ENEMY]";
+    private static final String[] newDirection = {"up","down","left","right"};
 
     protected Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(gp);
@@ -123,18 +124,16 @@ public abstract class Enemy extends Entity {
                     case "down" -> setWorldY(getWorldY() + getSpeed());
                     case "up" -> setWorldY(getWorldY() - getSpeed());
                     case "shoot" -> {
-                        if (shootCooldown == 0) {
-                            if(shootAnimationTimer==0){
-                                shootCooldown = SHOOT_COOLDOWN_TIME;
-                                direction = previousDirection;
-                                shootAnimationTimer = SHOOT_ANIMATION_DURATION;
-                            }
-                            else if(shootAnimationTimer==SHOOT_ANIMATION_DURATION/2){
-                                shoot();
-                                shootAnimationTimer--;
-                            }
-                            else
-                                shootAnimationTimer--;
+                        if (shootCooldown > 0) break;
+                        if (shootAnimationTimer == SHOOT_ANIMATION_DURATION / 2) {
+                            shoot();
+                        }
+                        if (shootAnimationTimer > 0) {
+                            shootAnimationTimer--;
+                        } else {
+                            shootCooldown = SHOOT_COOLDOWN_TIME;
+                            direction = newDirection[random.nextInt(4)];
+                            shootAnimationTimer = SHOOT_ANIMATION_DURATION;
                         }
                     }
                 }
@@ -147,7 +146,7 @@ public abstract class Enemy extends Entity {
         }
     }
 
-    protected void followPath() {
+    private void followPath() {
         if (pathIndex < path.size()) {
             int[] nextPoint = path.get(pathIndex);
             int nextX = nextPoint[0] * gp.getTileSize();

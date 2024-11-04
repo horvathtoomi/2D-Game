@@ -2,19 +2,20 @@ package entity;
 
 import main.InputHandler;
 import main.GamePanel;
+import main.UtilityTool;
 import object.*;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
+    public boolean isAttacking = false;
+    private long lastAttackTime = 0;
     private final InputHandler kezelo;
     private final Inventory inventory;
+    private static final long ATTACK_COOLDOWN = 500;
     private static final int INTERACTION_COOLDOWN = 30; // frames
-    private static final int ATTACK_COOLDOWN = 30;
     private int interactionTimer = 0;
-    private int attackTimer = 0;
     private BufferedImage up_key, up_boots, up_sword,
             down_key, down_boots, down_sword,
             left_key, left_boots, left_sword,
@@ -68,7 +69,11 @@ public class Player extends Entity {
         attack_down = scale("player", "attack_down");
         attack_left = scale("player", "attack_left");
         attack_rigth = scale("player", "attack_rigth");
-
+        UtilityTool uTool = new UtilityTool();
+        attack_up = uTool.scaleImage(attack_up, gp.getTileSize(), gp.getTileSize() * 2);
+        attack_down = uTool.scaleImage(attack_down, gp.getTileSize(), gp.getTileSize() * 2);
+        attack_left = uTool.scaleImage(attack_left, gp.getTileSize() * 2, gp.getTileSize());
+        attack_rigth = uTool.scaleImage(attack_rigth, gp.getTileSize() * 2, gp.getTileSize());
     }
 
     public void update() {
@@ -76,11 +81,14 @@ public class Player extends Entity {
             interactionTimer--;
         }
         setSpeed(inventory.getCurrent() instanceof OBJ_Boots ? 4 : 3);
-        if (kezelo.upPressed || kezelo.downPressed || kezelo.leftPressed || kezelo.rightPressed) {
+        if (kezelo.attackPressed || kezelo.upPressed || kezelo.downPressed || kezelo.leftPressed || kezelo.rightPressed) {
             if (kezelo.upPressed) direction = "up";
             if (kezelo.downPressed) direction = "down";
             if (kezelo.leftPressed) direction = "left";
             if (kezelo.rightPressed) direction = "right";
+            if (kezelo.attackPressed) {
+                attack();
+            }
 
             //Check Tile Collision
             collisionOn = false;
@@ -92,9 +100,6 @@ public class Player extends Entity {
                 interactWithObject(objIndex);
                 interactionTimer = INTERACTION_COOLDOWN;
             }
-
-            //Check npc collision
-//            int npcIndex = gp.cChecker.checkEntity(this, gp.entities);
 
             if (!collisionOn) {
                 switch (direction) {
@@ -162,14 +167,25 @@ public class Player extends Entity {
                     default -> null;
                 };
             }
-            else if(inventory.getCurrent() instanceof OBJ_Sword) {
-                image = switch(direction){
-                    case "up" -> up_sword;
-                    case "down" -> down_sword;
-                    case "left" -> left_sword;
-                    case "right" -> right_sword;
-                    default -> null;
-                };
+            else if(inventory.getCurrent() instanceof Weapon) {
+                if(!isAttacking) {
+                    image = switch (direction) {
+                        case "up" -> up_sword;
+                        case "down" -> down_sword;
+                        case "left" -> left_sword;
+                        case "right" -> right_sword;
+                        default -> null;
+                    };
+                }
+                else{
+                    image = switch (direction) {
+                        case "up" -> attack_up;
+                        case "down" -> attack_down;
+                        case "left" -> attack_left;
+                        case "right" -> attack_rigth;
+                        default -> null;
+                    };
+                }
             }
         } else {
             image = switch (direction) {
@@ -183,48 +199,57 @@ public class Player extends Entity {
         return image;
     }
 
-
-    /**
-     *
-     * GET THE DIRECTION OF THE ATTACK
-     * CREATE A HITBOX FOR THE WEAPON
-     *
-     * **/
     public void attack(){
         if(!(getInventory().getCurrent() instanceof Weapon)) {
             return;
         }
-        //DO SOMETHING
+        long currentTime = System.currentTimeMillis();
+        if(currentTime - lastAttackTime < ATTACK_COOLDOWN){
+            return;
+        }
+        Weapon weapon = (Weapon)getInventory().getCurrent();
+        isAttacking = true;
+        weapon.isActive = true;
+        lastAttackTime = currentTime;
+
+        weapon.updateHitbox(getWorldX(), getWorldY(), direction);
+        weapon.checkHit(gp.getEntity());
+    }
+
+    private int setAdjustedX(){
+        int x = getScreenX();
+        if(getScreenX() > getWorldX())
+            x = getWorldX();
+        int rightOffset = gp.getScreenWidth() - getScreenX();
+        if (rightOffset > gp.getWorldWidth() - getWorldX())
+            x = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
+        return x;
+    }
+
+    private int setAdjustedY(){
+        int y = getScreenY();
+        if(getScreenY() > getWorldY())
+            y = getWorldY();
+        int bottomOffset = gp.getScreenHeight() - getScreenY();
+        if (bottomOffset > gp.getWorldHeight() - getWorldY())
+            y = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
+        return y;
     }
 
     @Override
     public void draw(Graphics2D g2){
         BufferedImage image = getStateImage();
-        int x = getScreenX();
-        int y = getScreenY();
-        if(getScreenX() > getWorldX()){
-            x = getWorldX();
-        }
-        if(getScreenY() > getWorldY()){
-            y = getWorldY();
-        }
-        int rightOffset = gp.getScreenWidth() - getScreenX();
-        if (rightOffset > gp.getWorldWidth() - getWorldX()) {
-            x = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
-        }
-        int bottomOffset = gp.getScreenHeight() - getScreenY();
-        if (bottomOffset > gp.getWorldHeight() - getWorldY()) {
-            y = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
-        }
+        int x = setAdjustedX();
+        int y = setAdjustedY();
 
         if(image == attack_up)
-            g2.drawImage(image,x,y - 48,null);
+            g2.drawImage(image,x,y - gp.getTileSize(),null);
         else if(image == attack_down)
-            g2.drawImage(image,x,y + 48,null);
+            g2.drawImage(image,x,y + gp.getTileSize(),null);
         else if(image == attack_left)
-            g2.drawImage(image,x - 48,y,null);
+            g2.drawImage(image,x - gp.getTileSize(),y,null);
         else if(image == attack_rigth)
-            g2.drawImage(image,x + 48,y,null);
+            g2.drawImage(image,x + gp.getTileSize(),y,null);
         else
             g2.drawImage(image, x, y, null);
         inventory.draw(g2);

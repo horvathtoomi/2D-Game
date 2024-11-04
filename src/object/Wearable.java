@@ -10,7 +10,7 @@ public class Wearable extends SuperObject{
 
     @Override
     public void use(){
-        setDurability(getDurability() - usageDamage);
+        setDurability(getDurability() - getUsageDamage());
     }
 
 }

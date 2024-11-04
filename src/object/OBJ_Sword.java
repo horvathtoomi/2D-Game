@@ -9,9 +9,13 @@ import java.io.IOException;
 public class OBJ_Sword extends Weapon {
 
     private final WeaponRarity rarity;
+    private static final int swordUsageDamage = 2;
 
     public OBJ_Sword(GamePanel gp, int x, int y, int baseDamage) {
         super(gp, x, y, "sword", "sword", baseDamage, 1, 30); // 30 frames cooldown (0.5 seconds at 60 FPS)
+        setMaxDurability(200);
+        setDurability(getMaxDurability());
+        setUsageDamage(swordUsageDamage);
         this.rarity = gp.aSetter.determineWeaponRarity();
         this.damage = (int)(baseDamage * rarity.damageMultiplier);
         // Load attack animation frames
@@ -22,6 +26,7 @@ public class OBJ_Sword extends Weapon {
         } catch (Exception e) {
             GameLogger.error("[OBJ_SWORD]", "ERROR OCCURED WHILE GETTING IMAGE", new IOException(e.getMessage()));
         }
+        hitbox = new Rectangle(0,0,32,gp.getTileSize());
     }
 
     @Override

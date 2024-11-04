@@ -29,7 +29,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_S -> downPressed = true;
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
-            case KeyEvent.VK_E -> gp.player.attack();
+            case KeyEvent.VK_E -> attackPressed = true;
             case KeyEvent.VK_F -> gp.player.getInventory().rotate();
             case KeyEvent.VK_Q -> handleQ();
             case KeyEvent.VK_ESCAPE -> {
@@ -58,6 +58,21 @@ public class InputHandler implements KeyListener {
         }
     }
 
+    @Override
+    public void keyReleased(KeyEvent e) {
+        int code = e.getKeyCode();
+        switch (code) {
+            case KeyEvent.VK_W -> upPressed = false;
+            case KeyEvent.VK_S -> downPressed = false;
+            case KeyEvent.VK_A -> leftPressed = false;
+            case KeyEvent.VK_D -> rightPressed = false;
+            case KeyEvent.VK_E -> {
+                attackPressed = false;
+                gp.player.isAttacking = false;
+            }
+        }
+    }
+
     private void modeFinder(int mode){
         if(gp.getGameState() == GamePanel.GameState.DIFFICULTY_SCREEN) {
             String[] gameModes = {"EASY", "NORMAL", "HARD", "IMPOSSIBLE"};
@@ -70,18 +85,6 @@ public class InputHandler implements KeyListener {
                         GameLogger.error(LOG_CONTEXT, "SOMETHING UNEXPECTED HAPPENED", new IllegalArgumentException("Unexpected parameter"));
             }
             GameLogger.info(LOG_CONTEXT, "|GAME RESTARTED AS " + gameModes[mode] + "|");
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        int code = e.getKeyCode();
-        switch (code) {
-            case KeyEvent.VK_W -> upPressed = false;
-            case KeyEvent.VK_S -> downPressed = false;
-            case KeyEvent.VK_A -> leftPressed = false;
-            case KeyEvent.VK_D -> rightPressed = false;
-            case KeyEvent.VK_E -> attackPressed = false;
         }
     }
 

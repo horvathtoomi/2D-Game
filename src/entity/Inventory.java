@@ -5,6 +5,7 @@ import object.*;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Inventory {
     private final GamePanel gp;
@@ -97,26 +98,31 @@ public class Inventory {
     }
 
     public void update(){
-        if(getCurrent() instanceof Wearable) {
+        if(getCurrent() instanceof Wearable || getCurrent() instanceof Weapon) {
             getCurrent().use();
         }
-        for(SuperObject obj : items)
-            if(obj.getDurability()<1)
+        Iterator<SuperObject> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            SuperObject obj = iterator.next();
+            if (obj.getDurability() < 1) {
+                iterator.remove();
                 destroy(obj);
+            }
+        }
     }
 
     private void drawUsageBar(Graphics2D g2, int index) {
         int screenX = 10 + 4;
         int screenY = 3 * gp.getTileSize() + (gp.getTileSize() + 10) * index;
 
-        OBJ_Boots boots = (OBJ_Boots)items.get(index);
+        SuperObject obj = items.get(index);
 
         g2.setColor(Color.BLACK);
         g2.fillRect(screenX, screenY, gp.getTileSize() - 7, 7);
         g2.setColor(Color.RED);
         g2.fillRect(screenX, screenY, gp.getTileSize() - 7, 5);
         g2.setColor(Color.BLUE);
-        int blueWidth = (int) ((double) boots.getDurability() / boots.getMaxDurability() * gp.getTileSize());
+        int blueWidth = (int) ((double) obj.getDurability() / obj.getMaxDurability() * gp.getTileSize());
         g2.fillRect(screenX, screenY, blueWidth - 7, 5);
     }
 
@@ -130,7 +136,7 @@ public class Inventory {
             g2.drawRect(padding, 96 + (slotSize + padding) * i, slotSize, slotSize);
             if (i < items.size() && items.get(i) != null) {
                 g2.drawImage(items.get(i).image, padding, 96 + (slotSize + padding) * i, slotSize, slotSize, null);
-                if(items.get(i) instanceof Wearable){
+                if(items.get(i) instanceof Wearable || items.get(i) instanceof Weapon){
                     drawUsageBar(g2, i);
                 }
             }
