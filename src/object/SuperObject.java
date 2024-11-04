@@ -34,13 +34,30 @@ public abstract class SuperObject{
         image = image1;
     }
 
+    public void use(){}
+
     public void draw(Graphics2D g2, GamePanel gp) {
         int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
         int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
-        if(worldX+gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() && worldX-gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() &&
-                worldY+gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() && worldY-gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY())
-        {
-            g2.drawImage(image,screenX,screenY,gp.getTileSize(),gp.getTileSize(),null);
+
+        // Adjust for edges of the map
+        if (gp.player.getScreenX() > gp.player.getWorldX()) {
+            screenX = worldX;
+        }
+        if (gp.player.getScreenY() > gp.player.getWorldY()) {
+            screenY = worldY;
+        }
+        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
+        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
+            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - worldX);
+        }
+        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
+        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
+            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - worldY);
+        }
+
+        if (screenX > -gp.getTileSize() && screenX < gp.getScreenWidth() + gp.getTileSize() && screenY > -gp.getTileSize() && screenY < gp.getScreenHeight() + gp.getTileSize()) {
+            g2.drawImage(image, screenX, screenY, gp.getTileSize(), gp.getTileSize(), null);
         }
     }
 

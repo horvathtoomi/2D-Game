@@ -204,6 +204,7 @@ public abstract class Enemy extends Entity {
         }
     }
 
+    /*
     @Override
     public void draw(Graphics2D g2) {
         BufferedImage image = switch (direction) {
@@ -220,6 +221,44 @@ public abstract class Enemy extends Entity {
             g2.drawImage(image, getScreenX(), getScreenY(), width, height, null);
 
         drawHealthBar(g2);
+    }
+    */
+    @Override
+    public void draw(Graphics2D g2) {
+        BufferedImage image = switch (direction) {
+            case "up" -> up;
+            case "down" -> down;
+            case "left" -> left;
+            case "right" -> right;
+            default -> null;
+        };
+
+        int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
+        int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
+
+        // Adjust for edges of the map
+        if (gp.player.getScreenX() > gp.player.getWorldX()) {
+            screenX = getWorldX();
+        }
+        if (gp.player.getScreenY() > gp.player.getWorldY()) {
+            screenY = getWorldY();
+        }
+        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
+        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
+            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
+        }
+        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
+        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
+            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
+        }
+
+        // Only draw if within screen bounds
+        if (screenX > -gp.getTileSize() &&
+                screenX < gp.getScreenWidth() + gp.getTileSize() &&
+                screenY > -gp.getTileSize() &&
+                screenY < gp.getScreenHeight() + gp.getTileSize()) {
+            g2.drawImage(image, screenX, screenY, width, height, null);
+        }
     }
 
     private void drawHealthBar(Graphics2D g2) {

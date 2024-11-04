@@ -44,6 +44,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public GameState getGameState(){return gameState;}
     public GameDifficulty getGameDifficulty(){return difficulty;}
+    public int getFPS() {return FPS;}
     public int getTileSize() {return tileSize;}
     public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
     public int getScreenHeight() {return maxScreenRow*tileSize;} //576 pixel

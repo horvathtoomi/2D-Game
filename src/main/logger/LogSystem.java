@@ -24,7 +24,7 @@ public final class LogSystem {
     private static final String ANSI_BRIGHT_BLUE = "\u001B[94m";
 
     // Configuration constants
-    private static final String LOG_DIRECTORY = "logs";
+    private static final String LOG_DIRECTORY = "res/logs";
     private static final String LOG_FILE_FORMAT = "game_%s.log";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -113,7 +113,7 @@ public final class LogSystem {
             logger.setLevel(Level.ALL);
 
         } catch (IOException e) {
-            GameLogger.error("[LOG SYSTEM", "FAILED TO INITIALIZE LOGGER: " + e.getMessage(), new RuntimeException(e));
+            GameLogger.error("[LOG SYSTEM]", "FAILED TO INITIALIZE LOGGER: " + e.getMessage(), new RuntimeException(e));
         }
     }
 
