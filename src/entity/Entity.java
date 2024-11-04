@@ -14,9 +14,11 @@ public class Entity{
     public String name;
     private int worldX, worldY;
     private int screenX, screenY;
+    private int width;
+    private int height;
     private int speed, health;
     public int actionLockCounter;
-    public BufferedImage right,left,up,down;
+    public BufferedImage right,left,up,down,shoot;
     public String direction;
     public Rectangle solidArea = new Rectangle(0,0,48,48);
     public int solidAreaDefaultX, solidAreaDefaultY;
@@ -24,6 +26,8 @@ public class Entity{
     public GamePanel gp;
     protected int maxHealth;
 
+    public int getWidth() {return width;}
+    public int getHeight() {return height;}
     public int getWorldX() {return worldX;}
     public int getWorldY() {return worldY;}
     public int getScreenX() {return screenX;}
@@ -33,6 +37,8 @@ public class Entity{
     public String getName(){return name;}
     public int getMaxHealth(){return maxHealth;}
 
+    public void setWidth(int a) {width=a;}
+    public void setHeight(int a) {height=a;}
     public void setWorldX(int a) {worldX = a;}
     public void setWorldY(int a) {worldY = a;}
     public void setScreenX(int a) {screenX = a;}
@@ -43,6 +49,8 @@ public class Entity{
 
     public Entity(GamePanel gp) {
         this.gp = gp;
+        width = gp.getTileSize();
+        height = gp.getTileSize();
     }
 
     public void setAction(){}
@@ -71,23 +79,50 @@ public class Entity{
         }
     }
 
-    public void draw(Graphics2D g2){
-        BufferedImage image;
-            int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
-            int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
-            if(worldX+gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() && worldX-gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() &&
-                    worldY+gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() && worldY-gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY())
-            {
-                image = switch (direction) {
-                    case "up" -> up;
-                    case "down" -> down;
-                    case "left" -> left;
-                    case "right" -> right;
-                    default -> null;
-                };
-                g2.drawImage(image,screenX,screenY,gp.getTileSize(),gp.getTileSize(),null);
-            }
+    public void draw(Graphics2D g2) {
+        BufferedImage image = switch (direction) {
+            case "up" -> up;
+            case "down" -> down;
+            case "left" -> left;
+            case "right" -> right;
+            case "shoot" -> shoot;
+            default -> null;
+        };
+        int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
+        int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
 
+        screenX = adjustScreenX(screenX);
+        screenY = adjustScreenY(screenY);
+
+        if (isValidScreenXY(screenX, screenY)) {
+            g2.drawImage(image, screenX, screenY, width, height, null);
+        }
+    }
+
+    protected boolean isValidScreenXY(int screenX, int screenY){
+        return screenX > -gp.getTileSize() && screenX < gp.getScreenWidth() + gp.getTileSize() && screenY > -gp.getTileSize() && screenY < gp.getScreenHeight() + gp.getTileSize();
+    }
+
+    protected int adjustScreenY(int screenY){
+        if (gp.player.getScreenY() > gp.player.getWorldY()) {
+            screenY = getWorldY();
+        }
+        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
+        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
+            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
+        }
+        return screenY;
+    }
+
+    protected int adjustScreenX(int screenX){
+        if (gp.player.getScreenX() > gp.player.getWorldX()) {
+            screenX = getWorldX();
+        }
+        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
+        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
+            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
+        }
+        return screenX;
     }
 
     public BufferedImage scale(String folderName, String imageName){

@@ -3,27 +3,24 @@ package entity.enemy;
 import entity.*;
 import entity.algorithm.AStar;
 import entity.attack.*;
+import entity.npc.NPC_Wayfarer;
 import main.GamePanel;
+import main.logger.GameLogger;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.Comparator;
 import java.util.Random;
 import java.util.ArrayList;
 
 public abstract class Enemy extends Entity {
-    public BufferedImage shoot;
     String previousDirection;
-    private final int width, height;
 
     private final int startX;
     private int shootingRate;
 
-    //Duration between shots
     private int shootCooldown;
     private final int SHOOT_COOLDOWN_TIME = 60; // 2 seconds at 60 FPS
 
-    //Duration of the shoot image
     private int shootAnimationTimer;
     private final int SHOOT_ANIMATION_DURATION = 40;
 
@@ -35,13 +32,14 @@ public abstract class Enemy extends Entity {
     protected final int UPDATE_INTERVAL = 90;// Update path every second (assuming 60 FPS)
     private final int[] diffSpeed = {1,2,3,4};
     private final int[] diffShootingRate = {200, 150, 100, 50};
+    private static final String LOG_CONTEXT = "[ENEMY]";
 
-    public Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
+    protected Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(gp);
         solidArea = new Rectangle(10,10,width/2,height/2);
         random = new Random();
-        this.width = width;
-        this.height = height;
+        setWidth(width);
+        setHeight(height);
         this.name=name;
         this.startX = startX;
         this.shootingRate=shootingRate;
@@ -61,7 +59,7 @@ public abstract class Enemy extends Entity {
         try {
             getEnemyImage();
         } catch (Exception e) {
-            System.out.println("getEnemyImage() is not working :" + e.getCause());
+            GameLogger.error(LOG_CONTEXT, "getEnemyImage() is not working: " + e.getCause(), e);
         }
     }
 
@@ -89,7 +87,7 @@ public abstract class Enemy extends Entity {
 
     protected abstract void initializeBehavior();
 
-    public void getEnemyImage() {
+    protected void getEnemyImage() {
         right = scale(name, "right");
         left = scale(name, "left");
         down = scale(name, "down");
@@ -100,9 +98,7 @@ public abstract class Enemy extends Entity {
     @Override
     public void update() {
         if(getHealth() <= 0) {
-            System.out.println("---------------------");
-            System.out.println("|" + name + " dies|");
-            System.out.println("---------------------");
+            GameLogger.info(LOG_CONTEXT, name + "DIES");
             gp.removeEnemy(this);
             return;
         }
@@ -179,6 +175,28 @@ public abstract class Enemy extends Entity {
         }
     }
 
+    private Attack getClosestEnemy() {
+        return gp.getEntity().stream()
+                .filter(e -> !(e instanceof Player) && !(e instanceof FriendlyEnemy) && !(e instanceof NPC_Wayfarer))
+                .min(Comparator.comparingDouble(e ->
+                        Math.pow(e.getWorldX() - getWorldX(), 2) +
+                                Math.pow(e.getWorldY() - getWorldY(), 2)))
+                .map(nearestEnemy -> {
+                    int dx = nearestEnemy.getWorldX() - getWorldX();
+                    int dy = nearestEnemy.getWorldY() - getWorldY();
+                    double length = Math.sqrt(dx * dx + dy * dy);
+                    double normalizedDx = dx / length;
+                    double normalizedDy = dy / length;
+
+                    // Calculate starting position
+                    int startX = (int) (getWorldX() + normalizedDx * gp.getTileSize());
+                    int startY = (int) (getWorldY() + normalizedDy * gp.getTileSize());
+
+                    return new FriendlyEnemyAttack(gp, startX, startY,
+                            nearestEnemy.getWorldX(), nearestEnemy.getWorldY());
+                })
+                .orElse(null);
+    }
 
     public void shoot() {
         int playerWorldX = gp.player.getWorldX();
@@ -192,86 +210,36 @@ public abstract class Enemy extends Entity {
         // Adjust starting position
         int startX = (int) (getWorldX() + normalizedDx * gp.getTileSize());
         int startY = (int) (getWorldY() + normalizedDy * gp.getTileSize());
-        switch(name){
-            case "SmallEnemy" -> gp.addEntity(new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-            case "GiantEnemy" -> gp.addEntity(new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-            case "FriendlyEnemy" ->
-                gp.getEntity().stream()
-                        .filter(e -> !(e instanceof Player) && !(e instanceof FriendlyEnemy))
-                        .min(Comparator.comparingDouble(e -> Math.pow(e.getWorldX() - getWorldX(), 2) + Math.pow(e.getWorldY() - getWorldY(), 2)))
-                        .ifPresent(nearestEnemy -> gp.addEntity(new FriendlyEnemyAttack(gp, getWorldX(), getWorldY(), nearestEnemy.getWorldX(), nearestEnemy.getWorldY())));
-            default -> gp.addEntity(new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY));
-        }
+        Attack attack = switch(name){
+            case "SmallEnemy" -> new SmallEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY);
+            case "GiantEnemy" -> new GiantEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY);
+            case "FriendlyEnemy" -> getClosestEnemy();
+            default -> new DragonEnemyAttack(gp, startX, startY, playerWorldX, playerWorldY);
+        };
+        if(attack != null)
+            gp.addEntity(attack);
     }
 
-    /*
     @Override
     public void draw(Graphics2D g2) {
-        BufferedImage image = switch (direction) {
-            case "shoot" -> shoot;
-            case "up" -> up;
-            case "down" -> down;
-            case "left" -> left;
-            case "right" -> right;
-            default -> null;
-        };
-        setScreenX(getWorldX() - gp.player.getWorldX() + gp.player.getScreenX());
-        setScreenY(getWorldY() - gp.player.getWorldY() + gp.player.getScreenY());
-        if (getScreenX() > -gp.getTileSize() && getScreenX() < gp.getScreenWidth() && getScreenY() > -gp.getTileSize() && getScreenY() < gp.getScreenHeight())
-            g2.drawImage(image, getScreenX(), getScreenY(), width, height, null);
-
+        super.draw(g2);
         drawHealthBar(g2);
-    }
-    */
-    @Override
-    public void draw(Graphics2D g2) {
-        BufferedImage image = switch (direction) {
-            case "up" -> up;
-            case "down" -> down;
-            case "left" -> left;
-            case "right" -> right;
-            default -> null;
-        };
-
-        int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
-        int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
-
-        // Adjust for edges of the map
-        if (gp.player.getScreenX() > gp.player.getWorldX()) {
-            screenX = getWorldX();
-        }
-        if (gp.player.getScreenY() > gp.player.getWorldY()) {
-            screenY = getWorldY();
-        }
-        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
-        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
-            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
-        }
-        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
-        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
-            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
-        }
-
-        // Only draw if within screen bounds
-        if (screenX > -gp.getTileSize() &&
-                screenX < gp.getScreenWidth() + gp.getTileSize() &&
-                screenY > -gp.getTileSize() &&
-                screenY < gp.getScreenHeight() + gp.getTileSize()) {
-            g2.drawImage(image, screenX, screenY, width, height, null);
-        }
     }
 
     private void drawHealthBar(Graphics2D g2) {
         int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
         int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
-
-        g2.setColor(Color.BLACK);
-        g2.fillRect(screenX - 1, screenY - 11, gp.getTileSize() / 100 * getMaxHealth(), 7);
-        g2.setColor(Color.RED);
-        g2.fillRect(screenX + width-gp.getTileSize(), screenY - 10, gp.getTileSize(), 5);
-        g2.setColor(Color.GREEN);
-        int greenWidth = (int) ((double) getHealth() / getMaxHealth() * gp.getTileSize());
-        g2.fillRect(screenX + width-gp.getTileSize(), screenY - 10, greenWidth, 5);
+        screenX = adjustScreenX(screenX);
+        screenY = adjustScreenY(screenY);
+        if (isValidScreenXY(screenX, screenY)) {
+            g2.setColor(Color.BLACK);
+            g2.fillRect(screenX - 1, screenY - 11, gp.getTileSize() / 100 * getMaxHealth(), 7);
+            g2.setColor(Color.RED);
+            g2.fillRect(screenX + getWidth() - gp.getTileSize(), screenY - 10, gp.getTileSize(), 5);
+            g2.setColor(Color.GREEN);
+            int greenWidth = (int) ((double) getHealth() / getMaxHealth() * gp.getTileSize());
+            g2.fillRect(screenX + getWidth() - gp.getTileSize(), screenY - 10, greenWidth, 5);
+        }
     }
 
 }

@@ -14,7 +14,6 @@ import tile.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
 
-    //Game Screen settings
     private static final int OriginalTileSize = 16;    //16x16-os
     private static final int scale = 3;
     private static final int tileSize = OriginalTileSize * scale;  //48x48-as
@@ -34,7 +33,7 @@ public class GamePanel extends JPanel implements Runnable {
     public UserInterface ui;
     public transient Thread gameThread;
     public final transient ConsoleHandler console;
-    private static final String LOG_CONTEXT = "GamePanel";
+    private static final String LOG_CONTEXT = "[GAME PANEL]";
 
     public enum GameState {START, DIFFICULTY_SCREEN, RUNNING,PAUSED, FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
     public enum GameDifficulty {EASY, MEDIUM, HARD, IMPOSSIBLE}
@@ -134,9 +133,11 @@ public class GamePanel extends JPanel implements Runnable {
             aSetter.list.removeIf(Objects::isNull);
             entities.forEach(Entity::update);
             aSetter.list.forEach(SuperObject::update);
+            player.getInventory().update();
         }
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;

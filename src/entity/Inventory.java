@@ -23,14 +23,6 @@ public class Inventory {
             return null;
     }
 
-    public int getMaxSize(){
-        return maxSize;
-    }
-
-    public boolean hasItem(String itemName) {
-        return items.stream().anyMatch(item -> item.name.equals(itemName));
-    }
-
     public boolean isFull() {
         return items.size() >= maxSize;
     }
@@ -58,16 +50,6 @@ public class Inventory {
         return getCurrent() instanceof OBJ_Key;
     }
 
-    public boolean equalsBoots(){
-        return getCurrent() instanceof OBJ_Boots;
-    }
-
-    public boolean equalsWeapon(){
-        return getCurrent() instanceof Weapon;
-    }
-
-
-
     public void rotate() {
         if (items.size() > 1) {
             SuperObject temp = items.getFirst();
@@ -77,7 +59,8 @@ public class Inventory {
     }
 
     public SuperObject createDroppable(Entity ent){
-        int offSetX, offSetY;
+        int offSetX;
+        int offSetY;
         switch (ent.direction) {
             case "up" -> {
                 offSetX = 0;
@@ -98,12 +81,9 @@ public class Inventory {
         }
         int x = ent.getWorldX() + offSetX;
         int y = ent.getWorldY() + offSetY;
-        return switch(items.getFirst().name){
-            case "key" -> new OBJ_Key(gp, x, y);
-            case "boots" -> new OBJ_Boots(gp, x, y);
-            case "sword" -> new OBJ_Sword(gp, x, y,100);
-            default -> null;
-        };
+        items.getFirst().setWorldX(x);
+        items.getFirst().setWorldY(y);
+        return items.getFirst();
     }
 
     public void drop(){
@@ -116,16 +96,20 @@ public class Inventory {
         }
     }
 
+    public void update(){
+        if(getCurrent() instanceof Wearable) {
+            getCurrent().use();
+        }
+        for(SuperObject obj : items)
+            if(obj.getDurability()<1)
+                destroy(obj);
+    }
+
     private void drawUsageBar(Graphics2D g2, int index) {
         int screenX = 10 + 4;
         int screenY = 3 * gp.getTileSize() + (gp.getTileSize() + 10) * index;
 
         OBJ_Boots boots = (OBJ_Boots)items.get(index);
-        if(boots.getDurability()<1)
-            destroy(items.get(index));
-        if(getCurrent() instanceof OBJ_Boots) {
-            items.get(index).use();
-        }
 
         g2.setColor(Color.BLACK);
         g2.fillRect(screenX, screenY, gp.getTileSize() - 7, 7);
@@ -146,7 +130,7 @@ public class Inventory {
             g2.drawRect(padding, 96 + (slotSize + padding) * i, slotSize, slotSize);
             if (i < items.size() && items.get(i) != null) {
                 g2.drawImage(items.get(i).image, padding, 96 + (slotSize + padding) * i, slotSize, slotSize, null);
-                if(items.get(i) instanceof OBJ_Boots){
+                if(items.get(i) instanceof Wearable){
                     drawUsageBar(g2, i);
                 }
             }

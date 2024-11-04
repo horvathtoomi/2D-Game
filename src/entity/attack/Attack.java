@@ -6,7 +6,6 @@ import main.GamePanel;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Attack extends Entity {
     int imageChange = 0;
@@ -98,40 +97,14 @@ public class Attack extends Entity {
             return gp.tileman.tile[gp.tileman.mapTileNum[x][y]].collision;
     }
 
-/*
     @Override
     public void draw(Graphics2D g2) {
-        if (getWorldX() + gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() && getWorldX() - gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() && getWorldY() + gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() && getWorldY() - gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY())
-            g2.drawImage(image, getWorldX() - gp.player.getWorldX() + gp.player.getScreenX(), getWorldY() - gp.player.getWorldY() + gp.player.getScreenY(), gp.getTileSize(), gp.getTileSize(), null);
-    }
-*/
-    @Override
-    public void draw(Graphics2D g2) {
-        int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
-        int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
-
-        // Adjust for edges of the map
-        if (gp.player.getScreenX() > gp.player.getWorldX()) {
-            screenX = getWorldX();
-        }
-        if (gp.player.getScreenY() > gp.player.getWorldY()) {
-            screenY = getWorldY();
-        }
-        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
-        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
-            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
-        }
-        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
-        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
-            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
-        }
-
-        // Only draw if within screen bounds and taking into account the tile size for smoother transitions
-        if (screenX > -gp.getTileSize() &&
-                screenX < gp.getScreenWidth() + gp.getTileSize() &&
-                screenY > -gp.getTileSize() &&
-                screenY < gp.getScreenHeight() + gp.getTileSize()) {
-            g2.drawImage(image, screenX, screenY, gp.getTileSize(), gp.getTileSize(), null);
+        setScreenX(getWorldX() - gp.player.getWorldX() + gp.player.getScreenX());
+        setScreenY(getWorldY() - gp.player.getWorldY() + gp.player.getScreenY());
+        setScreenX(adjustScreenX(getScreenX()));
+        setScreenY(adjustScreenY(getScreenY()));
+        if (isValidScreenXY(getScreenX(), getScreenY())) {
+            g2.drawImage(image, getScreenX(), getScreenY(), getWidth(), getHeight(), null);
         }
     }
 
