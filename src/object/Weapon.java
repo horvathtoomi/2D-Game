@@ -17,11 +17,13 @@ public abstract class Weapon extends SuperObject {
     protected boolean isAttacking = false;
     protected Rectangle hitbox;
     public boolean isActive = false;
+    protected final WeaponRarity rarity;
 
     public int getDamage() {return damage;}
 
     public Weapon(GamePanel gp, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
         super(gp, x, y, name, imageName);
+        this.rarity = gp.aSetter.determineWeaponRarity();
         this.damage = damage;
         this.range = range;
         this.attackSpeed = attackSpeed;
@@ -89,4 +91,22 @@ public abstract class Weapon extends SuperObject {
         if(gp.player.isAttacking)
             setDurability(getDurability() - getUsageDamage());
     }
+
+    @Override
+    public void draw(Graphics2D g2, GamePanel gp) {
+        super.draw(g2, gp);
+        if (worldX + gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() &&
+                worldX - gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() &&
+                worldY + gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() &&
+                worldY - gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY()) {
+
+            int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
+            int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
+
+            // Draw rarity glow
+            g2.setColor(new Color(rarity.color.getRed(), rarity.color.getGreen(), rarity.color.getBlue(), 100));
+            g2.fillOval(screenX - 5, screenY - 5, gp.getTileSize() + 10, gp.getTileSize() + 10);
+        }
+    }
+
 }

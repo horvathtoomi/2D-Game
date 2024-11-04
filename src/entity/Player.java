@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 public class Player extends Entity {
 
     public boolean isAttacking = false;
+    private boolean hasReducedDurability = false;
     private long lastAttackTime = 0;
     private final InputHandler kezelo;
     private final Inventory inventory;
@@ -81,14 +82,21 @@ public class Player extends Entity {
             interactionTimer--;
         }
         setSpeed(inventory.getCurrent() instanceof OBJ_Boots ? 4 : 3);
+
+        if (!kezelo.attackPressed && isAttacking) {
+            isAttacking = false;
+            hasReducedDurability = false;
+            if (inventory.getCurrent() instanceof Weapon) {
+                ((Weapon) inventory.getCurrent()).isActive = false;
+            }
+        }
+
         if (kezelo.attackPressed || kezelo.upPressed || kezelo.downPressed || kezelo.leftPressed || kezelo.rightPressed) {
             if (kezelo.upPressed) direction = "up";
             if (kezelo.downPressed) direction = "down";
             if (kezelo.leftPressed) direction = "left";
             if (kezelo.rightPressed) direction = "right";
-            if (kezelo.attackPressed) {
-                attack();
-            }
+            if (kezelo.attackPressed) attack();
 
             //Check Tile Collision
             collisionOn = false;
@@ -109,6 +117,10 @@ public class Player extends Entity {
                     case "right" -> setWorldX(getWorldX() + getSpeed());
                 }
             }
+        }
+        if (isAttacking && !hasReducedDurability && inventory.getCurrent() instanceof Weapon) {
+            inventory.getCurrent().use();
+            hasReducedDurability = true;
         }
     }
 
@@ -209,6 +221,7 @@ public class Player extends Entity {
         }
         Weapon weapon = (Weapon)getInventory().getCurrent();
         isAttacking = true;
+        hasReducedDurability = false;
         weapon.isActive = true;
         lastAttackTime = currentTime;
 

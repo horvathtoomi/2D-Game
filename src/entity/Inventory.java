@@ -98,7 +98,7 @@ public class Inventory {
     }
 
     public void update(){
-        if(getCurrent() instanceof Wearable || getCurrent() instanceof Weapon) {
+        if(getCurrent() instanceof Wearable) {
             getCurrent().use();
         }
         Iterator<SuperObject> iterator = items.iterator();
