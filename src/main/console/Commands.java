@@ -83,7 +83,7 @@ public class Commands {
                 return;
             }
             FileManager.loadGameState(gp, RES_SAVE_PATH + filename);
-            writer.println(filename + " loaded successfully.");
+            GameLogger.info(LOG_CONTEXT, filename + "loaded successfully");
         } catch (IOException | ClassNotFoundException e) {
             GameLogger.error(LOG_CONTEXT, "UNABLE TO LOAD: " + filename, e);
         }

@@ -2,6 +2,7 @@ package main;
 
 
 import entity.npc.NPC_Wayfarer;
+import main.logger.GameLogger;
 import object.*;
 
 import java.io.*;
@@ -22,16 +23,14 @@ public class AssetSetter {
     }
 
     public void setObject() throws IOException {
-        // Use try-with-resources
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/assetsetter/assets.txt")))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(" ");
-                if (parts.length < 3) continue;
+                if (parts.length != 3) continue;
                 String name = parts[0];
                 int x = Integer.parseInt(parts[1]) * gp.getTileSize();
                 int y = Integer.parseInt(parts[2]) * gp.getTileSize();
-
                 createObject(name, x, y);
             }
         }
@@ -48,6 +47,9 @@ public class AssetSetter {
 
         if (obj != null) {
             list.add(obj);
+        }
+        else{
+            GameLogger.error("[ASSET SETTER]","Unexpected type listed in assets.txt", new IllegalArgumentException("Illegal argument"));
         }
     }
 

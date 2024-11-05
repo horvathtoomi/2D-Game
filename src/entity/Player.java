@@ -43,8 +43,8 @@ public class Player extends Entity {
     }
 
     public void setDefaultValues() {
-        setWorldX(gp.getTileSize() * 23);
-        setWorldY(gp.getTileSize() * 21);
+        setWorldX(gp.getTileSize() * 5);
+        setWorldY(gp.getTileSize() * 3);
         setSpeed(3);
         direction = "down";
     }
@@ -77,6 +77,7 @@ public class Player extends Entity {
         attack_rigth = uTool.scaleImage(attack_rigth, gp.getTileSize() * 2, gp.getTileSize());
     }
 
+    @Override
     public void update() {
         if (interactionTimer > 0) {
             interactionTimer--;

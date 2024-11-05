@@ -6,23 +6,50 @@ import main.logger.GameLogger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Objects;
 
 public class TileManager {
     GamePanel gp;
     public Tile[] tile;
     public int[][] mapTileNum;
+    private static final String LOG_CONTEXT = "[TILE MANAGER]";
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
         tile = new Tile[10];
         mapTileNum = new int[gp.getMaxWorldCol()][gp.getMaxWorldRow()];
         getTileImage();
-        loadMap("maps/map1.txt");
+        loadMap("maps/map_matrices/" + getCurrentMap());
+    }
+
+    private String getCurrentMap() {
+        File dir = new File("res/maps/map_matrices");
+        if (!dir.exists() || !dir.isDirectory()) {
+            GameLogger.error(LOG_CONTEXT, "Map matrices directory not found", new IOException());
+            return "map1.txt";
+        }
+
+        int maxIndex = 0;
+        File[] files = dir.listFiles((d, name) -> name.matches("map\\d+\\.txt"));
+
+        if (files != null) {
+            for (File file : files) {
+                try {
+                    int currentIndex = Integer.parseInt(file.getName().replaceAll("map(\\d+)\\.txt", "$1"));
+                    maxIndex = Math.max(maxIndex, currentIndex);
+                } catch (NumberFormatException e) {
+                    GameLogger.error(LOG_CONTEXT, "Error parsing map number: " + file.getName(), e);
+                }
+            }
+        }
+
+        if (maxIndex == 0) {
+            GameLogger.warn(LOG_CONTEXT,"No valid map files found, using default map");
+            return "map1.txt";
+        }
+
+        return "map" + maxIndex + ".txt";
     }
 
     public void getTileImage(){
@@ -46,7 +73,7 @@ public class TileManager {
             tile[idx].image = uTool.scaleImage(tile[idx].image,gp.getTileSize(),gp.getTileSize());
             tile[idx].collision=collision;
         }catch(IOException e){
-            GameLogger.error("[TILE MANAGER]", "Failed to setup Map", e);
+            GameLogger.error(LOG_CONTEXT, "Failed to setup Map", e);
         }
     }
 
@@ -71,7 +98,7 @@ public class TileManager {
             }
             br.close();
         }catch(Exception e){
-            GameLogger.error("[TILE MANAGER]", "Failed to load map: " + address, e);
+            GameLogger.error(LOG_CONTEXT, "Failed to load map: " + address, e);
         }
     }
 

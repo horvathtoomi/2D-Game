@@ -7,3 +7,6 @@ boots 15 8
 key 24 8
 door 25 20
 key 23 20
+door 4 13
+chest 8 8
+chest 10 6

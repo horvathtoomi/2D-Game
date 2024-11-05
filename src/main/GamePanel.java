@@ -19,8 +19,8 @@ public class GamePanel extends JPanel implements Runnable {
     private static final int tileSize = OriginalTileSize * scale;  //48x48-as
     private static final int maxScreenCol = 24;    //16
     private final int maxScreenRow = 18;    //12
-    private final int maxWorldCol = 50;
-    private final int maxWorldRow = 50;
+    private int maxWorldCol = 50;
+    private int maxWorldRow = 50;
     private final int FPS = 60;
 
     public final transient CollisionChecker cChecker=new CollisionChecker(this);
@@ -56,6 +56,8 @@ public class GamePanel extends JPanel implements Runnable {
     public void setGameState(GameState state){gameState = state;}
     public void setGameDifficulty(GameDifficulty diff){difficulty = diff;}
     public void setEntities(CopyOnWriteArrayList<Entity> entities){this.entities = entities;}
+    public void setMaxWorldCol(int a) {maxWorldCol = a;}
+    public void setMaxWorldRow(int a) {maxWorldRow = a;}
 
     public void addEntity(Entity ent){
         entities.add(ent);
