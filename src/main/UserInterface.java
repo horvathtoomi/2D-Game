@@ -123,7 +123,7 @@ public class UserInterface extends JFrame {
                         FileManager.loadGame(gp);
                         gp.setGameState(GamePanel.GameState.RUNNING);
                     }
-                    case 2 -> System.exit(0);
+                    default -> System.exit(0); // case 2
                 }
                 break;
             }
@@ -139,7 +139,10 @@ public class UserInterface extends JFrame {
                         gp.setGameMode(GamePanel.GameMode.STORY);
                         gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
                     }
-                    case 1 -> gp.setGameMode(GamePanel.GameMode.CUSTOM); // TO DO
+                    case 1 -> {
+                        gp.setGameMode(GamePanel.GameMode.CUSTOM);
+                        gp.setupCustomMode();
+                    }
                     case 2 -> gp.setGameState(GamePanel.GameState.START);
                 }
                 break;
@@ -155,7 +158,7 @@ public class UserInterface extends JFrame {
                     case 0 -> gp.setGameDifficulty(GamePanel.GameDifficulty.EASY);
                     case 1 -> gp.setGameDifficulty(GamePanel.GameDifficulty.MEDIUM);
                     case 2 -> gp.setGameDifficulty(GamePanel.GameDifficulty.HARD);
-                    case 3 -> gp.setGameDifficulty(GamePanel.GameDifficulty.IMPOSSIBLE);
+                    default -> gp.setGameDifficulty(GamePanel.GameDifficulty.IMPOSSIBLE); // case 3
                 }
                 gp.setGameState(GamePanel.GameState.RUNNING);
                 gp.resetGame();
@@ -173,7 +176,7 @@ public class UserInterface extends JFrame {
                         FileManager.loadGame(gp);
                         gp.setGameState(GamePanel.GameState.RUNNING);
                     }
-                    case 2 -> System.exit(0);
+                    default -> System.exit(0); // case 2
                 }
                 break;
             }

@@ -4,17 +4,19 @@ package main;
 import entity.npc.NPC_Wayfarer;
 import main.logger.GameLogger;
 import object.*;
-
 import java.io.*;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class AssetSetter {
     GamePanel gp;
-    public CopyOnWriteArrayList<SuperObject> list;
+    public List<SuperObject> list; //CopyOnWriteArrayList
     private final String[] possibleChestItems = {"key", "boots", "sword"};
     private final Random rand;
+    private int mapNum = 1;
+    private static final String LOG_CONTEXT = "[ASSET SETTER]";
 
     public AssetSetter(GamePanel gp) {
         this.gp = gp;
@@ -23,7 +25,7 @@ public class AssetSetter {
     }
 
     public void setObject() throws IOException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/assetsetter/assets.txt")))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/assets/map" + mapNum + "_assets.txt")))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(" ");
@@ -33,6 +35,7 @@ public class AssetSetter {
                 int y = Integer.parseInt(parts[2]) * gp.getTileSize();
                 createObject(name, x, y);
             }
+            mapNum++;
         }
     }
 
@@ -49,14 +52,13 @@ public class AssetSetter {
             list.add(obj);
         }
         else{
-            GameLogger.error("[ASSET SETTER]","Unexpected type listed in assets.txt", new IllegalArgumentException("Illegal argument"));
+            GameLogger.error(LOG_CONTEXT,"Unexpected type listed in assets.txt", new IllegalArgumentException("Illegal argument"));
         }
     }
 
     public void spawnItemFromChest(int x, int y) {
         String randomItem = possibleChestItems[rand.nextInt(possibleChestItems.length)];
         SuperObject newItem = null;
-        // Create the new item
         switch (randomItem) {
             case "key" -> newItem = new OBJ_Key(gp, x, y);
             case "boots" -> newItem = new OBJ_Boots(gp, x, y);

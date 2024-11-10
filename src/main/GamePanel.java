@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
+import map.MapGenerator;
 import object.*;
 import tile.TileManager;
 
@@ -94,7 +95,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.setFocusable(true);
     }
 
-    public void setupGame(){
+    public void setupStoryMode(){
         tileman.loadStoryMap();
         try{
             aSetter.setObject();
@@ -102,10 +103,14 @@ public class GamePanel extends JPanel implements Runnable {
             GameLogger.error(LOG_CONTEXT, "|FAILED TO INITIALIZE THE GAME|", e);
         }
         aSetter.setNPC();
-        //addEntity(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
-        //addEntity(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
-        //addEntity(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
-        //addEntity(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
+        /*
+         * Adding entities here
+         *
+         */
+    }
+
+    public void setupCustomMode(){
+        MapGenerator.GUIMapGenerator();
     }
 
     public void startGameThread() {
@@ -166,7 +171,7 @@ public class GamePanel extends JPanel implements Runnable {
         entities.clear();
         aSetter.list.clear();
         player = new Player(this, inpkez);
-        setupGame();
+        setupStoryMode();
     }
 
 

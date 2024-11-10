@@ -3,7 +3,7 @@ package tile;
 import main.GamePanel;
 import main.UtilityTool;
 import main.logger.GameLogger;
-
+import map.MapGenerator;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.*;
@@ -11,11 +11,11 @@ import java.util.Objects;
 import java.util.Random;
 
 public class TileManager {
-    GamePanel gp;
-    Random rand = new Random();
+    static GamePanel gp;
+    static Random rand = new Random();
     public Tile[] tile;
     private int mapNumber = 1;
-    public int[][] mapTileNum;
+    public static int[][] mapTileNum;
     private static final String LOG_CONTEXT = "[TILE MANAGER]";
 
     public TileManager(GamePanel gp) {
@@ -26,16 +26,16 @@ public class TileManager {
     }
 
     public void getTileImage(){
-            setup(0,"wall",true);
-            setup(1,"grass",false);
-            setup(2,"earth",false);
-            setup(3,"sand",false);
-            setup(4,"water",true);
-            setup(5,"blackborder",true);
-            setup(6,"blacksand",false);
-            setup(7,"deadbush",false);
-            setup(8,"cactus",false);
-            setup(9,"tree",true);
+        setup(0,"wall",true);
+        setup(1,"grass",false);
+        setup(2,"earth",false);
+        setup(3,"sand",false);
+        setup(4,"water",true);
+        setup(5,"blackborder",true);
+        setup(6,"blacksand",false);
+        setup(7,"deadbush",false);
+        setup(8,"cactus",false);
+        setup(9,"tree",true);
     }
 
     public void setup(int idx, String imagePath, boolean collision){
@@ -52,11 +52,9 @@ public class TileManager {
 
     public void loadStoryMap(){
         String address = "res/maps/map_matrices/story_mode/story_map_" + mapNumber + ".txt";
-        try{
-            InputStream is = getClass().getClassLoader().getResourceAsStream(address);
-            assert is != null;
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            int col=0, row=0;
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(address)))){
+            int col=0;
+            int row=0;
             while(col < gp.getMaxWorldCol() && row < gp.getMaxWorldRow()){
                 String line=br.readLine();
                 while(col < gp.getMaxWorldCol()){
@@ -71,7 +69,6 @@ public class TileManager {
                 }
             }
             mapNumber++;
-            br.close();
         }catch(Exception e){
             GameLogger.error(LOG_CONTEXT, "Failed to load map: " + address, e);
             GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
@@ -79,12 +76,10 @@ public class TileManager {
         }
     }
 
-    public void loadCustomMap(String address){
-        try{
-            InputStream is = getClass().getClassLoader().getResourceAsStream(address);
-            assert is != null;
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            int col=0, row=0;
+    public static void loadCustomMap(String address){
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/maps/map_matrices/map" + (MapGenerator.getNextMapNumber() - 1) + ".txt")))){
+            int col=0;
+            int row=0;
             while(col < gp.getMaxWorldCol() && row < gp.getMaxWorldRow()){
                 String line=br.readLine();
                 while(col < gp.getMaxWorldCol()){
@@ -98,7 +93,6 @@ public class TileManager {
                     row++;
                 }
             }
-            br.close();
         }catch(Exception e){
             GameLogger.error(LOG_CONTEXT, "Failed to load map: " + address, e);
             GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
@@ -106,7 +100,7 @@ public class TileManager {
         }
     }
 
-    private void createCleanMap() {
+    private static void createCleanMap() {
         int[] tomb = new int[4];
         tomb[0] = 1;
         tomb[1] = 2;

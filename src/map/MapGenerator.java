@@ -1,7 +1,7 @@
 package map;
 
-import main.logger.GameLogger;
 
+import main.logger.GameLogger;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,20 +11,6 @@ import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-class TileColor {
-    public final int r;
-    public final int g;
-    public final int b;
-    public final int tileNumber;
-
-    public TileColor(int r, int g, int b, int tileNumber) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.tileNumber = tileNumber;
-    }
-}
 
 class ColorAnalyzer {
 
@@ -194,15 +180,25 @@ public class MapGenerator {
         GameLogger.info(LOG_CONTEXT, "- " + analysisPath + ": Visual analysis of the conversion process");
     }
 
+    public static void GUIMapGenerator(){
+        GUIMapGenerator mapGenerator = new GUIMapGenerator();
+        mapGenerator.setVisible(true);
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        GameLogger.info(LOG_CONTEXT,"Enter the path to your PNG image: ");
+        GameLogger.info(LOG_CONTEXT, "Type 'GUI' to open graphical UI");
+        GameLogger.info(LOG_CONTEXT, "Enter the path to your PNG image: ");
         String imagePath = scanner.nextLine();
-
-        try {
-            processImage(imagePath);
-        } catch (Exception e) {
-            GameLogger.error(LOG_CONTEXT, "Error occurred while processing image: " + e.getMessage(), e);
+        if (imagePath.equalsIgnoreCase("GUI")) {
+            GUIMapGenerator();
+        } else {
+            try {
+                processImage(imagePath);
+            } catch (Exception e) {
+                GameLogger.warn(LOG_CONTEXT, "File not found!");
+            }
         }
     }
+
 }
