@@ -1,6 +1,5 @@
 package map;
 
-import main.GamePanel;
 import main.logger.GameLogger;
 
 import javax.imageio.ImageIO;
@@ -14,7 +13,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class TileColor {
-    public final int r, g, b;
+    public final int r;
+    public final int g;
+    public final int b;
     public final int tileNumber;
 
     public TileColor(int r, int g, int b, int tileNumber) {
@@ -26,6 +27,9 @@ class TileColor {
 }
 
 class ColorAnalyzer {
+
+    private ColorAnalyzer() {}
+
     private static final List<TileColor> TILE_COLORS = Arrays.asList(
             new TileColor(122, 122, 122, 0),  // Light gray, stone wall
             new TileColor(37, 166, 22, 1),    // Light green, grass
@@ -96,18 +100,12 @@ class ResultWriter {
 
 public class MapGenerator {
     private static final int BLOCK_SIZE = 16;
+    private static final int MAX_TILES = 1000;
     private static final String MATRICES_PATH = "res/maps/map_matrices";
     private static final String ANALYSIS_PATH = "res/maps/map_analysis";
-    private static final int MAX_TILES = 1000; // Maximum tile size limit
     private static final String LOG_CONTEXT = "[MAP GENERATOR]";
-    private final GamePanel gp;
 
-    public MapGenerator(GamePanel gp) {
-        this.gp = gp;
-    }
-
-    private void validateImageDimensions(int width, int height) {
-        // Check if dimensions are divisible by BLOCK_SIZE
+    private static void validateImageDimensions(int width, int height) {
         if (width % BLOCK_SIZE != 0 || height % BLOCK_SIZE != 0) {
             GameLogger.error(LOG_CONTEXT,
                     "Image dimensions must be divisible by 16. Current dimensions: " + width + "x" + height,
@@ -115,21 +113,15 @@ public class MapGenerator {
             throw new IllegalArgumentException("Invalid image dimensions");
         }
 
-        // Calculate number of tiles
         int tilesWidth = width / BLOCK_SIZE;
         int tilesHeight = height / BLOCK_SIZE;
 
-        // Check if tile count is within limits
         if (tilesWidth > MAX_TILES || tilesHeight > MAX_TILES) {
             GameLogger.error(LOG_CONTEXT,
                     "Map size exceeds maximum limit of " + MAX_TILES + "x" + MAX_TILES + " tiles",
                     new IllegalArgumentException());
             throw new IllegalArgumentException("Map size too large");
         }
-
-        // Update GamePanel dimensions
-        gp.setMaxWorldCol(tilesWidth);
-        gp.setMaxWorldRow(tilesHeight);
 
         GameLogger.info(LOG_CONTEXT,
                 "New map dimensions set to: " + tilesWidth + "x" + tilesHeight + " tiles");
@@ -157,49 +149,39 @@ public class MapGenerator {
         return maxNumber + 1;
     }
 
-    public void processImage(String imagePath) throws IOException {
-        // Load image
+    public static void processImage(String imagePath) throws IOException {
         BufferedImage image = ImageIO.read(new File(imagePath));
 
-        // Validate dimensions and update GamePanel
         validateImageDimensions(image.getWidth(), image.getHeight());
 
-        // Get next map number
         int mapNumber = getNextMapNumber();
 
-        // Ensure directories exist
         Files.createDirectories(Paths.get(MATRICES_PATH));
         Files.createDirectories(Paths.get(ANALYSIS_PATH));
 
-        // Create tile map with dynamic size
         int numBlocksH = image.getHeight() / BLOCK_SIZE;
         int numBlocksW = image.getWidth() / BLOCK_SIZE;
         int[][] tileMap = new int[numBlocksH][numBlocksW];
 
-        // Process blocks
         BufferedImage blockAnalysis = new BufferedImage(
                 image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = blockAnalysis.createGraphics();
 
         for (int row = 0; row < numBlocksH; row++) {
             for (int col = 0; col < numBlocksW; col++) {
-                // Extract block
                 BufferedImage block = image.getSubimage(
                         col * BLOCK_SIZE, row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 
-                // Analyze block
                 Color dominantColor = ColorAnalyzer.getDominantColor(block);
                 int tileNumber = ColorAnalyzer.getClosestTile(dominantColor);
                 tileMap[row][col] = tileNumber;
 
-                // Draw analysis result
                 g2d.setColor(dominantColor);
                 g2d.fillRect(col * BLOCK_SIZE, row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
             }
         }
         g2d.dispose();
 
-        // Save results
         Path analysisPath = Paths.get(ANALYSIS_PATH, "map_analysis_" + mapNumber + ".png");
         Path matrixPath = Paths.get(MATRICES_PATH, "map" + mapNumber + ".txt");
 
@@ -214,14 +196,11 @@ public class MapGenerator {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the path to your PNG image: ");
+        GameLogger.info(LOG_CONTEXT,"Enter the path to your PNG image: ");
         String imagePath = scanner.nextLine();
 
         try {
-            // Create a temporary GamePanel for testing
-            GamePanel gp = new GamePanel();
-            MapGenerator generator = new MapGenerator(gp);
-            generator.processImage(imagePath);
+            processImage(imagePath);
         } catch (Exception e) {
             GameLogger.error(LOG_CONTEXT, "Error occurred while processing image: " + e.getMessage(), e);
         }

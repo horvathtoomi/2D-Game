@@ -15,7 +15,9 @@ public class UserInterface extends JFrame {
     transient ArrayList<Button> startScreenButtons;
     transient ArrayList<Button> endScreenButtons;
     transient ArrayList<Button> pauseScreenButtons;
+    transient ArrayList<Button> modeScreenButtons;
     transient ArrayList<Button> difficultyScreenButtons;
+    private static final String LOG_CONTEXT = "[USER INTERFACE]";
 
     public UserInterface(GamePanel gp) {
         this.gp = gp;
@@ -25,6 +27,7 @@ public class UserInterface extends JFrame {
         endScreenButtons = new ArrayList<>();
         pauseScreenButtons = new ArrayList<>();
         difficultyScreenButtons = new ArrayList<>();
+        modeScreenButtons = new ArrayList<>();
         initializeScreenButtons();
     }
 
@@ -34,11 +37,25 @@ public class UserInterface extends JFrame {
         g2.setColor(Color.BLACK);
         switch (gp.getGameState()) {
             case START -> drawStartScreen();
+            case GAME_MODE_SCREEN -> drawModeChoosingScreen();
             case DIFFICULTY_SCREEN -> drawDifficultyScreen();
             case FINISHED -> drawGameEndScreen();
             case PAUSED -> drawPauseScreen();
-            case RUNNING -> drawPlayerHealthBar();
+            default -> drawPlayerHealthBar(); //case RUNNING
         }
+    }
+
+    private void drawModeChoosingScreen(){
+        g2.setColor(Color.BLACK);
+        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
+        g2.setColor(Color.WHITE);
+        g2.setFont(arial_80);
+        String title = "Choose Game Mode!";
+        int x = getXforCenteredText(title);
+        int y = gp.getScreenHeight() / 4;
+        g2.drawString(title, x, y);
+        for (Button button : modeScreenButtons)
+            button.draw(g2);
     }
 
     private void drawStartScreen() {
@@ -101,7 +118,7 @@ public class UserInterface extends JFrame {
         for (int i = 0; i < startScreenButtons.size(); i++) {
             if (startScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
+                    case 0 -> gp.setGameState(GamePanel.GameState.GAME_MODE_SCREEN);
                     case 1 -> {
                         FileManager.loadGame(gp);
                         gp.setGameState(GamePanel.GameState.RUNNING);
@@ -112,6 +129,24 @@ public class UserInterface extends JFrame {
             }
         }
     }
+
+
+    public void handleGameModeScreenClick(Point p) {
+        for (int i = 0; i < startScreenButtons.size(); i++) {
+            if (startScreenButtons.get(i).contains(p)) {
+                switch (i) {
+                    case 0 -> {
+                        gp.setGameMode(GamePanel.GameMode.STORY);
+                        gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
+                    }
+                    case 1 -> gp.setGameMode(GamePanel.GameMode.CUSTOM); // TO DO
+                    case 2 -> gp.setGameState(GamePanel.GameState.START);
+                }
+                break;
+            }
+        }
+    }
+
 
     public void handleDifficultyScreenClick(Point p) {
         for (int i = 0; i < difficultyScreenButtons.size(); i++) {
@@ -155,7 +190,7 @@ public class UserInterface extends JFrame {
                         try {
                             gp.console.startConsoleInput();
                         } catch (Exception e) {
-                            GameLogger.error("[USER INTERFACE]", "Console input error: {0}", e.getCause());
+                            GameLogger.error(LOG_CONTEXT, "Console input error: {0}", e.getCause());
                         }
                     }
                     case 2 -> System.exit(0);
@@ -229,6 +264,7 @@ public class UserInterface extends JFrame {
             case "start" -> startScreenButtons.add(new Button(x, y, width, heigth, text));
             case "pause" -> pauseScreenButtons.add(new Button(x, y, width, heigth, text));
             case "difficulty" -> difficultyScreenButtons.add(new Button(x, y, width, heigth, text));
+            case "gamemode" -> modeScreenButtons.add(new Button(x, y, width, heigth, text));
             case "end" -> endScreenButtons.add(new Button(x, y, width, heigth, text));
         }
     }
@@ -241,6 +277,12 @@ public class UserInterface extends JFrame {
         initButtons("start", gp.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "Start Game");
         initButtons("start", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Load Game");
         initButtons("start", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Quit");
+
+        initButtons("gamemode", gp.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "Story Mode");
+        initButtons("gamemode", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Custom Map");
+        initButtons("gamemode", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Back");
+
+
         initButtons("pause", gp.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY, buttonWidth, buttonHeight, "Resume");
         initButtons("pause", gp.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Console Input");
         initButtons("pause", gp.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit");

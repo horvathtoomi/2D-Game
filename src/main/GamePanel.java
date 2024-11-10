@@ -1,7 +1,6 @@
 package main;
 
 import entity.*;
-import entity.enemy.*;
 import java.awt.*;
 import java.io.*;
 import java.util.Objects;
@@ -19,30 +18,36 @@ public class GamePanel extends JPanel implements Runnable {
     private static final int tileSize = OriginalTileSize * scale;  //48x48-as
     private static final int maxScreenCol = 24;    //16
     private final int maxScreenRow = 18;    //12
-    private int maxWorldCol = 50;
-    private int maxWorldRow = 50;
+    private int maxWorldCol = 100;
+    private int maxWorldRow = 100;
     private final int FPS = 60;
+
+    private final int currentStory = 1;
+    private static final int MAX_STORY_LEVEL = 6;
 
     public final transient CollisionChecker cChecker=new CollisionChecker(this);
     public Player player;
     public AssetSetter aSetter;
     private CopyOnWriteArrayList<Entity> entities;
-    public TileManager tileman=new TileManager(this);
+    public TileManager tileman = new TileManager(this);
     public final transient InputHandler inpkez = new InputHandler(this);
     public final transient MouseHandler mouseHandler;
-    public UserInterface ui;
+    public UserInterface userInterface;
     public transient Thread gameThread;
     public final transient ConsoleHandler console;
     private static final String LOG_CONTEXT = "[GAME PANEL]";
 
-    public enum GameState {START, DIFFICULTY_SCREEN, RUNNING,PAUSED, FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
+    public enum GameState {START, DIFFICULTY_SCREEN, GAME_MODE_SCREEN, RUNNING,PAUSED, FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
     public enum GameDifficulty {EASY, MEDIUM, HARD, IMPOSSIBLE}
+    public enum GameMode {NONE, STORY, CUSTOM}
     private GameState gameState;
     private GameDifficulty difficulty;
+    private GameMode gameMode = GameMode.NONE;
 
 
     public GameState getGameState(){return gameState;}
     public GameDifficulty getGameDifficulty(){return difficulty;}
+    public GameMode getGameMode(){return gameMode;}
     public int getFPS() {return FPS;}
     public int getTileSize() {return tileSize;}
     public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
@@ -54,6 +59,7 @@ public class GamePanel extends JPanel implements Runnable {
     public CopyOnWriteArrayList<Entity> getEntity() {return entities;}
 
     public void setGameState(GameState state){gameState = state;}
+    public void setGameMode(GameMode mode){gameMode = mode;}
     public void setGameDifficulty(GameDifficulty diff){difficulty = diff;}
     public void setEntities(CopyOnWriteArrayList<Entity> entities){this.entities = entities;}
     public void setMaxWorldCol(int a) {maxWorldCol = a;}
@@ -70,7 +76,7 @@ public class GamePanel extends JPanel implements Runnable {
         player = new Player(this,inpkez);
         entities = new CopyOnWriteArrayList<>();
         aSetter = new AssetSetter(this);
-        ui = new UserInterface(this);
+        userInterface = new UserInterface(this);
         mouseHandler=new MouseHandler(this);
         console=new ConsoleHandler(this);
         setGamePanel();
@@ -89,16 +95,17 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void setupGame(){
+        tileman.loadStoryMap();
         try{
             aSetter.setObject();
         }catch(IOException e){
             GameLogger.error(LOG_CONTEXT, "|FAILED TO INITIALIZE THE GAME|", e);
         }
         aSetter.setNPC();
-        addEntity(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
-        addEntity(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
-        addEntity(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
-        addEntity(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
+        //addEntity(new DragonEnemy(this, 25 * tileSize, 21 * tileSize));
+        //addEntity(new SmallEnemy(this, 25 * tileSize, 25 * tileSize));
+        //addEntity(new GiantEnemy(this,15 * tileSize, 20 * tileSize));
+        //addEntity(new FriendlyEnemy(this,30 * tileSize,20 * tileSize));
     }
 
     public void startGameThread() {
@@ -123,7 +130,7 @@ public class GamePanel extends JPanel implements Runnable {
                 Thread.sleep((long) remainingTime);
                 nextDrawTime += drawInterval;
             } catch (InterruptedException e) {
-                e.getCause();
+                GameLogger.error(LOG_CONTEXT, "Unexpected error occured.",e);
             }
         }
     }
@@ -151,7 +158,7 @@ public class GamePanel extends JPanel implements Runnable {
         for(Entity entity : entities)
             entity.draw(g2);
         player.draw(g2);
-        ui.draw(g2);
+        userInterface.draw(g2);
         g2.dispose();
     }
 
@@ -160,6 +167,17 @@ public class GamePanel extends JPanel implements Runnable {
         aSetter.list.clear();
         player = new Player(this, inpkez);
         setupGame();
+    }
+
+
+
+    public void checkLevelCompletion(){
+        if(gameMode == GameMode.STORY){
+            if(currentStory < MAX_STORY_LEVEL)
+                tileman.loadStoryMap();
+            else
+                setGameState(GameState.FINISHED);
+        }
     }
 
 }

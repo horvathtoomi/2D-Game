@@ -17,3 +17,13 @@ public class Main {
         panel.startGameThread();
     }
 }
+
+
+/*
+*** TO DO ***
+*
+* Map valtozatas implementacioja.
+* "Story modeot szeretnek" legyen 5 map kb tansitionokkel.
+* Legyen free play mode, ahol a user megadja hogy milyen mapot szeretne.
+*
+ */
