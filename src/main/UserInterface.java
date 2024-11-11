@@ -141,7 +141,7 @@ public class UserInterface extends JFrame {
                     }
                     case 1 -> {
                         gp.setGameMode(GamePanel.GameMode.CUSTOM);
-                        gp.setupCustomMode();
+                        GamePanel.setupCustomMode();
                     }
                     case 2 -> gp.setGameState(GamePanel.GameState.START);
                 }

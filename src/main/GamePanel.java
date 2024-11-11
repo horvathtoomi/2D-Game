@@ -109,7 +109,7 @@ public class GamePanel extends JPanel implements Runnable {
          */
     }
 
-    public void setupCustomMode(){
+    public static void setupCustomMode(){
         MapGenerator.GUIMapGenerator();
     }
 

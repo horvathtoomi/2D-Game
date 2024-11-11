@@ -181,8 +181,10 @@ public class MapGenerator {
     }
 
     public static void GUIMapGenerator(){
-        GUIMapGenerator mapGenerator = new GUIMapGenerator();
-        mapGenerator.setVisible(true);
+        CustomMapSelector selector = new CustomMapSelector();
+        selector.setVisible(true);
+        //        GUIMapGenerator mapGenerator = new GUIMapGenerator();
+        //        mapGenerator.setVisible(true);
     }
 
     public static void main(String[] args) {
