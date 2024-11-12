@@ -81,14 +81,12 @@ public class TileManager {
         }
     }
 
+    private static String getRightPath(String path) throws IOException {
+        return path == null ? "res/maps/map_matrices/map" + (MapGenerator.getNextMapNumber() - 1) + ".txt" : path;
+    }
+
     public static void loadCustomMap(String mapPath) {
-        String path = "";
-        try {
-            path = mapPath == null ? "res/maps/map_matrices/map" + (MapGenerator.getNextMapNumber() - 1) + ".txt" : mapPath;
-        }catch(IOException e){
-            GameLogger.warn(LOG_CONTEXT, "Map could not be loaded");
-        }
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/maps/map_matrices/map" + (MapGenerator.getNextMapNumber() - 1) + ".txt")))){
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getRightPath(mapPath))))){
             int col=0;
             int row=0;
             while(col < gp.getMaxWorldCol() && row < gp.getMaxWorldRow()){
@@ -141,24 +139,11 @@ public class TileManager {
             for (int i = 0; i < 100; i++) {
                 writer.write("0 ");
             }
-            cleanMapInit();
         } catch (IOException e) {
             GameLogger.error(LOG_CONTEXT, "Some unexpected error occured: "+ e.getMessage() + "\nClosing application.", e);
             System.exit(1);
         }
-    }
-
-    private static void cleanMapInit(){
-        for(int i = 0; i < gp.getMaxWorldCol(); i++){
-            for(int j = 0; j < gp.getMaxWorldRow(); j++){
-                if(i == 0 || i == 99 || j == 0 || j == 99){
-                    mapTileNum[i][j] = 0;
-                }
-                else{
-                    mapTileNum[i][j] = 1;
-                }
-            }
-        }
+        loadCustomMap("res/maps/map_matrices/default.txt");
     }
 
     public void draw(Graphics2D g2) {

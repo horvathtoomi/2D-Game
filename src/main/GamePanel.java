@@ -2,7 +2,6 @@ package main;
 
 import entity.*;
 import java.awt.*;
-import java.io.*;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
@@ -23,7 +22,7 @@ public class GamePanel extends JPanel implements Runnable {
     private int maxWorldRow = 100;
     private final int FPS = 60;
 
-    private final int currentStory = 1;
+    private final int currentStoryLevel = 1;
     private static final int MAX_STORY_LEVEL = 6;
 
     public final transient CollisionChecker cChecker=new CollisionChecker(this);
