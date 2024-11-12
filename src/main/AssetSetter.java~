@@ -1,5 +1,6 @@
 package main;
 
+
 import entity.npc.NPC_Wayfarer;
 import main.logger.GameLogger;
 import object.*;
@@ -7,6 +8,7 @@ import java.io.*;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 
 public class AssetSetter {
     GamePanel gp;
@@ -22,11 +24,7 @@ public class AssetSetter {
         rand = new Random();
     }
 
-    public void setObject(boolean restart) throws IOException {
-        if(restart) {
-            list.clear();
-            mapNum = 1;
-        }
+    public void setObject() throws IOException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/assets/map" + mapNum + "_assets.txt")))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -49,6 +47,7 @@ public class AssetSetter {
             case "boots" -> new OBJ_Boots(gp, x, y);
             default -> null;
         };
+
         if (obj != null) {
             list.add(obj);
         }

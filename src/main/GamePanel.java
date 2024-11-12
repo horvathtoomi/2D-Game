@@ -2,6 +2,7 @@ package main;
 
 import entity.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
@@ -13,33 +14,48 @@ import tile.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
 
-    private static final int OriginalTileSize = 16;    //16x16-os
-    private static final int scale = 3;
-    private static final int tileSize = OriginalTileSize * scale;  //48x48-as
-    private static final int maxScreenCol = 24;    //16
-    private final int maxScreenRow = 18;    //12
-    private int maxWorldCol = 100;
-    private int maxWorldRow = 100;
-    private final int FPS = 60;
+    private static final int ORIGINAL_TILE_SIZE = 16;
+    private static final int SCALE = 3;
+    private static final int TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE;
+    private static final int MAX_SCREEN_COL = 24;
+    private static final int MAX_SCREEN_ROW = 18;
+    private static int MAX_WORLD_COL = 100;
+    private static int MAX_WORLD_ROW = 100;
+    private static final int FPS = 60;
 
-    private final int currentStoryLevel = 1;
-    private static final int MAX_STORY_LEVEL = 6;
+    private int currentStoryLevel = 0;
+    private static final int MAX_STORY_LEVEL = 3;
 
-    public final transient CollisionChecker cChecker=new CollisionChecker(this);
+    private final transient int[][] endPoints = {
+            {100 * TILE_SIZE, 94 * TILE_SIZE},
+            {TILE_SIZE, 85 * TILE_SIZE},
+            {3,3},
+            {5,5}
+    };
+
+    private final transient int[][] spawnPoints = {
+            {6 * TILE_SIZE,4 * TILE_SIZE},
+            {5 * TILE_SIZE, 10 * TILE_SIZE},
+            {14 * TILE_SIZE, 54 * TILE_SIZE},
+            {TILE_SIZE, TILE_SIZE}
+    };
+
     public Player player;
     public AssetSetter aSetter;
-    private CopyOnWriteArrayList<Entity> entities;
-    public TileManager tileman = new TileManager(this);
-    public final transient InputHandler inpkez = new InputHandler(this);
-    public final transient MouseHandler mouseHandler;
-    public UserInterface userInterface;
     public transient Thread gameThread;
+    public transient TileManager tileman;
+    private CopyOnWriteArrayList<Entity> entities;
+    public final transient InputHandler inpkez;
     public final transient ConsoleHandler console;
+    public final transient CollisionChecker cChecker;
+    public final transient MouseHandler mouseHandler;
+    public final transient UserInterface userInterface;
     private static final String LOG_CONTEXT = "[GAME PANEL]";
 
     public enum GameState {START, DIFFICULTY_SCREEN, GAME_MODE_SCREEN, RUNNING,PAUSED, FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
     public enum GameDifficulty {EASY, MEDIUM, HARD, IMPOSSIBLE}
     public enum GameMode {NONE, STORY, CUSTOM}
+
     private GameState gameState;
     private GameDifficulty difficulty;
     private GameMode gameMode = GameMode.NONE;
@@ -49,21 +65,19 @@ public class GamePanel extends JPanel implements Runnable {
     public GameDifficulty getGameDifficulty(){return difficulty;}
     public GameMode getGameMode(){return gameMode;}
     public int getFPS() {return FPS;}
-    public int getTileSize() {return tileSize;}
-    public int getScreenWidth() {return maxScreenCol*tileSize;} //768 pixel
-    public int getScreenHeight() {return maxScreenRow*tileSize;} //576 pixel
-    public int getMaxWorldCol() {return maxWorldCol;}
-    public int getMaxWorldRow() {return maxWorldRow;}
-    public int getWorldWidth() {return maxWorldCol * tileSize;}
-    public int getWorldHeight() {return maxWorldRow * tileSize;}
+    public int getTileSize() {return TILE_SIZE;}
+    public int getScreenWidth() {return MAX_SCREEN_COL * TILE_SIZE;} //768 pixel
+    public int getScreenHeight() {return MAX_SCREEN_ROW * TILE_SIZE;} //576 pixel
+    public int getMaxWorldCol() {return MAX_WORLD_COL;}
+    public int getMaxWorldRow() {return MAX_WORLD_ROW;}
+    public int getWorldWidth() {return MAX_WORLD_COL * TILE_SIZE;}
+    public int getWorldHeight() {return MAX_WORLD_ROW * TILE_SIZE;}
     public CopyOnWriteArrayList<Entity> getEntity() {return entities;}
 
     public void setGameState(GameState state){gameState = state;}
     public void setGameMode(GameMode mode){gameMode = mode;}
     public void setGameDifficulty(GameDifficulty diff){difficulty = diff;}
     public void setEntities(CopyOnWriteArrayList<Entity> entities){this.entities = entities;}
-    public void setMaxWorldCol(int a) {maxWorldCol = a;}
-    public void setMaxWorldRow(int a) {maxWorldRow = a;}
 
     public void addEntity(Entity ent){
         entities.add(ent);
@@ -73,11 +87,14 @@ public class GamePanel extends JPanel implements Runnable {
 
     public GamePanel() {
         GameLogger.info(LOG_CONTEXT, "|INITIALIZING GAMEPANEL|");
+        inpkez = new InputHandler(this);
         player = new Player(this,inpkez);
         entities = new CopyOnWriteArrayList<>();
         aSetter = new AssetSetter(this);
+        cChecker=new CollisionChecker(this);
         userInterface = new UserInterface(this);
         mouseHandler=new MouseHandler(this);
+        tileman = new TileManager(this);
         console=new ConsoleHandler(this);
         setGamePanel();
     }
@@ -96,17 +113,14 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupStoryMode(){
         tileman.loadStoryMap(true);
-/*
         try{
-            aSetter.setObject();
+            aSetter.setObject(true);
         }catch(IOException e){
             GameLogger.error(LOG_CONTEXT, "|FAILED TO INITIALIZE THE GAME|", e);
         }
         aSetter.setNPC();
 
-        * Adding entities here
-
-*/
+        // Adding entities here
     }
 
     public static void setupCustomMode(){
@@ -148,6 +162,7 @@ public class GamePanel extends JPanel implements Runnable {
             entities.forEach(Entity::update);
             aSetter.list.forEach(SuperObject::update);
             player.getInventory().update();
+            checkLevelCompletion();
         }
     }
 
@@ -181,11 +196,24 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    public boolean isPlayerWithinRadius() {
+        double distance = Math.sqrt(Math.pow(player.getWorldX() - endPoints[currentStoryLevel][0], 2) + Math.pow(player.getWorldY() - endPoints[currentStoryLevel][1], 2));
+        return distance < (3 * TILE_SIZE);
+    }
+
     public void checkLevelCompletion() {
-        if (gameState == GameState.RUNNING) {
-            if (player.getHealth() <= 0) {
-                gameState = GameState.FINISHED;
-            }
+        if(!isPlayerWithinRadius()) {
+            return;
+        }
+        if(currentStoryLevel < MAX_STORY_LEVEL) {
+            currentStoryLevel++;
+            tileman.loadStoryMap(false);
+            player.setWorldX(spawnPoints[currentStoryLevel][0]);
+            player.setWorldY(spawnPoints[currentStoryLevel][1]);
+        }
+        else{
+            gameState = GameState.FINISHED;
         }
     }
+
 }

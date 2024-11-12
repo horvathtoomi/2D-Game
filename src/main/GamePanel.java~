@@ -2,7 +2,7 @@ package main;
 
 import entity.*;
 import java.awt.*;
-import java.io.*;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
@@ -23,8 +23,22 @@ public class GamePanel extends JPanel implements Runnable {
     private int maxWorldRow = 100;
     private final int FPS = 60;
 
-    private final int currentStory = 1;
-    private static final int MAX_STORY_LEVEL = 6;
+    private int currentStoryLevel = 0;
+    private static final int MAX_STORY_LEVEL = 3;
+
+    private final transient int[][] endPoints = {
+            {100 * tileSize, 94 * tileSize},
+            {tileSize, 85 * tileSize},
+            {3,3},
+            {5,5}
+    };
+
+    private final transient int[][] spawnPoints = {
+            {6 * tileSize,4 * tileSize},
+            {5 * tileSize, 10 * tileSize},
+            {14 * tileSize, 54 * tileSize},
+            {tileSize, tileSize}
+    };
 
     public final transient CollisionChecker cChecker=new CollisionChecker(this);
     public Player player;
@@ -97,17 +111,14 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupStoryMode(){
         tileman.loadStoryMap(true);
-/*
         try{
-            aSetter.setObject();
+            aSetter.setObject(true);
         }catch(IOException e){
             GameLogger.error(LOG_CONTEXT, "|FAILED TO INITIALIZE THE GAME|", e);
         }
         aSetter.setNPC();
 
-        * Adding entities here
-
-*/
+        // Adding entities here
     }
 
     public static void setupCustomMode(){
@@ -149,6 +160,7 @@ public class GamePanel extends JPanel implements Runnable {
             entities.forEach(Entity::update);
             aSetter.list.forEach(SuperObject::update);
             player.getInventory().update();
+            checkLevelCompletion();
         }
     }
 
@@ -182,11 +194,24 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    public boolean isPlayerWithinRadius() {
+        double distance = Math.sqrt(Math.pow(player.getWorldX() - endPoints[currentStoryLevel][0], 2) + Math.pow(player.getWorldY() - endPoints[currentStoryLevel][1], 2));
+        return distance < (3 * tileSize);
+    }
+
     public void checkLevelCompletion() {
-        if (gameState == GameState.RUNNING) {
-            if (player.getHealth() <= 0) {
-                gameState = GameState.FINISHED;
-            }
+        if(!isPlayerWithinRadius()) {
+            return;
+        }
+        if(currentStoryLevel < MAX_STORY_LEVEL) {
+            currentStoryLevel++;
+            tileman.loadStoryMap(false);
+            player.setWorldX(spawnPoints[currentStoryLevel][0]);
+            player.setWorldY(spawnPoints[currentStoryLevel][1]);
+        }
+        else{
+            gameState = GameState.FINISHED;
         }
     }
+
 }

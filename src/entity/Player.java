@@ -82,6 +82,7 @@ public class Player extends Entity {
         if (interactionTimer > 0) {
             interactionTimer--;
         }
+
         setSpeed(inventory.getCurrent() instanceof OBJ_Boots ? 4 : 3);
 
         if (!kezelo.attackPressed && isAttacking) {
@@ -103,7 +104,6 @@ public class Player extends Entity {
             collisionOn = false;
             gp.cChecker.checkTile(this);
 
-            //Check Object Colllision
             int objIndex = gp.cChecker.checkObject(this, true);
             if (objIndex != 999 && interactionTimer == 0) {
                 interactWithObject(objIndex);
@@ -259,11 +259,11 @@ public class Player extends Entity {
         if(image == attack_up)
             g2.drawImage(image,x,y - gp.getTileSize(),null);
         else if(image == attack_down)
-            g2.drawImage(image,x,y + gp.getTileSize(),null);
+            g2.drawImage(image,x,y,null);
         else if(image == attack_left)
             g2.drawImage(image,x - gp.getTileSize(),y,null);
         else if(image == attack_rigth)
-            g2.drawImage(image,x + gp.getTileSize(),y,null);
+            g2.drawImage(image,x,y,null);
         else
             g2.drawImage(image, x, y, null);
         inventory.draw(g2);

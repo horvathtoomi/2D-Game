@@ -116,18 +116,18 @@ public class MapGenerator {
         GameLogger.info(LOG_CONTEXT, "Type 'GUI' to open graphical UI");
         GameLogger.info(LOG_CONTEXT, "Type 'exit' to close application");
         GameLogger.info(LOG_CONTEXT, "Enter the path to your PNG image: ");
-        String imagePath;
-        while((imagePath = scanner.nextLine()) != null) {
-            if (imagePath.equalsIgnoreCase("GUI")) {
-                GUIMapGenerator();
-            } else if (imagePath.equalsIgnoreCase("exit")) {
-                System.exit(0);
-            } else {
-                try {
-                    processImage(imagePath);
-                } catch (Exception e) {
-                    GameLogger.warn(LOG_CONTEXT, "File not found!");
-                }
+        String imagePath = scanner.nextLine();
+        if (imagePath.equalsIgnoreCase("GUI")) {
+            GUIMapGenerator();
+        }
+        else if(imagePath.equalsIgnoreCase("exit")){
+            System.exit(0);
+        }
+        else {
+            try {
+                processImage(imagePath);
+            } catch (Exception e) {
+                GameLogger.warn(LOG_CONTEXT, "File not found!");
             }
         }
     }
