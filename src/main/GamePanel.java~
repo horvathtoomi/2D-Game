@@ -97,17 +97,16 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupStoryMode(){
         tileman.loadStoryMap(true);
-/*
         try{
             aSetter.setObject();
         }catch(IOException e){
             GameLogger.error(LOG_CONTEXT, "|FAILED TO INITIALIZE THE GAME|", e);
         }
         aSetter.setNPC();
-
-        * Adding entities here
-
-*/
+        /*
+         * Adding entities here
+         *
+         */
     }
 
     public static void setupCustomMode(){

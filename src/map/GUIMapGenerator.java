@@ -8,7 +8,7 @@ import java.awt.*;
 import java.io.File;
 
 public class GUIMapGenerator extends JFrame {
-    private static final String LOG_CONTEXT = "[CUSTOM MAP SELECTOR]";
+    private static final String LOG_CONTEXT = "[GUI MAP GENERATOR]";
     private final int WINDOW_WIDTH = 300;
     private final int WINDOW_HEIGHT = 150;
 
@@ -18,7 +18,6 @@ public class GUIMapGenerator extends JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
         setLayout(new GridBagLayout());
-
         initializeComponents();
     }
 
@@ -63,7 +62,7 @@ public class GUIMapGenerator extends JFrame {
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 try {
-                    TileManager.loadCustomMap();
+                    TileManager.loadCustomMap(selectedFile.getAbsolutePath());
                     GameLogger.info(LOG_CONTEXT, "Custom map loaded successfully: " + selectedFile.getName());
                     dispose();
                 } catch (Exception ex) {
@@ -98,7 +97,7 @@ public class GUIMapGenerator extends JFrame {
                 try {
                     MapGenerator.processImage(selectedFile.getAbsolutePath());
                     GameLogger.info(LOG_CONTEXT, "Map generated successfully from: " + selectedFile.getName());
-                    TileManager.loadCustomMap();
+                    TileManager.loadCustomMap(null);
                     dispose();
                 } catch (Exception ex) {
                     GameLogger.error(LOG_CONTEXT, "Failed to generate map", ex);

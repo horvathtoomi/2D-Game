@@ -52,10 +52,7 @@ public class TileManager {
         }
     }
 
-    public void loadStoryMap(boolean reset){
-        if(reset) {
-            mapNumber = 1;
-        }
+    public void loadStoryMap(){
         String address = "res/maps/map_matrices/story_mode/story_map_" + mapNumber + ".txt";
         try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(address)))){
             int col=0;

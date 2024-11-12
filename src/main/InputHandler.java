@@ -105,14 +105,11 @@ public class InputHandler implements KeyListener {
     }
 
     private void togglePauseState() {
-        if (gp.getGameState() == GamePanel.GameState.RUNNING) {
-            gp.setGameState(GamePanel.GameState.PAUSED);
-        }
-        else if (gp.getGameState() == GamePanel.GameState.PAUSED) {
-            gp.setGameState(GamePanel.GameState.RUNNING);
-        }
-        else if(gp.getGameState()==GamePanel.GameState.DIFFICULTY_SCREEN){
-            gp.setGameState(GamePanel.GameState.START);
+        switch(gp.getGameState()){
+            case RUNNING -> gp.setGameState(GamePanel.GameState.PAUSED);
+            case PAUSED -> gp.setGameState(GamePanel.GameState.RUNNING);
+            case DIFFICULTY_SCREEN -> gp.setGameState(GamePanel.GameState.GAME_MODE_SCREEN);
+            default -> gp.setGameState(GamePanel.GameState.START);
         }
     }
 
