@@ -1,6 +1,5 @@
 package map;
 
-
 import main.logger.GameLogger;
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -26,7 +25,9 @@ class ColorAnalyzer {
             new TileColor(64, 64, 64, 6),     // Dark gray, gravel
             new TileColor(119, 132, 87, 7),   // Brown with sand bg, deadbush
             new TileColor(13, 160, 132, 8),   // Green with sand bg, cactus
-            new TileColor(62, 113, 2, 9)      // Green-brown with grass bg, tree
+            new TileColor(62, 113, 2, 9),     // Green-brown with grass bg, tree
+            new TileColor(255, 216, 93, 10),  //Light-gray, gravel
+            new TileColor(254,16,2,11)        //Red, lava
     );
 
     public static double calculateColorDistance(Color color1, TileColor color2) {
@@ -181,10 +182,8 @@ public class MapGenerator {
     }
 
     public static void GUIMapGenerator(){
-        CustomMapSelector selector = new CustomMapSelector();
-        selector.setVisible(true);
-        //        GUIMapGenerator mapGenerator = new GUIMapGenerator();
-        //        mapGenerator.setVisible(true);
+        GUIMapGenerator mapGenerator = new GUIMapGenerator();
+        mapGenerator.setVisible(true);
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,5 @@
 package main.console;
 
-
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +9,6 @@ import main.logger.GameLogger;
 public class ConsoleHandler {
     private final GamePanel gp;
     private final BufferedReader reader;
-    private final PrintWriter writer;
     private final Commands commands;
     public boolean abortProcess;
     private final Map<String, Command> commandMap;
@@ -19,7 +17,6 @@ public class ConsoleHandler {
     public ConsoleHandler(GamePanel gp) {
         this.gp = gp;
         this.reader = new BufferedReader(new InputStreamReader(System.in));
-        this.writer = new PrintWriter(System.out, true);
         this.commands = new Commands(gp);
         this.abortProcess = false;
         this.commandMap = initializeCommands();
@@ -37,14 +34,12 @@ public class ConsoleHandler {
         });
 
         map.put("reset", name -> {
-            gp.resetGame();
+            gp.startGame();
             GameLogger.info(LOG_CONTEXT, "GAME HAS BEEN RESET");
         });
 
         map.put("exit", name -> abortProcess = true);
-
         map.put("exit_game", name -> System.exit(0));
-
         map.put("remove", args -> {
             if (args.length == 2) {
                 commands.removeEntities(args[1], args[1].equalsIgnoreCase("all"));
@@ -52,7 +47,6 @@ public class ConsoleHandler {
                 GameLogger.error(LOG_CONTEXT, "Invalid format! Use help remove", new IllegalArgumentException());
             }
         });
-
         map.put("save", args -> {
             if (args.length == 2) {
                 commands.saveFile(args[1]);
@@ -60,7 +54,6 @@ public class ConsoleHandler {
                 GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help save'");
             }
         });
-
         map.put("load", args -> {
             if (args.length == 2) {
                 commands.loadFile(args[1]);
@@ -68,7 +61,6 @@ public class ConsoleHandler {
                 GameLogger.error(LOG_CONTEXT, "Invalid format! Use help load", new IllegalArgumentException());
             }
         });
-
         map.put("set", args -> {
             switch (args.length) {
                 case 4 -> {
@@ -87,7 +79,6 @@ public class ConsoleHandler {
                         ->entity: *Enemy, Player, args: speed,health,maxhealth""");
             }
         });
-
         map.put("get", args -> {
             switch (args.length) {
                 case 3 -> {
@@ -106,7 +97,6 @@ public class ConsoleHandler {
                         ->entity: *Enemy, Player, args: speed, health""");
             }
         });
-
         map.put("add", args -> {
             if (args.length == 4) {
                 commands.add(args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]));
@@ -118,7 +108,6 @@ public class ConsoleHandler {
                     object: chest,door,key,boots""");
             }
         });
-
         map.put("script", args -> {
             if (args.length == 2) {
                 commands.runScript(args[1]);
@@ -126,7 +115,6 @@ public class ConsoleHandler {
                 GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help'");
             }
         });
-
         map.put("make", args -> {
             if (args.length == 2) {
                 commands.createFile(args[1], reader);
@@ -134,7 +122,6 @@ public class ConsoleHandler {
                 GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help'");
             }
         });
-
         return map;
     }
 

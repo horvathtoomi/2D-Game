@@ -100,7 +100,7 @@ public class InputHandler implements KeyListener {
 
     private void startByKey(GamePanel.GameDifficulty diff){
         gp.setGameDifficulty(diff);
-        gp.resetGame();
+        gp.startGame();
         gp.setGameState(GamePanel.GameState.RUNNING);
     }
 

@@ -3,126 +3,111 @@ package map;
 import main.logger.GameLogger;
 import tile.TileManager;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 public class GUIMapGenerator extends JFrame {
-    private JTextField inputField;
-    private JButton generateButton;
-    private JButton browserButton;
-    private static final String LOG_CONTEXT = "[GUI MAP GENERATOR]";
+    private static final String LOG_CONTEXT = "[CUSTOM MAP SELECTOR]";
+    private final int WINDOW_WIDTH = 300;
+    private final int WINDOW_HEIGHT = 150;
 
     public GUIMapGenerator() {
-        setTitle("Generate Custom Map");
-        setSize(400, 110);
+        setTitle("Custom Map Options");
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setResizable(false);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        setLayout(new GridBagLayout());
 
-        inputField = new JTextField(20);
-        inputField.setToolTipText("Enter image path or use Browse button");
-
-        generateButton = new JButton("Generate");
-        generateButton.setEnabled(false);
-        browserButton = new JButton("Browse Image");
-
-        JPanel centerPanel = new JPanel(new FlowLayout());
-        centerPanel.add(new JLabel("Image Path: "));
-        centerPanel.add(inputField);
-
-        JPanel bottomPanel = new JPanel(new FlowLayout());
-        bottomPanel.add(generateButton);
-        bottomPanel.add(browserButton);
-
-        add(centerPanel, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
-
-        generateButton.addActionListener(new GenerateButtonActionListener());
-        browserButton.addActionListener(new BrowserButtonActionListener());
-        inputField.getDocument().addDocumentListener(new InputFieldDocumentListener());
+        initializeComponents();
     }
 
-    private class GenerateButtonActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            String imagePath = inputField.getText();
-            File imageFile = new File(imagePath);
+    private void initializeComponents() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-            if (!imageFile.exists() || !imageFile.isFile()) {
-                JOptionPane.showMessageDialog(GUIMapGenerator.this,
-                        "Invalid image file path",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
+        JButton chooseMapButton = new JButton("Choose Existing Map");
+        JButton generateMapButton = new JButton("Generate New Map");
+
+        // Style buttons
+        chooseMapButton.setPreferredSize(new Dimension(200, 40));
+        generateMapButton.setPreferredSize(new Dimension(200, 40));
+
+        // Add choose map button
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(chooseMapButton, gbc);
+
+        // Add generate map button
+        gbc.gridy = 1;
+        add(generateMapButton, gbc);
+
+        // Choose Map Button Action
+        chooseMapButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Select Map File");
+            fileChooser.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return f.isDirectory() || f.getName().toLowerCase().endsWith(".txt");
+                }
+
+                @Override
+                public String getDescription() {
+                    return "Text Files (*.txt)";
+                }
+            });
+
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                try {
+                    TileManager.loadCustomMap();
+                    GameLogger.info(LOG_CONTEXT, "Custom map loaded successfully: " + selectedFile.getName());
+                    dispose();
+                } catch (Exception ex) {
+                    GameLogger.error(LOG_CONTEXT, "Failed to load custom map", ex);
+                    JOptionPane.showMessageDialog(this,
+                            "Error loading map: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
+        });
 
-            try {
-                MapGenerator.processImage(imagePath);
-                GameLogger.info(LOG_CONTEXT, "Map generated successfully from image: " + imagePath);
-
-                // Load the newly generated map
-                int mapNumber = MapGenerator.getNextMapNumber() - 1;  // Get the number of the map we just created
-                String mapPath = "maps/map_matrices/map" + mapNumber + ".txt";
-                TileManager.loadCustomMap(mapPath);
-
-                dispose();  // Close the window after successful generation
-            } catch (Exception ex) {
-                GameLogger.error(LOG_CONTEXT, "Failed to generate map from image: " + ex.getMessage(), ex);
-                JOptionPane.showMessageDialog(GUIMapGenerator.this,
-                        "Error generating map: " + ex.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    private class BrowserButtonActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
+        // Generate Map Button Action
+        generateMapButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Select Image File");
             fileChooser.setFileFilter(new FileFilter() {
+                @Override
                 public boolean accept(File f) {
                     return f.isDirectory() || f.getName().toLowerCase().endsWith(".png");
                 }
 
+                @Override
                 public String getDescription() {
                     return "PNG Images (*.png)";
                 }
             });
 
-            int result = fileChooser.showOpenDialog(GUIMapGenerator.this);
+            int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
-                inputField.setText(selectedFile.getAbsolutePath());
+                try {
+                    MapGenerator.processImage(selectedFile.getAbsolutePath());
+                    GameLogger.info(LOG_CONTEXT, "Map generated successfully from: " + selectedFile.getName());
+                    TileManager.loadCustomMap();
+                    dispose();
+                } catch (Exception ex) {
+                    GameLogger.error(LOG_CONTEXT, "Failed to generate map", ex);
+                    JOptionPane.showMessageDialog(this,
+                            "Error generating map: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
-        }
-    }
-
-    private class InputFieldDocumentListener implements DocumentListener {
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            updateGenerateButton();
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            updateGenerateButton();
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-            updateGenerateButton();
-        }
-
-        private void updateGenerateButton() {
-            String path = inputField.getText();
-            generateButton.setEnabled(!path.isEmpty() && new File(path).exists());
-        }
+        });
     }
 }

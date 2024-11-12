@@ -167,22 +167,14 @@ public class GamePanel extends JPanel implements Runnable {
         g2.dispose();
     }
 
-    public void resetGame() {
+    public void startGame() {
         entities.clear();
         aSetter.list.clear();
         player = new Player(this, inpkez);
-        setupStoryMode();
-    }
-
-
-
-    public void checkLevelCompletion(){
-        if(gameMode == GameMode.STORY){
-            if(currentStory < MAX_STORY_LEVEL)
-                tileman.loadStoryMap();
-            else
-                setGameState(GameState.FINISHED);
-        }
+        if(gameMode.equals(GameMode.STORY))
+            setupStoryMode();
+        else if(gameMode.equals(GameMode.CUSTOM))
+            setupCustomMode();
     }
 
 }

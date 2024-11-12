@@ -1,14 +1,14 @@
 package tile;
 
-import main.GamePanel;
-import main.UtilityTool;
-import main.logger.GameLogger;
-import map.MapGenerator;
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.*;
 import java.util.Objects;
 import java.util.Random;
+import javax.imageio.ImageIO;
+import main.GamePanel;
+import main.UtilityTool;
+import main.logger.GameLogger;
+import map.MapGenerator;
 
 public class TileManager {
     static GamePanel gp;
@@ -20,7 +20,7 @@ public class TileManager {
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
-        tile = new Tile[10];
+        tile = new Tile[12];
         getTileImage();
         mapTileNum = new int[gp.getMaxWorldCol()][gp.getMaxWorldRow()];
     }
@@ -36,6 +36,8 @@ public class TileManager {
         setup(7,"deadbush",false);
         setup(8,"cactus",false);
         setup(9,"tree",true);
+        setup(10,"gravel",false);
+        setup(11, "lava", true);
     }
 
     public void setup(int idx, String imagePath, boolean collision){
@@ -69,6 +71,7 @@ public class TileManager {
                 }
             }
             mapNumber++;
+            gp.setGameMode(GamePanel.GameMode.STORY);
         }catch(Exception e){
             GameLogger.error(LOG_CONTEXT, "Failed to load map: " + address, e);
             GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
@@ -76,7 +79,7 @@ public class TileManager {
         }
     }
 
-    public static void loadCustomMap(String address){
+    public static void loadCustomMap(){
         try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/maps/map_matrices/map" + (MapGenerator.getNextMapNumber() - 1) + ".txt")))){
             int col=0;
             int row=0;
@@ -93,8 +96,11 @@ public class TileManager {
                     row++;
                 }
             }
+            gp.startGame();
+            gp.setGameState(GamePanel.GameState.RUNNING);
+            gp.setGameMode(GamePanel.GameMode.CUSTOM);
         }catch(Exception e){
-            GameLogger.error(LOG_CONTEXT, "Failed to load map: " + address, e);
+            GameLogger.error(LOG_CONTEXT, "Failed to load map", e);
             GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
             createCleanMap();
         }
@@ -128,9 +134,23 @@ public class TileManager {
             for (int i = 0; i < 100; i++) {
                 writer.write("0 ");
             }
+            cleanMapInit();
         } catch (IOException e) {
             GameLogger.error(LOG_CONTEXT, "Some unexpected error occured: "+ e.getMessage() + "\nClosing application.", e);
             System.exit(1);
+        }
+    }
+
+    private static void cleanMapInit(){
+        for(int i = 0; i < gp.getMaxWorldCol(); i++){
+            for(int j = 0; j < gp.getMaxWorldRow(); j++){
+                if(i == 0 || i == 99 || j == 0 || j == 99){
+                    mapTileNum[i][j] = 0;
+                }
+                else{
+                    mapTileNum[i][j] = 1;
+                }
+            }
         }
     }
 

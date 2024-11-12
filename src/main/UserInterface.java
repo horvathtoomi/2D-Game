@@ -161,7 +161,7 @@ public class UserInterface extends JFrame {
                     default -> gp.setGameDifficulty(GamePanel.GameDifficulty.IMPOSSIBLE); // case 3
                 }
                 gp.setGameState(GamePanel.GameState.RUNNING);
-                gp.resetGame();
+                gp.startGame();
                 break;
             }
         }
@@ -198,7 +198,7 @@ public class UserInterface extends JFrame {
                     }
                     case 2 -> System.exit(0);
                     case 3 -> {
-                        gp.resetGame();
+                        gp.startGame();
                         gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
                     }
                     case 4 -> FileManager.saveGame(gp);
