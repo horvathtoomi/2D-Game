@@ -1,5 +1,7 @@
 package main;
 
+import entity.Entity;
+import entity.enemy.*;
 import entity.npc.NPC_Wayfarer;
 import main.logger.GameLogger;
 import object.*;
@@ -22,11 +24,20 @@ public class AssetSetter {
         rand = new Random();
     }
 
+    public void loadLevelAssets(boolean restart){
+        try {
+            setEnemies(restart);
+            setObject(restart);
+        } catch (IOException e) {
+            GameLogger.error(LOG_CONTEXT,"Assets could not be set.", e);
+        }
+    }
+
     public void setObject(boolean restart) throws IOException {
         if(restart) {
-            list.clear();
             mapNum = 1;
         }
+        list.clear();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/assets/map" + mapNum + "_assets.txt")))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -41,20 +52,53 @@ public class AssetSetter {
         }
     }
 
+    public void setEnemies(boolean restart) throws IOException {
+        if(restart) {
+            mapNum = 1;
+        }
+        list.clear();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("res/enemies/map" + mapNum + "_enemies.txt")))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(" ");
+                if (parts.length != 3) continue;
+                String name = parts[0];
+                int x = Integer.parseInt(parts[1]) * gp.getTileSize();
+                int y = Integer.parseInt(parts[2]) * gp.getTileSize();
+                createEnemy(name, x, y);
+            }
+        }
+    }
+
     private void createObject(String name, int x, int y) {
         SuperObject obj = switch (name) {
             case "key" -> new OBJ_Key(gp, x, y);
             case "chest" -> new OBJ_Chest(gp, x, y);
             case "door" -> new OBJ_Door(gp, x, y);
             case "boots" -> new OBJ_Boots(gp, x, y);
+            case "sword" -> new OBJ_Sword(gp, x, y, 50);
             default -> null;
         };
         if (obj != null) {
             list.add(obj);
         }
         else{
-            GameLogger.error(LOG_CONTEXT,"Unexpected type listed in assets.txt", new IllegalArgumentException("Illegal argument"));
+            GameLogger.error(LOG_CONTEXT,"Unexpected type listed in one of the assets file", new IllegalArgumentException("Illegal argument"));
         }
+    }
+
+    private void createEnemy(String name, int x, int y) {
+        Entity ent = switch (name.toLowerCase()){
+            case "dragonenemy" -> new DragonEnemy(gp, x, y);
+            case "friendlyenemy" -> new FriendlyEnemy(gp, x, y);
+            case "giantenemy" -> new GiantEnemy(gp, x, y);
+            case "smallenemy" -> new SmallEnemy(gp, x, y);
+            default -> null;
+        };
+        if(ent != null)
+            gp.addEntity(ent);
+        else
+            GameLogger.error(LOG_CONTEXT, "Unexpected type listed in one of the enemies file", new IllegalArgumentException("ILLEGAL ARGUMENT"));
     }
 
     public void spawnItemFromChest(int x, int y) {

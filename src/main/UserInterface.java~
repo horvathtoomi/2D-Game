@@ -39,7 +39,7 @@ public class UserInterface extends JFrame {
             case START -> drawStartScreen();
             case GAME_MODE_SCREEN -> drawModeChoosingScreen();
             case DIFFICULTY_SCREEN -> drawDifficultyScreen();
-            case FINISHED_LOST, FINISHED_WON -> drawGameEndScreen();
+            case FINISHED -> drawGameEndScreen();
             case PAUSED -> drawPauseScreen();
             default -> drawPlayerHealthBar(); //case RUNNING
         }
@@ -92,13 +92,9 @@ public class UserInterface extends JFrame {
         g2.setColor(Color.RED);
         g2.setFont(arial_80);
         String gameOverText = "GAME OVER";
-        String wonGameText = "YOU WON";
         int x = getXforCenteredText(gameOverText);
         int y = gp.getScreenHeight() / 4;
-        if(gp.getGameState().equals(GamePanel.GameState.FINISHED_LOST))
-            g2.drawString(gameOverText, x, y);
-        else
-            g2.drawString(wonGameText, x, y);
+        g2.drawString(gameOverText, x, y);
         for (Button button : endScreenButtons)
             button.draw(g2);
     }
@@ -222,7 +218,7 @@ public class UserInterface extends JFrame {
             case START -> hoverButtons.addAll(startScreenButtons);
             case DIFFICULTY_SCREEN -> hoverButtons.addAll(difficultyScreenButtons);
             case PAUSED -> hoverButtons.addAll(pauseScreenButtons);
-            case FINISHED_LOST, FINISHED_WON -> hoverButtons.addAll(endScreenButtons);
+            case FINISHED -> hoverButtons.addAll(endScreenButtons);
         }
         for (Button button : hoverButtons) {
             if (button.contains(p))

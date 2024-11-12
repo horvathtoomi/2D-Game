@@ -1,0 +1,4 @@
+key 5 5
+sword 6 6
+chest 7 7
+door 8 8

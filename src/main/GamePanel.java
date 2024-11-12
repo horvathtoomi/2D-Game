@@ -52,7 +52,11 @@ public class GamePanel extends JPanel implements Runnable {
     public final transient UserInterface userInterface;
     private static final String LOG_CONTEXT = "[GAME PANEL]";
 
-    public enum GameState {START, DIFFICULTY_SCREEN, GAME_MODE_SCREEN, RUNNING,PAUSED, FINISHED, SAVE, LOAD, CONSOLE_INPUT} //Game State
+    public enum GameState {
+        START, DIFFICULTY_SCREEN, GAME_MODE_SCREEN,
+        RUNNING, PAUSED, FINISHED_LOST, FINISHED_WON,
+        SAVE, LOAD, CONSOLE_INPUT
+    }
     public enum GameDifficulty {EASY, MEDIUM, HARD, IMPOSSIBLE}
     public enum GameMode {NONE, STORY, CUSTOM}
 
@@ -113,14 +117,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupStoryMode(){
         tileman.loadStoryMap(true);
-        try{
-            aSetter.setObject(true);
-        }catch(IOException e){
-            GameLogger.error(LOG_CONTEXT, "|FAILED TO INITIALIZE THE GAME|", e);
-        }
+        aSetter.loadLevelAssets(true);
         aSetter.setNPC();
-
-        // Adding entities here
     }
 
     public static void setupCustomMode(){
@@ -138,11 +136,10 @@ public class GamePanel extends JPanel implements Runnable {
         double nextDrawTime = System.nanoTime() + drawInterval;
         while (gameThread != null) {
             if(player.getHealth()<=0 && gameState == GameState.RUNNING)
-                gameState=GameState.FINISHED;
+                gameState=GameState.FINISHED_LOST;
             else if(gameState == GameState.RUNNING)
                 update();
             repaint();
-
             try {
                 double remainingTime = nextDrawTime - System.nanoTime();
                 remainingTime = Math.max(0, remainingTime / 1_000_000);
@@ -208,11 +205,11 @@ public class GamePanel extends JPanel implements Runnable {
         if(currentStoryLevel < MAX_STORY_LEVEL) {
             currentStoryLevel++;
             tileman.loadStoryMap(false);
+            aSetter.loadLevelAssets(false);
             player.setWorldX(spawnPoints[currentStoryLevel][0]);
             player.setWorldY(spawnPoints[currentStoryLevel][1]);
-        }
-        else{
-            gameState = GameState.FINISHED;
+        } else{
+            gameState = GameState.FINISHED_WON;
         }
     }
 

@@ -118,11 +118,7 @@ public class InputHandler implements KeyListener {
             case PAUSED -> gp.setGameState(GamePanel.GameState.RUNNING);
             case START, FINISHED_LOST, FINISHED_WON -> gp.setGameState(GamePanel.GameState.GAME_MODE_SCREEN);
             case GAME_MODE_SCREEN -> gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
-            case DIFFICULTY_SCREEN -> {
-                gp.setGameMode(GamePanel.GameMode.STORY);
-                gp.setGameState(GamePanel.GameState.RUNNING);
-                gp.setupStoryMode();
-            }
+            case DIFFICULTY_SCREEN -> gp.setGameState(GamePanel.GameState.RUNNING);
         }
     }
 
