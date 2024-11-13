@@ -4,7 +4,7 @@ import entity.Entity;
 import entity.enemy.*;
 import main.logger.GameLogger;
 import object.*;
-import main.GamePanel;
+import main.Engine;
 import serializable.FileManager;
 
 import java.io.*;
@@ -12,11 +12,16 @@ import java.util.ArrayList;
 
 
 public class Commands {
-    private final GamePanel gp;
+    private final Engine gp;
     private final PrintWriter writer;
-    private final String LOG_CONTEXT = "[COMMANDS]";
+    private static final String LOG_CONTEXT = "[COMMANDS]";
+    private static final String RES_SAVE_PATH = "res/save/";
+    private static final String RES_SCRIPTS_PATH = "res/scripts/";
+    private static final String UNKNOWN_ATTRIBUTE = "Unknown attribute: ";
+    private static final String SPEED = "speed";
+    private static final String HEALTH = "health";
 
-    public Commands(GamePanel gp) {
+    public Commands(Engine gp) {
         this.gp = gp;
         this.writer = new PrintWriter(System.out, true);
     }
@@ -56,12 +61,14 @@ public class Commands {
             case "door" -> gp.addObject(new OBJ_Door(gp,x * gp.getTileSize(),y * gp.getTileSize()));
             case "boots" -> gp.addObject(new OBJ_Boots(gp,x * gp.getTileSize(),y * gp.getTileSize()));
             case "chest" -> gp.addObject(new OBJ_Chest(gp,x * gp.getTileSize(),y * gp.getTileSize()));
+            case "sword" -> gp.addObject(new OBJ_Sword(gp,x * gp.getTileSize(),y * gp.getTileSize(), 50));
+            default -> GameLogger.warn(LOG_CONTEXT, "Unknown command or object: " + obj);
         }
     }
 
     public void saveFile(String filename) {
         try {
-            FileManager.saveGameState(gp, "res/save/" + filename);
+            FileManager.saveGameState(gp, RES_SAVE_PATH + filename);
             GameLogger.info(LOG_CONTEXT, filename + " saved successfully");
         } catch (IOException e) {
             GameLogger.error(LOG_CONTEXT, "UNABLE TO SAVE: " + filename, e);
@@ -70,20 +77,20 @@ public class Commands {
 
     public void loadFile(String filename) {
         try {
-            File file = new File("res/save/" + filename);
+            File file = new File(RES_SAVE_PATH + filename);
             if (!file.exists()) {
                 GameLogger.warn(LOG_CONTEXT, filename + " not found");
                 return;
             }
-            FileManager.loadGameState(gp, "res/save/" + filename);
-            writer.println(filename + " loaded successfully.");
+            FileManager.loadGameState(gp, RES_SAVE_PATH + filename);
+            GameLogger.info(LOG_CONTEXT, filename + "loaded successfully");
         } catch (IOException | ClassNotFoundException e) {
             GameLogger.error(LOG_CONTEXT, "UNABLE TO LOAD: " + filename, e);
         }
     }
 
     public void createFile(String filename, BufferedReader reader) {
-        File saveFile = new File("res/scripts/" + filename + ".txt");
+        File saveFile = new File(RES_SCRIPTS_PATH + filename + ".txt");
         GameLogger.info(LOG_CONTEXT, "Entering script creation |type 'end' to exit|");
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(saveFile))) {
             String inputLine;
@@ -104,7 +111,7 @@ public class Commands {
     }
 
     public void runScript(String filename) {
-        File scriptFile = new File("res/scripts/"+filename+".txt");
+        File scriptFile = new File(RES_SCRIPTS_PATH + filename + ".txt");
         if (!scriptFile.exists() || !scriptFile.isFile()) {
             GameLogger.warn(LOG_CONTEXT, "ERROR: " +filename + " not found");
             return;
@@ -120,7 +127,7 @@ public class Commands {
                 if (line.startsWith("make")) {
                     String[] parts = line.split("\\s+");
                     if(parts.length == 2) {
-                        File saveFile = new File("res/scripts/" + parts[1] + ".txt");
+                        File saveFile = new File(RES_SCRIPTS_PATH + parts[1] + ".txt");
                         fileWriter = new BufferedWriter(new FileWriter(saveFile));
                         inMakeMode = true;
                         GameLogger.info(LOG_CONTEXT, "|Auto-make mode activated for" + parts[1] + "|");
@@ -163,7 +170,7 @@ public class Commands {
                     Where entity_name: <blank>,<GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>""");
             case "add" -> GameLogger.info(LOG_CONTEXT,"""
                     Add use: add <entity/object> <x> <y>
-                    Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>""");
+                    Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>,<sword>""");
             case "remove" -> GameLogger.info(LOG_CONTEXT,"""
                     Remove use: remove <entity_name>
                     Where entity_name: <all> <GiantEnemy> <SmallEnemy> <DragonEnemy> <FriendlyEnemy>""");
@@ -172,18 +179,17 @@ public class Commands {
             case "load" -> GameLogger.info(LOG_CONTEXT,"Load use: load <filename> without extension");
             case "exit" -> GameLogger.info(LOG_CONTEXT,"Exit use: exit - exits console mode");
             case "exit_game" -> GameLogger.info(LOG_CONTEXT,"Exits game");
-            default -> {
+            default ->
                 GameLogger.info(LOG_CONTEXT, """
                         script/make/set/get/add/reset
                         save/load/exit/exit_game/remove
                         | Use 'help <command>' from above commands |
                         """);
-            }
         }
     }
 
     public void setAll(String attribute, int value) {
-        if(attribute.equals("speed")) {
+        if(attribute.equals(SPEED)) {
             if (value > 8 || value < 0) {
                 GameLogger.warn(LOG_CONTEXT,"Value not valid! (0:8)");
                 return;
@@ -191,7 +197,7 @@ public class Commands {
             for(Entity entity : gp.getEntity())
                 entity.setSpeed(value);
         }
-        else if(attribute.equals("health")) {
+        else if(attribute.equals(HEALTH)) {
             if (value > 5000 || value < 0) {
                 GameLogger.warn(LOG_CONTEXT,"Value not valid! (0:5000)");
                 return;
@@ -202,14 +208,14 @@ public class Commands {
             }
         }
         else {
-            GameLogger.warn(LOG_CONTEXT,"Unknown attribute: " + attribute);
+            GameLogger.warn(LOG_CONTEXT,UNKNOWN_ATTRIBUTE + attribute);
         }
         GameLogger.info(LOG_CONTEXT, "Every entity's " + attribute + " set to: " + value);
     }
 
     public void setEntity(String name, String attribute, int value) {
         int entityIndex = -1;
-        if(attribute.equals("speed")) {
+        if(attribute.equals(SPEED)) {
             if (value > 8 || value < 0) {
                 GameLogger.warn(LOG_CONTEXT,"Value not valid! (0:8)");
                 return;
@@ -222,7 +228,7 @@ public class Commands {
                 }
             }
         }
-        else if(attribute.equals("health")) {
+        else if(attribute.equals(HEALTH)) {
             if (value > 5000 || value < 0) {
                 GameLogger.warn(LOG_CONTEXT, "Value not valid! (0:5000)");
                 return;
@@ -236,7 +242,7 @@ public class Commands {
             }
         }
         else {
-            GameLogger.warn(LOG_CONTEXT, "Unknown attribute: " + attribute);
+            GameLogger.warn(LOG_CONTEXT, UNKNOWN_ATTRIBUTE + attribute);
         }
 
         if(entityIndex != -1)
@@ -248,14 +254,14 @@ public class Commands {
     public void getEntity(String name, String attribute) {
         for (Entity entity : gp.getEntity()) {
             if (entity.getName().toLowerCase().equals(name)) {
-                if (attribute.equals("speed")) {
+                if (attribute.equals(SPEED)) {
                     writer.println(entity.getName() + " speed: " + entity.getSpeed());
                     return;
-                } else if (attribute.equals("health")) {
+                } else if (attribute.equals(HEALTH)) {
                     writer.println(entity.getName() + " health: " + entity.getHealth());
                     return;
                 } else {
-                    GameLogger.warn(LOG_CONTEXT, "Unknown attribute: " + attribute);
+                    GameLogger.warn(LOG_CONTEXT, UNKNOWN_ATTRIBUTE + attribute);
                 }
             }
         }
@@ -268,7 +274,7 @@ public class Commands {
         int val = Integer.parseInt(value);
         if(val > 0 && val <= 5001) {
             switch (variable) {
-                case "health" -> {
+                case HEALTH -> {
                     if (gp.player.getMaxHealth() < val) {
                         GameLogger.warn(LOG_CONTEXT, "Value exceeded max health | Change maxhealth first");
                         return;
@@ -293,7 +299,7 @@ public class Commands {
                     }
                     GameLogger.info(LOG_CONTEXT,"Player maxhealth set to " + val);
                 }
-                case "speed" -> {
+                case SPEED -> {
                     if (val > speedLimit) {
                         GameLogger.warn(LOG_CONTEXT,"Value exceeded speed limit (" + speedLimit + ")");
                         return;
@@ -301,7 +307,7 @@ public class Commands {
                     gp.player.setSpeed(val);
                     GameLogger.info(LOG_CONTEXT,"Player speed set to " + val);
                 }
-                default -> GameLogger.warn(LOG_CONTEXT,"Unknown variable: " + variable);
+                default -> GameLogger.warn(LOG_CONTEXT,UNKNOWN_ATTRIBUTE + variable);
             }
         } else {
             GameLogger.warn(LOG_CONTEXT,"Value out of range");
@@ -310,9 +316,9 @@ public class Commands {
 
     public void getGameValue(String variable) {
         switch (variable) {
-            case "health" -> GameLogger.info(LOG_CONTEXT,"Player health: " + gp.player.getHealth());
+            case HEALTH -> GameLogger.info(LOG_CONTEXT,"Player health: " + gp.player.getHealth());
             case "maxhealth" -> GameLogger.info(LOG_CONTEXT,"Player max health: " + gp.player.getMaxHealth());
-            case "speed" -> GameLogger.info(LOG_CONTEXT,"Player speed: " + gp.player.getSpeed());
+            case SPEED -> GameLogger.info(LOG_CONTEXT,"Player speed: " + gp.player.getSpeed());
             default -> GameLogger.warn(LOG_CONTEXT, "VARIABLE NOT FOUND");
         }
     }

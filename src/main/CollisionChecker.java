@@ -6,9 +6,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CollisionChecker {
 
-    GamePanel gp;
+    Engine gp;
 
-    public CollisionChecker(GamePanel gp) {
+    public CollisionChecker(Engine gp) {
         this.gp=gp;
 
     }

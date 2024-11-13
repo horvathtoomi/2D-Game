@@ -1,56 +1,112 @@
 package object;
 
-import main.GamePanel;
+import entity.Entity;
+import entity.npc.NPC_Wayfarer;
+import main.Engine;
+
+import java.awt.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Weapon extends SuperObject {
     protected int damage;
     protected int range;  // Range in tiles
     protected int attackSpeed; // Frames between attacks
-    protected int currentCooldown = 0;
-    protected int attackDuration = 15; // Duration of attack animation in frames
-    protected int currentAttackFrame = 0;
+    protected int attackDuration = 30; // Duration of attack animation in frames
+    protected int attackCooldown = 30;
+    private final int ATTACK_COOLDOWN_TIME = 30;
     protected boolean isAttacking = false;
+    protected Rectangle hitbox;
+    public boolean isActive = false;
+    protected final WeaponRarity rarity;
 
-    public Weapon(GamePanel gp, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
+    public int getDamage() {return damage;}
+
+    public Weapon(Engine gp, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
         super(gp, x, y, name, imageName);
+        this.rarity = gp.aSetter.determineWeaponRarity();
         this.damage = damage;
         this.range = range;
         this.attackSpeed = attackSpeed;
     }
 
-    public int getDamage() {return damage;}
-    public int getAttackSpeed() {return attackSpeed;}
-    public int getRange() {return range;}
-
-    public boolean canAttack() {
-        return currentCooldown <= 0;
-    }
-
-    public void startAttack() {
-        if (canAttack()) {
-            isAttacking = true;
-            currentAttackFrame = attackDuration;
-            currentCooldown = attackSpeed;
+    public void updateHitbox(int playerWorldX, int playerWorldY, String direction) {
+        switch(direction) {
+            case "up" -> hitbox.setBounds(
+                    playerWorldX + 8,  // Align with player's hitbox x
+                    playerWorldY - gp.getTileSize(),  // One tile above player
+                    32,  // Same width as player's hitbox
+                    gp.getTileSize()  // One tile height
+            );
+            case "down" -> hitbox.setBounds(
+                    playerWorldX + 8,
+                    playerWorldY + gp.getTileSize(),
+                    32,
+                    gp.getTileSize()
+            );
+            case "left" -> hitbox.setBounds(
+                    playerWorldX - gp.getTileSize(),
+                    playerWorldY + 8,
+                    gp.getTileSize(),
+                    32
+            );
+            case "right" -> hitbox.setBounds(
+                    playerWorldX + gp.getTileSize(),
+                    playerWorldY + 8,
+                    gp.getTileSize(),
+                    32
+            );
         }
     }
 
-    public void update() {
-        if (currentCooldown > 0) {
-            currentCooldown--;
-        }
-        if (isAttacking) {
-            currentAttackFrame--;
-            if (currentAttackFrame <= 0) {
-                isAttacking = false;
+    public void checkHit(CopyOnWriteArrayList<Entity> entities) {
+        if (!isActive) return;
+        for (Entity entity : entities) {
+            if (entity instanceof NPC_Wayfarer) continue;
+
+            Rectangle entityHitbox = new Rectangle(
+                    entity.getWorldX() + entity.solidArea.x,
+                    entity.getWorldY() + entity.solidArea.y,
+                    entity.solidArea.width,
+                    entity.solidArea.height
+            );
+
+            if (hitbox.intersects(entityHitbox)) {
+                entity.setHealth(entity.getHealth() - getDamage());
             }
         }
     }
 
-    public boolean isAttacking() {
-        return isAttacking;
+    public void update() {
+        if(isAttacking) {
+            attackCooldown--;
+        }
+        if(attackCooldown==0 && isAttacking) {
+            attackCooldown = ATTACK_COOLDOWN_TIME;
+            attackDuration--;
+        }
     }
 
-    public int getCurrentAttackFrame() {
-        return currentAttackFrame;
+    @Override
+    public void use(){
+        if(gp.player.isAttacking)
+            setDurability(getDurability() - getUsageDamage());
     }
+
+    @Override
+    public void draw(Graphics2D g2, Engine gp) {
+        super.draw(g2, gp);
+        if (worldX + gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() &&
+                worldX - gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() &&
+                worldY + gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() &&
+                worldY - gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY()) {
+
+            int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
+            int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
+
+            // Draw rarity glow
+            g2.setColor(new Color(rarity.color.getRed(), rarity.color.getGreen(), rarity.color.getBlue(), 100));
+            g2.fillOval(screenX - 5, screenY - 5, gp.getTileSize() + 10, gp.getTileSize() + 10);
+        }
+    }
+
 }

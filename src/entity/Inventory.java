@@ -1,19 +1,18 @@
 package entity;
 
-import main.GamePanel;
-import object.OBJ_Boots;
-import object.OBJ_Key;
-import object.OBJ_Sword;
-import object.SuperObject;
+import main.Engine;
+import object.*;
+
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Inventory {
-    private final GamePanel gp;
+    private final Engine gp;
     private final ArrayList<SuperObject> items;
-    private final int maxSize = 3;
+    private static final int maxSize = 3;
 
-    public Inventory(GamePanel gp) {
+    public Inventory(Engine gp) {
         this.gp = gp;
         items = new ArrayList<>(maxSize);
     }
@@ -23,14 +22,6 @@ public class Inventory {
             return items.getFirst();
         else
             return null;
-    }
-
-    public int getMaxSize(){
-        return maxSize;
-    }
-
-    public boolean hasItem(String itemName) {
-        return items.stream().anyMatch(item -> item.name.equals(itemName));
     }
 
     public boolean isFull() {
@@ -43,6 +34,10 @@ public class Inventory {
         }
     }
 
+    private void destroy(SuperObject item) {
+        items.remove(item);
+    }
+
     public void removeItem(String itemName) {
         for(int i=0;i<items.size();i++){
             if(items.get(i).name.equals(itemName)){
@@ -53,7 +48,7 @@ public class Inventory {
     }
 
     public boolean equalsKey(){
-        return getCurrent() != null && getCurrent() instanceof OBJ_Key;
+        return getCurrent() instanceof OBJ_Key;
     }
 
     public void rotate() {
@@ -65,7 +60,8 @@ public class Inventory {
     }
 
     public SuperObject createDroppable(Entity ent){
-        int offSetX, offSetY;
+        int offSetX;
+        int offSetY;
         switch (ent.direction) {
             case "up" -> {
                 offSetX = 0;
@@ -86,12 +82,9 @@ public class Inventory {
         }
         int x = ent.getWorldX() + offSetX;
         int y = ent.getWorldY() + offSetY;
-        return switch(items.getFirst().name){
-            case "key" -> new OBJ_Key(gp, x, y);
-            case "boots" -> new OBJ_Boots(gp, x, y);
-            case "sword" -> new OBJ_Sword(gp, x, y,100);
-            default -> null;
-        };
+        items.getFirst().setWorldX(x);
+        items.getFirst().setWorldY(y);
+        return items.getFirst();
     }
 
     public void drop(){
@@ -104,6 +97,35 @@ public class Inventory {
         }
     }
 
+    public void update(){
+        if(getCurrent() instanceof Wearable) {
+            getCurrent().use();
+        }
+        Iterator<SuperObject> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            SuperObject obj = iterator.next();
+            if (obj.getDurability() < 1) {
+                iterator.remove();
+                destroy(obj);
+            }
+        }
+    }
+
+    private void drawUsageBar(Graphics2D g2, int index) {
+        int screenX = 10 + 4;
+        int screenY = 3 * gp.getTileSize() + (gp.getTileSize() + 10) * index;
+
+        SuperObject obj = items.get(index);
+
+        g2.setColor(Color.BLACK);
+        g2.fillRect(screenX, screenY, gp.getTileSize() - 7, 7);
+        g2.setColor(Color.RED);
+        g2.fillRect(screenX, screenY, gp.getTileSize() - 7, 5);
+        g2.setColor(Color.BLUE);
+        int blueWidth = (int) ((double) obj.getDurability() / obj.getMaxDurability() * gp.getTileSize());
+        g2.fillRect(screenX, screenY, blueWidth - 7, 5);
+    }
+
     public void draw(Graphics2D g2) {
         int padding = 10;
         for (int i = 0; i < maxSize; i++) {
@@ -114,6 +136,9 @@ public class Inventory {
             g2.drawRect(padding, 96 + (slotSize + padding) * i, slotSize, slotSize);
             if (i < items.size() && items.get(i) != null) {
                 g2.drawImage(items.get(i).image, padding, 96 + (slotSize + padding) * i, slotSize, slotSize, null);
+                if(items.get(i) instanceof Wearable || items.get(i) instanceof Weapon){
+                    drawUsageBar(g2, i);
+                }
             }
         }
     }

@@ -1,8 +1,9 @@
 package main;
 
+import javax.swing.*;
 import java.awt.*;
 
-public class Button {
+public class Button extends JButton {
     private final int x, y, width, height;
     private final String text;
     private Color backgroundColor;
@@ -23,7 +24,6 @@ public class Button {
     public void draw(Graphics2D g2) {
         g2.setColor(backgroundColor);
         g2.fillRect(x, y, width, height);
-
         g2.setColor(textColor);
         g2.setFont(font);
         FontMetrics fm = g2.getFontMetrics();
@@ -38,6 +38,31 @@ public class Button {
 
     public void setBackgroundColor(Color color) {
         this.backgroundColor = color;
+    }
+
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(new Dimension(150, 50));
+        button.setFont(new Font("Arial", Font.BOLD, 20));
+        button.setFocusPainted(false);
+        button.setForeground(Color.WHITE);
+        button.setBackground(new Color(70, 130, 180)); // Light Steel Blue
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(100, 149, 237));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(70, 130, 180));
+            }
+        });
+
+        return button;
     }
 
 }

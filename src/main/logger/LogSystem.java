@@ -17,14 +17,12 @@ public final class LogSystem {
     private static volatile LogSystem instance;
     private static final Object INSTANCE_LOCK = new Object();
 
-    // Console colors
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BRIGHT_GREEN = "\u001B[92m";
     private static final String ANSI_BRIGHT_RED = "\u001B[91m";
     private static final String ANSI_BRIGHT_BLUE = "\u001B[94m";
 
-    // Configuration constants
-    private static final String LOG_DIRECTORY = "logs";
+    private static final String LOG_DIRECTORY = "res/logs";
     private static final String LOG_FILE_FORMAT = "game_%s.log";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
@@ -32,11 +30,9 @@ public final class LogSystem {
     private static final int LOG_QUEUE_CAPACITY = 10000;
     private static final int LOG_WORKER_THREADS = 2;
 
-    // Custom log levels
     private static final Level GAME_EVENT = new Level("GAME_EVENT", Level.INFO.intValue() + 1) {};
     private static final Level ENTITY_EVENT = new Level("ENTITY_EVENT", Level.INFO.intValue() + 2) {};
 
-    // Instance fields
     private final Logger logger;
     private final ConcurrentLinkedQueue<String> recentLogs;
     private final BlockingQueue<LogRecord> logQueue;
@@ -113,8 +109,7 @@ public final class LogSystem {
             logger.setLevel(Level.ALL);
 
         } catch (IOException e) {
-            System.err.println("Failed to initialize logger: " + e.getMessage());
-            throw new RuntimeException(e);
+            GameLogger.error("[LOG SYSTEM]", "FAILED TO INITIALIZE LOGGER: " + e.getMessage(), new RuntimeException(e));
         }
     }
 

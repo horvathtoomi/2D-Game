@@ -3,13 +3,13 @@ package entity.attack;
 import entity.Entity;
 import entity.enemy.Enemy;
 import entity.enemy.FriendlyEnemy;
-import main.GamePanel;
+import main.Engine;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FriendlyEnemyAttack extends Attack {
 
-    public FriendlyEnemyAttack(GamePanel gp, int startX, int startY, int targetX, int targetY) {
+    public FriendlyEnemyAttack(Engine gp, int startX, int startY, int targetX, int targetY) {
         super(gp, "FriendlyEnemyAttack", 10, startX, startY, targetX, targetY);
         setSpeed(getSpeed()+2);
     }

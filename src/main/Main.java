@@ -8,12 +8,11 @@ public class Main {
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setResizable(true);
         window.setTitle("2D game");
-        GamePanel panel = new GamePanel();
+        Engine panel = new Engine();
         window.add(panel);
         window.pack();
         window.setLocationRelativeTo(null);
         window.setVisible(true);
-        panel.setupGame();
         panel.startGameThread();
     }
 }

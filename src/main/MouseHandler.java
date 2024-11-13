@@ -3,19 +3,20 @@ package main;
 import java.awt.event.*;
 
 public class MouseHandler implements MouseListener, MouseMotionListener {
-    private final GamePanel gp;
+    private final Engine gp;
 
-    public MouseHandler(GamePanel gp) {
+    public MouseHandler(Engine gp) {
         this.gp = gp;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         switch (gp.getGameState()) {
-            case START -> gp.ui.handleStartScreenClick(e.getPoint());
-            case DIFFICULTY_SCREEN -> gp.ui.handleDifficultyScreenClick(e.getPoint());
-            case FINISHED -> gp.ui.handleGameOverClick(e.getPoint());
-            case PAUSED -> gp.ui.handlePauseScreenClick(e.getPoint());
+            case START -> gp.userInterface.handleStartScreenClick(e.getPoint());
+            case GAME_MODE_SCREEN -> gp.userInterface.handleGameModeScreenClick(e.getPoint());
+            case DIFFICULTY_SCREEN -> gp.userInterface.handleDifficultyScreenClick(e.getPoint());
+            case FINISHED_LOST -> gp.userInterface.handleGameOverClick(e.getPoint());
+            case PAUSED -> gp.userInterface.handlePauseScreenClick(e.getPoint());
         }
     }
 
@@ -36,7 +37,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        gp.ui.handleHover(e.getPoint());
+        gp.userInterface.handleHover(e.getPoint());
     }
 
 }

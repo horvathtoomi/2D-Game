@@ -2,11 +2,10 @@ package entity.attack;
 
 import entity.Entity;
 import entity.enemy.Enemy;
-import main.GamePanel;
+import main.Engine;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Attack extends Entity {
     int imageChange = 0;
@@ -15,7 +14,7 @@ public class Attack extends Entity {
     public double dx, dy;
     private final int[] diffAttackSpeed = {4, 6, 8, 10};
 
-    public Attack(GamePanel gp,String name,int damage, int startX, int startY, int targetX, int targetY) {
+    public Attack(Engine gp,String name,int damage, int startX, int startY, int targetX, int targetY) {
         super(gp);
         setWorldX(startX);
         setWorldY(startY);
@@ -98,11 +97,15 @@ public class Attack extends Entity {
             return gp.tileman.tile[gp.tileman.mapTileNum[x][y]].collision;
     }
 
-
     @Override
     public void draw(Graphics2D g2) {
-        if (getWorldX() + gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() && getWorldX() - gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() && getWorldY() + gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() && getWorldY() - gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY())
-            g2.drawImage(image, getWorldX() - gp.player.getWorldX() + gp.player.getScreenX(), getWorldY() - gp.player.getWorldY() + gp.player.getScreenY(), gp.getTileSize(), gp.getTileSize(), null);
+        setScreenX(getWorldX() - gp.player.getWorldX() + gp.player.getScreenX());
+        setScreenY(getWorldY() - gp.player.getWorldY() + gp.player.getScreenY());
+        setScreenX(adjustScreenX(getScreenX()));
+        setScreenY(adjustScreenY(getScreenY()));
+        if (isValidScreenXY(getScreenX(), getScreenY())) {
+            g2.drawImage(image, getScreenX(), getScreenY(), getWidth(), getHeight(), null);
+        }
     }
 
 }

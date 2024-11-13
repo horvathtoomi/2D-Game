@@ -1,0 +1,2 @@
+SmallEnemy 11 11
+GiantEnemy 13 12

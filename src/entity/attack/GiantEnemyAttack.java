@@ -1,10 +1,10 @@
 package entity.attack;
 
-import main.GamePanel;
+import main.Engine;
 
 public class GiantEnemyAttack extends Attack {
 
-    public GiantEnemyAttack(GamePanel gp, int startX, int startY, int targetX, int targetY) {
+    public GiantEnemyAttack(Engine gp, int startX, int startY, int targetX, int targetY) {
         super(gp,"GiantEnemyAttack",100,startX,startY,targetX,targetY);
     }
 

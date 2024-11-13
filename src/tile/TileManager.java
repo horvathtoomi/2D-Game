@@ -1,41 +1,43 @@
 package tile;
 
-import main.GamePanel;
+import java.awt.*;
+import java.io.*;
+import java.util.Objects;
+import java.util.Random;
+import javax.imageio.ImageIO;
+import main.Engine;
 import main.UtilityTool;
 import main.logger.GameLogger;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Objects;
+import map.MapGenerator;
 
 public class TileManager {
-    GamePanel gp;
+    static Engine gp;
+    static Random rand = new Random();
     public Tile[] tile;
-    public int[][] mapTileNum;
+    private int mapNumber = 3;
+    public static int[][] mapTileNum;
+    private static final String LOG_CONTEXT = "[TILE MANAGER]";
 
-    public TileManager(GamePanel gp) {
-        this.gp = gp;
-        tile = new Tile[10];
-        mapTileNum = new int[gp.getMaxWorldCol()][gp.getMaxWorldRow()];
+    public TileManager(Engine engine) {
+        gp = engine;
+        tile = new Tile[12];
         getTileImage();
-        loadMap("maps/map1.txt");
+        mapTileNum = new int[gp.getMaxWorldCol()][gp.getMaxWorldRow()];
     }
 
     public void getTileImage(){
-            setup(0,"wall",true);
-            setup(1,"grass",false);
-            setup(2,"earth",false);
-            setup(3,"sand",false);
-            setup(4,"water",true);
-            setup(5,"blackborder",true);
-            setup(6,"blacksand",false);
-            setup(7,"deadbush",false);
-            setup(8,"cactus",false);
-            setup(9,"tree",true);
+        setup(0,"wall",true);
+        setup(1,"grass",false);
+        setup(2,"earth",false);
+        setup(3,"sand",false);
+        setup(4,"water",true);
+        setup(5,"blackborder",true);
+        setup(6,"blacksand",false);
+        setup(7,"deadbush",false);
+        setup(8,"cactus",false);
+        setup(9,"tree",true);
+        setup(10,"gravel",false);
+        setup(11, "lava", true);
     }
 
     public void setup(int idx, String imagePath, boolean collision){
@@ -46,39 +48,107 @@ public class TileManager {
             tile[idx].image = uTool.scaleImage(tile[idx].image,gp.getTileSize(),gp.getTileSize());
             tile[idx].collision=collision;
         }catch(IOException e){
-            GameLogger.error("[TILE MANAGER]", "Failed to setup Map", e);
+            GameLogger.error(LOG_CONTEXT, "Failed to setup Map", e);
         }
     }
 
-    public void loadMap(String address){
-        try{
-            InputStream is = getClass().getClassLoader().getResourceAsStream(address);
-            assert is != null;
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            int col=0, row=0;
-            while(col<gp.getMaxWorldCol()&&row<gp.getMaxWorldRow()){
+    public void loadStoryMap(boolean reset){
+        if(reset) {
+            mapNumber = 1;
+        }
+        String address = "res/maps/map_matrices/story_mode/story_map_" + mapNumber + ".txt";
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(address)))){
+            int col=0;
+            int row=0;
+            while(col < gp.getMaxWorldCol() && row < gp.getMaxWorldRow()){
                 String line=br.readLine();
-                while(col<gp.getMaxWorldCol()){
+                while(col < gp.getMaxWorldCol()){
                     String[] numbers =line.split(" ");
                     int num=Integer.parseInt(numbers[col]);
                     mapTileNum[col][row]=num;
                     col++;
                 }
-                if(col==gp.getMaxWorldCol()){
+                if(col == gp.getMaxWorldCol()){
                     col=0;
                     row++;
                 }
             }
-            br.close();
+            mapNumber++;
         }catch(Exception e){
-            GameLogger.error("[TILE MANAGER]", "Failed to load map: " + address, e);
+            GameLogger.error(LOG_CONTEXT, "Failed to load map: " + address, e);
+            GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
+            createCleanMap();
         }
+    }
+
+    private static String getRightPath(String path) throws IOException {
+        return path == null ? "res/maps/map_matrices/map" + (MapGenerator.getNextMapNumber() - 1) + ".txt" : path;
+    }
+
+    public static void loadCustomMap(String mapPath) {
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getRightPath(mapPath))))){
+            int col=0;
+            int row=0;
+            while(col < gp.getMaxWorldCol() && row < gp.getMaxWorldRow()){
+                String line=br.readLine();
+                while(col < gp.getMaxWorldCol()){
+                    String[] numbers =line.split(" ");
+                    int num=Integer.parseInt(numbers[col]);
+                    mapTileNum[col][row]=num;
+                    col++;
+                }
+                if(col == gp.getMaxWorldCol()){
+                    col=0;
+                    row++;
+                }
+            }
+            gp.startGame();
+            gp.setGameState(Engine.GameState.RUNNING);
+        }catch(Exception e){
+            GameLogger.error(LOG_CONTEXT, "Failed to load map", e);
+            GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
+            createCleanMap();
+        }
+    }
+
+    private static void createCleanMap() {
+        int[] tomb = new int[4];
+        tomb[0] = 1;
+        tomb[1] = 2;
+        tomb[2] = 3;
+        tomb[3] = 6;
+        String filePath = "res/maps/map_matrices/default.txt";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (int i = 0; i < 100; i++) {
+                writer.write("0 ");
+            }
+            writer.newLine();
+            for (int j = 0; j < 98; j++) {
+                writer.write("0 ");
+                for (int i = 0; i < 49; i++) {
+                    int rand_int1 = rand.nextInt(5);
+                    int rand_int2 = rand.nextInt(5);
+                    if (rand_int1 == 0) rand_int1++;
+                    if (rand_int2 == 0) rand_int2++;
+                    writer.write(tomb[i % rand_int1] + " ");
+                    writer.write(tomb[i % rand_int2] + " ");
+                }
+                writer.write("0 ");
+                writer.newLine();
+            }
+            for (int i = 0; i < 100; i++) {
+                writer.write("0 ");
+            }
+        } catch (IOException e) {
+            GameLogger.error(LOG_CONTEXT, "Some unexpected error occurred: "+ e.getMessage() + "\nClosing application.", e);
+            System.exit(1);
+        }
+        loadCustomMap("res/maps/map_matrices/default.txt");
     }
 
     public void draw(Graphics2D g2) {
         int worldCol = 0;
         int worldRow = 0;
-
         while (worldCol < gp.getMaxWorldCol() && worldRow < gp.getMaxWorldRow()) {
             int tileNum = mapTileNum[worldCol][worldRow];
             int worldX = worldCol * gp.getTileSize();

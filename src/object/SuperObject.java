@@ -5,23 +5,42 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 
-import main.GamePanel;
+import main.Engine;
 import main.logger.GameLogger;
 
 import javax.imageio.ImageIO;
 
 public abstract class SuperObject{
-    public GamePanel gp;
+    public Engine gp;
     public BufferedImage image, image1, image2;
     public String name;
-    public boolean collision = false;
-    public boolean opened = false;
+    private static final String LOG_CONTEXT = "[SUPER OBJECT]";
+
+    private int MAX_DURABILITY;
+    private int durability = 100;
+    private int usageDamage = 0;
     public int worldX, worldY;
-    public Rectangle solidArea = new Rectangle(0,0,48,48);
     public int solidAreaDefaultX = 0;
     public int solidAreaDefaultY = 0;
 
-    protected SuperObject(GamePanel gp, int x, int y, String name, String imageName) {
+    public boolean collision = false;
+    public boolean opened = false;
+    public Rectangle solidArea = new Rectangle(0,0,48,48);
+
+
+    public int getWorldX(){return worldX;}
+    public int getWorldY(){return worldY;}
+    public int getMaxDurability(){return MAX_DURABILITY;}
+    public int getDurability(){return durability;}
+    public int getUsageDamage(){return usageDamage;}
+
+    public void setWorldX(int x){worldX = x;}
+    public void setWorldY(int y){worldY = y;}
+    public void setMaxDurability(int a) {MAX_DURABILITY = a;}
+    public void setDurability(int a){durability = a;}
+    public void setUsageDamage(int a){usageDamage = a;}
+
+    protected SuperObject(Engine gp, int x, int y, String name, String imageName) {
         this.gp = gp;
         this.worldX = x;
         this.worldY = y;
@@ -29,18 +48,34 @@ public abstract class SuperObject{
         try {
             image1 = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("objects/" + imageName +".png")));
         } catch(IOException e) {
-            GameLogger.error("[SUPER OBJECT]", "Failed to get image: " + e.getMessage(), e);
+            GameLogger.error(LOG_CONTEXT, "Failed to get image: " + e.getMessage(), e);
         }
         image = image1;
     }
 
-    public void draw(Graphics2D g2, GamePanel gp) {
+    public void use(){}
+
+    public void draw(Graphics2D g2, Engine gp) {
         int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
         int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
-        if(worldX+gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() && worldX-gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() &&
-                worldY+gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() && worldY-gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY())
-        {
-            g2.drawImage(image,screenX,screenY,gp.getTileSize(),gp.getTileSize(),null);
+
+        if (gp.player.getScreenX() > gp.player.getWorldX()) {
+            screenX = worldX;
+        }
+        if (gp.player.getScreenY() > gp.player.getWorldY()) {
+            screenY = worldY;
+        }
+        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
+        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
+            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - worldX);
+        }
+        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
+        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
+            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - worldY);
+        }
+
+        if (screenX > -gp.getTileSize() && screenX < gp.getScreenWidth() + gp.getTileSize() && screenY > -gp.getTileSize() && screenY < gp.getScreenHeight() + gp.getTileSize()) {
+            g2.drawImage(image, screenX, screenY, gp.getTileSize(), gp.getTileSize(), null);
         }
     }
 
@@ -49,7 +84,7 @@ public abstract class SuperObject{
         try {
             ima = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("objects/" + filename +".png")));
         } catch(IOException e) {
-            GameLogger.error("[SUPER OBJECT]", "Failed to scale image: " + e.getMessage(), e);
+            GameLogger.error(LOG_CONTEXT, "Failed to scale image: " + e.getMessage(), e);
         }
         return ima;
     }

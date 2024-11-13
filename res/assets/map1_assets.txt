@@ -3,7 +3,5 @@ key 20 8
 door 18 7
 chest 17 6
 chest 16 8
-boots 15 8
-key 24 8
-door 25 20
-key 23 20
+chest 8 8
+chest 10 6

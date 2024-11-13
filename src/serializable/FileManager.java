@@ -14,37 +14,40 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import main.*;
+import main.logger.GameLogger;
 import object.*;
 
 import javax.swing.*;
 
 public class FileManager {
 
+    private static final String LOG_CONTEXT = "[FILE MANAGER]";
+
     private FileManager(){}
 
-    private static final Map<String, BiFunction<GamePanel, SerializableEntityState, Entity>> entityCreators = Map.of(
+    private static final Map<String, BiFunction<Engine, SerializableEntityState, Entity>> entityCreators = Map.of(
             "NPC_Wayfarer", (gp, state) -> new NPC_Wayfarer(gp),
             "DragonEnemy", (gp, state) -> new DragonEnemy(gp, state.worldX, state.worldY),
             "SmallEnemy", (gp, state) -> new SmallEnemy(gp, state.worldX, state.worldY),
             "GiantEnemy", (gp, state) -> new GiantEnemy(gp, state.worldX, state.worldY)
     );
 
-    private static final Map<String, BiFunction<GamePanel, SerializableObjectState, SuperObject>> objectCreators = Map.of(
+    private static final Map<String, BiFunction<Engine, SerializableObjectState, SuperObject>> objectCreators = Map.of(
             "key", (gp, state) -> new OBJ_Key(gp, state.worldX, state.worldY),
             "door", (gp, state) -> new OBJ_Door(gp, state.worldX, state.worldY),
             "chest", (gp, state) -> new OBJ_Chest(gp, state.worldX, state.worldY),
             "boots", (gp, state) -> new OBJ_Boots(gp, state.worldX, state.worldY)
     );
 
-    public static void saveGameState(GamePanel gp, String filename) throws IOException {
+    public static void saveGameState(Engine gp, String filename) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
             oos.writeObject(new SerializablePlayerState(gp.player, gp.getGameDifficulty()));
-            oos.writeObject(new ArrayList<>(gp.getEntity().stream().filter(Objects::nonNull).map(SerializableEntityState::new).collect(Collectors.toList())));
-            oos.writeObject(new ArrayList<>(gp.aSetter.list.stream().filter(Objects::nonNull).map(SerializableObjectState::new).collect(Collectors.toList())));
+            oos.writeObject(new ArrayList<>(gp.getEntity().stream().filter(Objects::nonNull).map(SerializableEntityState::new).toList()));
+            oos.writeObject(new ArrayList<>(gp.aSetter.list.stream().filter(Objects::nonNull).map(SerializableObjectState::new).toList()));
         }
     }
 
-    public static void loadGameState(GamePanel gp, String filename) throws IOException, ClassNotFoundException {
+    public static void loadGameState(Engine gp, String filename) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
             SerializablePlayerState playerState = (SerializablePlayerState) ois.readObject();
             updatePlayerState(gp.player, playerState);
@@ -64,8 +67,8 @@ public class FileManager {
         player.setHealth(state.health);
     }
 
-    private static Entity createEntityFromState(GamePanel gp, SerializableEntityState state) {
-        BiFunction<GamePanel, SerializableEntityState, Entity> creator = entityCreators.get(state.type);
+    private static Entity createEntityFromState(Engine gp, SerializableEntityState state) {
+        BiFunction<Engine, SerializableEntityState, Entity> creator = entityCreators.get(state.type);
         if (creator == null) {
             return null;
         }
@@ -80,8 +83,8 @@ public class FileManager {
         return entity;
     }
 
-    private static SuperObject createObjectFromState(GamePanel gp, SerializableObjectState state) {
-        BiFunction<GamePanel, SerializableObjectState, SuperObject> creator = objectCreators.get(state.name);
+    private static SuperObject createObjectFromState(Engine gp, SerializableObjectState state) {
+        BiFunction<Engine, SerializableObjectState, SuperObject> creator = objectCreators.get(state.name);
         if (creator == null) {
             return null;
         }
@@ -94,12 +97,9 @@ public class FileManager {
         return obj;
     }
 
-    public static void saveGame(GamePanel gp) {
-        System.out.println("---------------");
-        System.out.println("|Saving pending|");
-        System.out.println("---------------");
-
-        gp.setGameState(GamePanel.GameState.SAVE);
+    public static void saveGame(Engine gp) {
+        GameLogger.info(LOG_CONTEXT, "SAVING PENDING");
+        gp.setGameState(Engine.GameState.SAVE);
 
         // GETTING FILENAME
         String filename = JOptionPane.showInputDialog(gp, "Enter a name for your save file:");
@@ -119,37 +119,35 @@ public class FileManager {
                             "Overwrite Save",
                             JOptionPane.YES_NO_OPTION);
                     if (choice != JOptionPane.YES_OPTION) {
-                        System.out.println("Save cancelled.");
-                        gp.setGameState(GamePanel.GameState.RUNNING);
+                        GameLogger.info(LOG_CONTEXT, "SAVE CANCELLED");
+                        gp.setGameState(Engine.GameState.RUNNING);
                         return;
                     }
                 }
 
                 FileManager.saveGameState(gp, saveFile.getPath());
-                System.out.println("Game saved successfully.");
+                GameLogger.info(LOG_CONTEXT, "GAME SAVED SUCCESSFULLY");
                 JOptionPane.showMessageDialog(gp, "Game saved successfully.");
             } catch (IOException e) {
-                System.err.println("Error saving game: " + e.getMessage());
+                GameLogger.error(LOG_CONTEXT, "ERROR SAVING GAME: " + e.getMessage(), null);
                 JOptionPane.showMessageDialog(gp, "Error saving game: " + e.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
-                throw new RuntimeException(e);
+                throw new IllegalArgumentException(e);
             }
         } else {
-            System.out.println("Save cancelled.");
+            GameLogger.warn(LOG_CONTEXT, "SAVE CANCELLED");
         }
-        gp.setGameState(GamePanel.GameState.RUNNING);
+        gp.setGameState(Engine.GameState.RUNNING);
     }
 
-    public static void loadGame(GamePanel gp) {
-        System.out.println("-------------");
-        System.out.println("|Load pending|");
-        System.out.println("-------------");
-        gp.setGameState(GamePanel.GameState.LOAD);
+    public static void loadGame(Engine gp) {
+        GameLogger.info(LOG_CONTEXT, "LOAD PENDING");
+        gp.setGameState(Engine.GameState.LOAD);
 
         // GETTING FILENAME
         File saveDir = new File("res/save");
         if (!saveDir.exists() || saveDir.list() == null || Objects.requireNonNull(saveDir.list()).length == 0) {
             JOptionPane.showMessageDialog(gp, "No save files found.", "Load Game", JOptionPane.INFORMATION_MESSAGE);
-            gp.setGameState(GamePanel.GameState.RUNNING);
+            gp.setGameState(Engine.GameState.RUNNING);
         }
 
         String[] saveFiles = saveDir.list((dir, name) -> name.endsWith(".dat"));
@@ -159,16 +157,16 @@ public class FileManager {
         if (selectedFile != null) {
             try {
                 FileManager.loadGameState(gp, new File(saveDir, selectedFile).getPath());
-                System.out.println("Game loaded successfully.");
+                GameLogger.info(LOG_CONTEXT, "GAME LOADED SUCCESSFULLY.");
                 JOptionPane.showMessageDialog(gp, "Game loaded successfully.");
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Error loading game: " + e.getMessage());
+                GameLogger.error(LOG_CONTEXT, "ERROR LOADING GAME: " + e.getMessage(), null);
                 JOptionPane.showMessageDialog(gp, "Error loading game: " + e.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         else
-            System.out.println("Load cancelled.");
-        gp.setGameState(GamePanel.GameState.RUNNING);
+            GameLogger.warn(LOG_CONTEXT, "LOAD CANCELLED");
+        gp.setGameState(Engine.GameState.RUNNING);
     }
 
 }
@@ -178,11 +176,14 @@ public class FileManager {
 class SerializablePlayerState implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    int worldX, worldY, speed, health;
+    int worldX;
+    int worldY;
+    int speed;
+    int health;
     String direction;
-    GamePanel.GameDifficulty difficulty;
+    Engine.GameDifficulty difficulty;
 
-    SerializablePlayerState(Player player, GamePanel.GameDifficulty difficulty) {
+    SerializablePlayerState(Player player, Engine.GameDifficulty difficulty) {
         this.worldX = player.getWorldX();
         this.worldY = player.getWorldY();
         this.speed = player.getSpeed();
@@ -196,7 +197,10 @@ class SerializableEntityState implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     String type;
-    int worldX, worldY, speed, health;
+    int worldX;
+    int worldY;
+    int speed;
+    int health;
     String direction;
 
     SerializableEntityState(Entity entity) {
@@ -213,7 +217,8 @@ class SerializableObjectState implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     String name;
-    int worldX, worldY;
+    int worldX;
+    int worldY;
     boolean collision;
 
     SerializableObjectState(SuperObject obj) {

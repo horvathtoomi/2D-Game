@@ -5,20 +5,16 @@ import java.util.logging.LogRecord;
 import java.util.function.Supplier;
 
 public final class GameLogger {
-    // Private static instance - lazily initialized
     private static volatile LogSystem instance;
     private static final Object LOCK = new Object();
 
-    //Color
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_BRIGHT_GREEN = "\u001B[92m";
     private static final String ANSI_BRIGHT_RED = "\u001B[91m";
     private static final String ANSI_BRIGHT_BLUE = "\u001B[94m";
 
-    // Prevent instantiation
     private GameLogger() {}
 
-    // Private getter for the singleton instance
     private static LogSystem getInstance() {
         LogSystem result = instance;
         if (result == null) {
