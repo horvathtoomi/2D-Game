@@ -1,10 +1,5 @@
 package main.logger;
 
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.*;
@@ -22,9 +17,6 @@ public final class LogSystem {
     private static final String ANSI_BRIGHT_RED = "\u001B[91m";
     private static final String ANSI_BRIGHT_BLUE = "\u001B[94m";
 
-    private static final String LOG_DIRECTORY = "res/logs";
-    private static final String LOG_FILE_FORMAT = "game_%s.log";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     private static final int MAX_RECENT_LOGS = 100;
     private static final int LOG_QUEUE_CAPACITY = 10000;
@@ -85,32 +77,15 @@ public final class LogSystem {
     }
 
     private void initializeLogger() {
-        try {
-            // Create logs directory
-            Path logDir = Paths.get(LOG_DIRECTORY);
-            Files.createDirectories(logDir);
+        fileHandler.setFormatter(fileFormatter);
 
-            // Create new log file with timestamp
-            String timestamp = LocalDateTime.now().format(DATE_FORMATTER);
-            String logFileName = String.format(LOG_FILE_FORMAT, timestamp);
-            Path logFile = logDir.resolve(logFileName);
-
-            // Configure handlers
-            fileHandler = new FileHandler(logFile.toString(), true);
-            fileHandler.setFormatter(fileFormatter);
-
-            consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(consoleFormatter);
-
-            // Configure logger
-            logger.setUseParentHandlers(false);
-            logger.addHandler(fileHandler);
-            logger.addHandler(consoleHandler);
-            logger.setLevel(Level.ALL);
-
-        } catch (IOException e) {
-            GameLogger.error("[LOG SYSTEM]", "FAILED TO INITIALIZE LOGGER: " + e.getMessage(), new RuntimeException(e));
-        }
+        consoleHandler = new ConsoleHandler();
+        consoleHandler.setFormatter(consoleFormatter);
+        // Configure logger
+        logger.setUseParentHandlers(false);
+        logger.addHandler(fileHandler);
+        logger.addHandler(consoleHandler);
+        logger.setLevel(Level.ALL);
     }
 
     private Formatter createFileFormatter() {

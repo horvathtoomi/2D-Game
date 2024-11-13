@@ -20,6 +20,7 @@ public abstract class Weapon extends SuperObject {
     protected final WeaponRarity rarity;
 
     public int getDamage() {return damage;}
+    public void setDamage(int damage) {this.damage = damage;}
 
     public Weapon(Engine gp, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
         super(gp, x, y, name, imageName);

@@ -12,6 +12,10 @@ public class Inventory {
     private final ArrayList<SuperObject> items;
     private static final int maxSize = 3;
 
+    public ArrayList<SuperObject> getItems() {
+        return items;
+    }
+
     public Inventory(Engine gp) {
         this.gp = gp;
         items = new ArrayList<>(maxSize);

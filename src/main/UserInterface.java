@@ -19,6 +19,35 @@ public class UserInterface extends JFrame {
     transient ArrayList<Button> difficultyScreenButtons;
     private static final String LOG_CONTEXT = "[USER INTERFACE]";
 
+    // Start screen colors
+    private static final Color START_GRADIENT_TOP = new Color(50, 50, 150);
+    private static final Color START_GRADIENT_BOTTOM = new Color(0, 0, 50);
+    private static final Color START_BUTTON = new Color(70, 130, 180);
+    private static final Color START_BUTTON_HOVER = new Color(100, 149, 237);
+
+    // Mode screen colors
+    private static final Color MODE_GRADIENT_TOP = new Color(70, 70, 170);
+    private static final Color MODE_GRADIENT_BOTTOM = new Color(20, 20, 70);
+    private static final Color MODE_BUTTON = new Color(90, 150, 200);
+    private static final Color MODE_BUTTON_HOVER = new Color(120, 169, 255);  // Javítva: 257 -> 255
+
+    // Difficulty screen colors
+    private static final Color DIFFICULTY_GRADIENT_TOP = new Color(40, 60, 140);
+    private static final Color DIFFICULTY_GRADIENT_BOTTOM = new Color(10, 10, 40);
+    private static final Color DIFFICULTY_BUTTON = new Color(60, 120, 170);
+    private static final Color DIFFICULTY_BUTTON_HOVER = new Color(80, 139, 227);
+
+    // Pause screen colors
+    private static final Color PAUSE_GRADIENT_TOP = new Color(40, 100, 40);
+    private static final Color PAUSE_GRADIENT_BOTTOM = new Color(0, 40, 0);
+    private static final Color PAUSE_BUTTON = new Color(60, 140, 60);
+    private static final Color PAUSE_BUTTON_HOVER = new Color(80, 160, 80);
+
+    // Game over screen colors
+    private static final Color GAMEOVER_OVERLAY = new Color(120, 0, 0, 180);
+    private static final Color GAMEOVER_BUTTON = new Color(140, 40, 40);
+    private static final Color GAMEOVER_BUTTON_HOVER = new Color(170, 60, 60);
+
     public UserInterface(Engine gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -31,89 +60,115 @@ public class UserInterface extends JFrame {
         initializeScreenButtons();
     }
 
+    // A draw metódus módosítása a UserInterface osztályban:
     public void draw(Graphics2D g2) {
         this.g2 = g2;
         g2.setFont(arial_40);
-        g2.setColor(Color.BLACK);
+
+        // Enable antialiasing
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
         switch (gp.getGameState()) {
             case START -> drawStartScreen();
             case GAME_MODE_SCREEN -> drawModeChoosingScreen();
             case DIFFICULTY_SCREEN -> drawDifficultyScreen();
             case FINISHED_LOST, FINISHED_WON -> drawGameEndScreen();
             case PAUSED -> drawPauseScreen();
-            default -> drawPlayerHealthBar(); //case RUNNING
+            default -> drawPlayerHealthBar();
         }
     }
 
-    private void drawModeChoosingScreen(){
-        g2.setColor(Color.BLACK);
+    private void drawGradientBackground(Color topColor, Color bottomColor) {
+        GradientPaint gradient = new GradientPaint(
+                0, 0, topColor,
+                0, gp.getScreenHeight(), bottomColor
+        );
+        g2.setPaint(gradient);
         g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-        g2.setColor(Color.WHITE);
-        g2.setFont(arial_80);
-        String title = "Choose Game Mode!";
-        int x = getXforCenteredText(title);
-        int y = gp.getScreenHeight() / 4;
-        g2.drawString(title, x, y);
-        for (Button button : modeScreenButtons)
-            button.draw(g2);
     }
 
     private void drawStartScreen() {
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-        g2.setColor(Color.WHITE);
+        drawGradientBackground(START_GRADIENT_TOP, START_GRADIENT_BOTTOM);
         g2.setFont(arial_80);
+        g2.setColor(Color.WHITE);
         String title = "2D Game";
         int x = getXforCenteredText(title);
         int y = gp.getScreenHeight() / 4;
         g2.drawString(title, x, y);
-        for (Button button : startScreenButtons)
+
+        for (Button button : startScreenButtons) {
             button.draw(g2);
+        }
+    }
+
+    private void drawModeChoosingScreen() {
+        drawGradientBackground(MODE_GRADIENT_TOP, MODE_GRADIENT_BOTTOM);
+        g2.setFont(arial_80);
+        g2.setColor(Color.WHITE);
+        String title = "Choose Game Mode!";
+        int x = getXforCenteredText(title);
+        int y = gp.getScreenHeight() / 4;
+        g2.drawString(title, x, y);
+
+        for (Button button : modeScreenButtons) {
+            button.draw(g2);
+        }
     }
 
     private void drawDifficultyScreen() {
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-        g2.setColor(Color.WHITE);
+        drawGradientBackground(DIFFICULTY_GRADIENT_TOP, DIFFICULTY_GRADIENT_BOTTOM);
         g2.setFont(arial_80);
+        g2.setColor(Color.WHITE);
         String title = "SET DIFFICULTY";
         int x = getXforCenteredText(title);
         int y = gp.getScreenHeight() / 4;
         g2.drawString(title, x, y);
+
         g2.setFont(new Font("Arial", Font.PLAIN, 10));
         g2.drawString("Keys: 1->EASY, 2->MEDIUM, 3->HARD, 4->IMPOSSIBLE", 10, 10);
-        for (Button button : difficultyScreenButtons)
-            button.draw(g2);
-    }
 
-    private void drawGameEndScreen() {
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
-        g2.setColor(Color.RED);
-        g2.setFont(arial_80);
-        String gameOverText = "GAME OVER";
-        String wonGameText = "YOU WON";
-        int x = getXforCenteredText(gameOverText);
-        int y = gp.getScreenHeight() / 4;
-        if(gp.getGameState().equals(Engine.GameState.FINISHED_LOST))
-            g2.drawString(gameOverText, x, y);
-        else
-            g2.drawString(wonGameText, x, y);
-        for (Button button : endScreenButtons)
+        for (Button button : difficultyScreenButtons) {
             button.draw(g2);
+        }
     }
 
     private void drawPauseScreen() {
-        // Draw a semi-transparent black overlay
-        g2.setColor(new Color(0, 0, 0, 200));
-        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
+        // First draw the game screen
+        drawPlayerHealthBar();
+
+        // Then add green gradient overlay
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.9f));
+        drawGradientBackground(PAUSE_GRADIENT_TOP, PAUSE_GRADIENT_BOTTOM);
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
         g2.setColor(Color.WHITE);
         g2.setFont(arial_80);
         String pauseText = "PAUSED";
         int x = getXforCenteredText(pauseText);
         int y = gp.getScreenHeight() / 4;
         g2.drawString(pauseText, x, y);
+
         for (Button button : pauseScreenButtons) {
+            button.draw(g2);
+        }
+    }
+
+    private void drawGameEndScreen() {
+        // First draw the game screen
+        drawPlayerHealthBar();
+
+        // Add dark red overlay
+        g2.setColor(GAMEOVER_OVERLAY);
+        g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
+
+        g2.setFont(arial_80);
+        g2.setColor(Color.WHITE);
+        String gameOverText = gp.getGameState() == Engine.GameState.FINISHED_LOST ? "GAME OVER" : "YOU WON";
+        int x = getXforCenteredText(gameOverText);
+        int y = gp.getScreenHeight() / 4;
+        g2.drawString(gameOverText, x, y);
+
+        for (Button button : endScreenButtons) {
             button.draw(g2);
         }
     }
@@ -121,12 +176,11 @@ public class UserInterface extends JFrame {
     public void handleStartScreenClick(Point p) {
         for (Button button : startScreenButtons) {
             if (button.contains(p)) {
-                button.doClick();  // This will trigger the ActionListener
+                button.doClick();
                 break;
             }
         }
     }
-
 
     public void handleGameModeScreenClick(Point p) {
         for (Button button : modeScreenButtons) {
@@ -136,7 +190,6 @@ public class UserInterface extends JFrame {
             }
         }
     }
-
 
     public void handleDifficultyScreenClick(Point p) {
         for (Button button : difficultyScreenButtons) {
@@ -168,18 +221,49 @@ public class UserInterface extends JFrame {
     }
 
     public void handleHover(Point p) {
-        ArrayList<Button> hoverButtons = new ArrayList<>();
-        switch (gp.getGameState()) {
-            case START -> hoverButtons.addAll(startScreenButtons);
-            case DIFFICULTY_SCREEN -> hoverButtons.addAll(difficultyScreenButtons);
-            case PAUSED -> hoverButtons.addAll(pauseScreenButtons);
-            case FINISHED_LOST, FINISHED_WON -> hoverButtons.addAll(endScreenButtons);
+        ArrayList<Button> currentButtons = switch (gp.getGameState()) {
+            case START -> {
+                setButtonColors(startScreenButtons, START_BUTTON);
+                yield startScreenButtons;
+            }
+            case GAME_MODE_SCREEN -> {
+                setButtonColors(modeScreenButtons, MODE_BUTTON);
+                yield modeScreenButtons;
+            }
+            case DIFFICULTY_SCREEN -> {
+                setButtonColors(difficultyScreenButtons, DIFFICULTY_BUTTON);
+                yield difficultyScreenButtons;
+            }
+            case PAUSED -> {
+                setButtonColors(pauseScreenButtons, PAUSE_BUTTON);
+                yield pauseScreenButtons;
+            }
+            case FINISHED_LOST, FINISHED_WON -> {
+                setButtonColors(endScreenButtons, GAMEOVER_BUTTON);
+                yield endScreenButtons;
+            }
+            default -> new ArrayList<>();
+        };
+
+        // Handle hover effects
+        for (Button button : currentButtons) {
+            if (button.contains(p)) {
+                Color hoverColor = switch (gp.getGameState()) {
+                    case START -> START_BUTTON_HOVER;
+                    case GAME_MODE_SCREEN -> MODE_BUTTON_HOVER;
+                    case DIFFICULTY_SCREEN -> DIFFICULTY_BUTTON_HOVER;
+                    case PAUSED -> PAUSE_BUTTON_HOVER;
+                    case FINISHED_LOST, FINISHED_WON -> GAMEOVER_BUTTON_HOVER;
+                    default -> START_BUTTON_HOVER;
+                };
+                button.setBackgroundColor(hoverColor);
+            }
         }
-        for (Button button : hoverButtons) {
-            if (button.contains(p))
-                button.setBackgroundColor(new Color(100, 100, 100));
-            else
-                button.setBackgroundColor(new Color(70, 70, 70));
+    }
+
+    private void setButtonColors(ArrayList<Button> buttons, Color defaultColor) {
+        for (Button button : buttons) {
+            button.setBackgroundColor(defaultColor);
         }
     }
 
@@ -237,8 +321,10 @@ public class UserInterface extends JFrame {
         initButtons("start", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Quit");
         startScreenButtons.getFirst().addActionListener(e -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN));
         startScreenButtons.get(1).addActionListener(e -> {
-            FileManager.loadGame(gp);
-            gp.setGameState(Engine.GameState.RUNNING);
+            if(FileManager.loadGame(gp))
+                gp.setGameState(Engine.GameState.RUNNING);
+            else
+                gp.setGameState(Engine.GameState.START);
         });
         startScreenButtons.get(2).addActionListener(e -> System.exit(0));
         initButtons("gamemode", gp.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "Story Mode");
@@ -274,10 +360,7 @@ public class UserInterface extends JFrame {
             gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
         });
         pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(gp));
-        pauseScreenButtons.get(5).addActionListener(e -> {
-            FileManager.loadGame(gp);
-            gp.setGameState(Engine.GameState.RUNNING);
-        });
+        pauseScreenButtons.get(5).addActionListener(e -> FileManager.loadGame(gp));
         initButtons("difficulty", gp.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY, buttonWidth, buttonHeight, "EASY");
         initButtons("difficulty", gp.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY + buttonHeight + 20, buttonWidth, buttonHeight, "MEDIUM");
         initButtons("difficulty", gp.getScreenWidth() / 2 + buttonWidth / 2, startY, buttonWidth, buttonHeight, "HARD");

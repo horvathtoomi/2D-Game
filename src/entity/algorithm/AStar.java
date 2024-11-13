@@ -1,11 +1,14 @@
 package entity.algorithm;
 
 import main.Engine;
+import main.logger.GameLogger;
+
 import java.util.*;
 
 public class AStar {
     private static final int DIAGONAL_COST = 14;
     private static final int V_H_COST = 10;
+    private static final String LOG_CONTEXT = "[A-STAR]";
 
     private static class Cell {
         int heuristicCost = 0;
@@ -46,9 +49,18 @@ public class AStar {
         int endI = endY / gp.getTileSize();
         int endJ = endX / gp.getTileSize();
 
-        Cell start = grid[startI][startJ];
-        Cell end = grid[endI][endJ];
-
+        Cell start = new Cell(startI, startJ);
+        Cell end = new Cell(endI, endJ);
+        try {
+            startI = Math.min(startI, 0);
+            startJ = Math.min(startJ, 0);
+            endI = Math.max(endI, 0);
+            endJ = Math.max(endJ, 0);
+            start = grid[startI][startJ];
+            end = grid[endI][endJ];
+        } catch(Exception e) {
+            GameLogger.error(LOG_CONTEXT,"Cell class error: " + e.getCause(),e);
+        }
         start.finalCost = 0;
         openList.add(start);
 

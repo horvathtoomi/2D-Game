@@ -32,12 +32,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_E -> attackPressed = true;
             case KeyEvent.VK_F -> gp.player.getInventory().rotate();
             case KeyEvent.VK_Q -> handleQ();
-            case KeyEvent.VK_ESCAPE -> {
-                if (gp.getGameState() == Engine.GameState.SAVE || gp.getGameState() == Engine.GameState.LOAD)
-                    gp.setGameState(Engine.GameState.PAUSED);
-                else
-                    togglePauseState();
-            }
+            case KeyEvent.VK_ESCAPE -> togglePauseState();
             case KeyEvent.VK_ENTER -> toggleMenuState();
             case KeyEvent.VK_L -> {
                 if(gp.getGameState() == Engine.GameState.START || gp.getGameState() == Engine.GameState.FINISHED_LOST || gp.getGameState() == Engine.GameState.FINISHED_WON || gp.getGameState() == Engine.GameState.PAUSED)

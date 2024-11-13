@@ -52,9 +52,9 @@ public class Engine extends JPanel implements Runnable {
     private static final String LOG_CONTEXT = "[ENGINE]";
 
     public enum GameState {
-        START, DIFFICULTY_SCREEN, GAME_MODE_SCREEN,
-        RUNNING, PAUSED, FINISHED_LOST, FINISHED_WON,
-        SAVE, LOAD, CONSOLE_INPUT
+        START, DIFFICULTY_SCREEN,
+        GAME_MODE_SCREEN, RUNNING, PAUSED,
+        FINISHED_LOST, FINISHED_WON, CONSOLE_INPUT
     }
     public enum GameDifficulty {EASY, MEDIUM, HARD, IMPOSSIBLE}
     public enum GameMode {NONE, STORY, CUSTOM}
@@ -64,6 +64,7 @@ public class Engine extends JPanel implements Runnable {
     private GameMode gameMode = GameMode.NONE;
 
     public GameState getGameState(){return gameState;}
+    public GameMode getGameMode(){return gameMode;}
     public GameDifficulty getGameDifficulty(){return difficulty;}
     public int getFPS() {return FPS;}
     public int getTileSize() {return TILE_SIZE;}
@@ -73,8 +74,10 @@ public class Engine extends JPanel implements Runnable {
     public int getMaxWorldRow() {return MAX_WORLD_ROW;}
     public int getWorldWidth() {return MAX_WORLD_COL * TILE_SIZE;}
     public int getWorldHeight() {return MAX_WORLD_ROW * TILE_SIZE;}
+    public int getStoryLevel() {return currentStoryLevel;}
     public CopyOnWriteArrayList<Entity> getEntity() {return entities;}
 
+    public void setStoryLevel(int a){currentStoryLevel = a;}
     public void setGameState(GameState state){gameState = state;}
     public void setGameMode(GameMode mode){gameMode = mode;}
     public void setGameDifficulty(GameDifficulty diff){difficulty = diff;}
@@ -164,14 +167,16 @@ public class Engine extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        tileman.draw(g2);
         entities.removeIf(Objects::isNull);
         aSetter.list.removeIf(Objects::isNull);
-        for(SuperObject object : aSetter.list)
-            object.draw(g2, this);
-        for(Entity entity : entities)
-            entity.draw(g2);
-        player.draw(g2);
+        if(gameState == GameState.RUNNING ) {
+            tileman.draw(g2);
+            for (SuperObject object : aSetter.list)
+                object.draw(g2, this);
+            for (Entity entity : entities)
+                entity.draw(g2);
+            player.draw(g2);
+        }
         userInterface.draw(g2);
         g2.dispose();
     }
