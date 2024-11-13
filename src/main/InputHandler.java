@@ -7,12 +7,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class InputHandler implements KeyListener {
-    GamePanel gp;
+    Engine gp;
     public boolean upPressed, downPressed, leftPressed,rightPressed, attackPressed;
     private final ConsoleHandler consoleHandler;
     private static final String LOG_CONTEXT = "[INPUT HANDLER]";
 
-    public InputHandler(GamePanel gp) {
+    public InputHandler(Engine gp) {
         this.gp =gp;
         consoleHandler = new ConsoleHandler(gp);
     }
@@ -33,20 +33,20 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_F -> gp.player.getInventory().rotate();
             case KeyEvent.VK_Q -> handleQ();
             case KeyEvent.VK_ESCAPE -> {
-                if (gp.getGameState() == GamePanel.GameState.SAVE || gp.getGameState() == GamePanel.GameState.LOAD)
-                    gp.setGameState(GamePanel.GameState.PAUSED);
+                if (gp.getGameState() == Engine.GameState.SAVE || gp.getGameState() == Engine.GameState.LOAD)
+                    gp.setGameState(Engine.GameState.PAUSED);
                 else
                     togglePauseState();
             }
             case KeyEvent.VK_ENTER -> toggleMenuState();
             case KeyEvent.VK_L -> {
-                if(gp.getGameState() == GamePanel.GameState.START || gp.getGameState() == GamePanel.GameState.FINISHED_LOST || gp.getGameState() == GamePanel.GameState.FINISHED_WON || gp.getGameState() == GamePanel.GameState.PAUSED)
+                if(gp.getGameState() == Engine.GameState.START || gp.getGameState() == Engine.GameState.FINISHED_LOST || gp.getGameState() == Engine.GameState.FINISHED_WON || gp.getGameState() == Engine.GameState.PAUSED)
                     FileManager.loadGame(gp);
                 else
                     GameLogger.warn(LOG_CONTEXT, "CAN NOT LOAD GAME WHILE RUNNING");
             }
             case KeyEvent.VK_O -> {
-                if(gp.getGameState() == GamePanel.GameState.RUNNING || gp.getGameState() == GamePanel.GameState.PAUSED)
+                if(gp.getGameState() == Engine.GameState.RUNNING || gp.getGameState() == Engine.GameState.PAUSED)
                     FileManager.saveGame(gp);
                 else
                     GameLogger.warn(LOG_CONTEXT, "You are not running the game yet!");
@@ -74,13 +74,13 @@ public class InputHandler implements KeyListener {
     }
 
     private void modeFinder(int mode){
-        if(gp.getGameState() == GamePanel.GameState.DIFFICULTY_SCREEN) {
+        if(gp.getGameState() == Engine.GameState.DIFFICULTY_SCREEN) {
             String[] gameModes = {"EASY", "NORMAL", "HARD", "IMPOSSIBLE"};
             switch (mode) {
-                case 0 -> startByKey(GamePanel.GameDifficulty.EASY);
-                case 1 -> startByKey(GamePanel.GameDifficulty.MEDIUM);
-                case 2 -> startByKey(GamePanel.GameDifficulty.HARD);
-                case 3 -> startByKey(GamePanel.GameDifficulty.IMPOSSIBLE);
+                case 0 -> startByKey(Engine.GameDifficulty.EASY);
+                case 1 -> startByKey(Engine.GameDifficulty.MEDIUM);
+                case 2 -> startByKey(Engine.GameDifficulty.HARD);
+                case 3 -> startByKey(Engine.GameDifficulty.IMPOSSIBLE);
                 default ->
                         GameLogger.error(LOG_CONTEXT, "SOMETHING UNEXPECTED HAPPENED", new IllegalArgumentException("Unexpected parameter"));
             }
@@ -89,38 +89,38 @@ public class InputHandler implements KeyListener {
     }
 
     private void handleQ(){
-        if (gp.getGameState() == GamePanel.GameState.PAUSED) {
-            gp.setGameState(GamePanel.GameState.CONSOLE_INPUT);
+        if (gp.getGameState() == Engine.GameState.PAUSED) {
+            gp.setGameState(Engine.GameState.CONSOLE_INPUT);
             consoleHandler.startConsoleInput();
         }
-        else if(gp.getGameState() == GamePanel.GameState.RUNNING) {
+        else if(gp.getGameState() == Engine.GameState.RUNNING) {
             gp.player.getInventory().drop();
         }
     }
 
-    private void startByKey(GamePanel.GameDifficulty diff){
+    private void startByKey(Engine.GameDifficulty diff){
         gp.setGameDifficulty(diff);
         gp.startGame();
-        gp.setGameState(GamePanel.GameState.RUNNING);
+        gp.setGameState(Engine.GameState.RUNNING);
     }
 
     private void togglePauseState() {
         switch(gp.getGameState()){
-            case RUNNING -> gp.setGameState(GamePanel.GameState.PAUSED);
-            case PAUSED -> gp.setGameState(GamePanel.GameState.RUNNING);
-            case DIFFICULTY_SCREEN -> gp.setGameState(GamePanel.GameState.GAME_MODE_SCREEN);
-            default -> gp.setGameState(GamePanel.GameState.START);
+            case RUNNING -> gp.setGameState(Engine.GameState.PAUSED);
+            case PAUSED -> gp.setGameState(Engine.GameState.RUNNING);
+            case DIFFICULTY_SCREEN -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN);
+            default -> gp.setGameState(Engine.GameState.START);
         }
     }
 
     private void toggleMenuState() {
         switch(gp.getGameState()){
-            case PAUSED -> gp.setGameState(GamePanel.GameState.RUNNING);
-            case START, FINISHED_LOST, FINISHED_WON -> gp.setGameState(GamePanel.GameState.GAME_MODE_SCREEN);
-            case GAME_MODE_SCREEN -> gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
+            case PAUSED -> gp.setGameState(Engine.GameState.RUNNING);
+            case START, FINISHED_LOST, FINISHED_WON -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN);
+            case GAME_MODE_SCREEN -> gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
             case DIFFICULTY_SCREEN -> {
-                gp.setGameMode(GamePanel.GameMode.STORY);
-                gp.setGameState(GamePanel.GameState.RUNNING);
+                gp.setGameMode(Engine.GameMode.STORY);
+                gp.setGameState(Engine.GameState.RUNNING);
                 gp.setupStoryMode();
             }
         }

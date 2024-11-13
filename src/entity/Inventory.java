@@ -1,6 +1,6 @@
 package entity;
 
-import main.GamePanel;
+import main.Engine;
 import object.*;
 
 import java.awt.*;
@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Inventory {
-    private final GamePanel gp;
+    private final Engine gp;
     private final ArrayList<SuperObject> items;
     private static final int maxSize = 3;
 
-    public Inventory(GamePanel gp) {
+    public Inventory(Engine gp) {
         this.gp = gp;
         items = new ArrayList<>(maxSize);
     }

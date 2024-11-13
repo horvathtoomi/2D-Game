@@ -8,7 +8,7 @@ public class Main {
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setResizable(true);
         window.setTitle("2D game");
-        GamePanel panel = new GamePanel();
+        Engine panel = new Engine();
         window.add(panel);
         window.pack();
         window.setLocationRelativeTo(null);
@@ -16,13 +16,3 @@ public class Main {
         panel.startGameThread();
     }
 }
-
-
-/*
-*** TO DO ***
-*
-* Map valtozatas implementacioja.
-* "Story modeot szeretnek" legyen 5 map kb tansitionokkel.
-* Legyen free play mode, ahol a user megadja hogy milyen mapot szeretne.
-*
- */

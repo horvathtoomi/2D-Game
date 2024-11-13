@@ -5,13 +5,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 
-import main.GamePanel;
+import main.Engine;
 import main.logger.GameLogger;
 
 import javax.imageio.ImageIO;
 
 public abstract class SuperObject{
-    public GamePanel gp;
+    public Engine gp;
     public BufferedImage image, image1, image2;
     public String name;
     private static final String LOG_CONTEXT = "[SUPER OBJECT]";
@@ -40,7 +40,7 @@ public abstract class SuperObject{
     public void setDurability(int a){durability = a;}
     public void setUsageDamage(int a){usageDamage = a;}
 
-    protected SuperObject(GamePanel gp, int x, int y, String name, String imageName) {
+    protected SuperObject(Engine gp, int x, int y, String name, String imageName) {
         this.gp = gp;
         this.worldX = x;
         this.worldY = y;
@@ -55,7 +55,7 @@ public abstract class SuperObject{
 
     public void use(){}
 
-    public void draw(Graphics2D g2, GamePanel gp) {
+    public void draw(Graphics2D g2, Engine gp) {
         int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
         int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
 

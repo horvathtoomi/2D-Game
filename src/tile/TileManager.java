@@ -5,20 +5,20 @@ import java.io.*;
 import java.util.Objects;
 import java.util.Random;
 import javax.imageio.ImageIO;
-import main.GamePanel;
+import main.Engine;
 import main.UtilityTool;
 import main.logger.GameLogger;
 import map.MapGenerator;
 
 public class TileManager {
-    static GamePanel gp;
+    static Engine gp;
     static Random rand = new Random();
     public Tile[] tile;
     private int mapNumber = 3;
     public static int[][] mapTileNum;
     private static final String LOG_CONTEXT = "[TILE MANAGER]";
 
-    public TileManager(GamePanel gp) {
+    public TileManager(Engine gp) {
         this.gp = gp;
         tile = new Tile[12];
         getTileImage();
@@ -103,7 +103,7 @@ public class TileManager {
                 }
             }
             gp.startGame();
-            gp.setGameState(GamePanel.GameState.RUNNING);
+            gp.setGameState(Engine.GameState.RUNNING);
         }catch(Exception e){
             GameLogger.error(LOG_CONTEXT, "Failed to load map", e);
             GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
@@ -140,7 +140,7 @@ public class TileManager {
                 writer.write("0 ");
             }
         } catch (IOException e) {
-            GameLogger.error(LOG_CONTEXT, "Some unexpected error occured: "+ e.getMessage() + "\nClosing application.", e);
+            GameLogger.error(LOG_CONTEXT, "Some unexpected error occurred: "+ e.getMessage() + "\nClosing application.", e);
             System.exit(1);
         }
         loadCustomMap("res/maps/map_matrices/default.txt");

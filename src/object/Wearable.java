@@ -1,10 +1,10 @@
 package object;
 
-import main.GamePanel;
+import main.Engine;
 
 public class Wearable extends SuperObject{
 
-    public Wearable(GamePanel gp, int x, int y, String name, String imageName){
+    public Wearable(Engine gp, int x, int y, String name, String imageName){
         super(gp, x, y, name, imageName);
     }
 

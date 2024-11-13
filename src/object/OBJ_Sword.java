@@ -1,13 +1,13 @@
 package object;
 
-import main.GamePanel;
+import main.Engine;
 import java.awt.*;
 
 public class OBJ_Sword extends Weapon {
 
     private static final int swordUsageDamage = 2;
 
-    public OBJ_Sword(GamePanel gp, int x, int y, int baseDamage) {
+    public OBJ_Sword(Engine gp, int x, int y, int baseDamage) {
         super(gp, x, y, "sword", "sword", baseDamage, 1, 30); // 30 frames cooldown (0.5 seconds at 60 FPS)
         setMaxDurability(200);
         setDurability(getMaxDurability());

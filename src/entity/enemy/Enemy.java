@@ -4,7 +4,7 @@ import entity.*;
 import entity.algorithm.AStar;
 import entity.attack.*;
 import entity.npc.NPC_Wayfarer;
-import main.GamePanel;
+import main.Engine;
 import main.logger.GameLogger;
 
 import java.awt.*;
@@ -35,7 +35,7 @@ public abstract class Enemy extends Entity {
     private static final String LOG_CONTEXT = "[ENEMY]";
     private static final String[] newDirection = {"up","down","left","right"};
 
-    protected Enemy(GamePanel gp, String name, int startX, int startY, int width, int height, int shootingRate) {
+    protected Enemy(Engine gp, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(gp);
         solidArea = new Rectangle(10,10,width/2,height/2);
         random = new Random();

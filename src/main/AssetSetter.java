@@ -11,14 +11,14 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AssetSetter {
-    GamePanel gp;
+    Engine gp;
     public List<SuperObject> list; //CopyOnWriteArrayList
     private final String[] possibleChestItems = {"key", "boots", "sword"};
     private final Random rand;
     private int mapNum = 1;
     private static final String LOG_CONTEXT = "[ASSET SETTER]";
 
-    public AssetSetter(GamePanel gp) {
+    public AssetSetter(Engine gp) {
         this.gp = gp;
         list = new CopyOnWriteArrayList<>();
         rand = new Random();

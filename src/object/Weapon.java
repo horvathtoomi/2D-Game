@@ -2,7 +2,7 @@ package object;
 
 import entity.Entity;
 import entity.npc.NPC_Wayfarer;
-import main.GamePanel;
+import main.Engine;
 
 import java.awt.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -21,7 +21,7 @@ public abstract class Weapon extends SuperObject {
 
     public int getDamage() {return damage;}
 
-    public Weapon(GamePanel gp, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
+    public Weapon(Engine gp, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
         super(gp, x, y, name, imageName);
         this.rarity = gp.aSetter.determineWeaponRarity();
         this.damage = damage;
@@ -93,7 +93,7 @@ public abstract class Weapon extends SuperObject {
     }
 
     @Override
-    public void draw(Graphics2D g2, GamePanel gp) {
+    public void draw(Graphics2D g2, Engine gp) {
         super.draw(g2, gp);
         if (worldX + gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() &&
                 worldX - gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() &&

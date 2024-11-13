@@ -2,7 +2,6 @@ package main;
 
 import entity.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
@@ -12,7 +11,7 @@ import map.MapGenerator;
 import object.*;
 import tile.TileManager;
 
-public class GamePanel extends JPanel implements Runnable {
+public class Engine extends JPanel implements Runnable {
 
     private static final int ORIGINAL_TILE_SIZE = 16;
     private static final int SCALE = 3;
@@ -50,7 +49,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final transient CollisionChecker cChecker;
     public final transient MouseHandler mouseHandler;
     public final transient UserInterface userInterface;
-    private static final String LOG_CONTEXT = "[GAME PANEL]";
+    private static final String LOG_CONTEXT = "[ENGINE]";
 
     public enum GameState {
         START, DIFFICULTY_SCREEN, GAME_MODE_SCREEN,
@@ -64,10 +63,8 @@ public class GamePanel extends JPanel implements Runnable {
     private GameDifficulty difficulty;
     private GameMode gameMode = GameMode.NONE;
 
-
     public GameState getGameState(){return gameState;}
     public GameDifficulty getGameDifficulty(){return difficulty;}
-    public GameMode getGameMode(){return gameMode;}
     public int getFPS() {return FPS;}
     public int getTileSize() {return TILE_SIZE;}
     public int getScreenWidth() {return MAX_SCREEN_COL * TILE_SIZE;} //768 pixel
@@ -89,8 +86,8 @@ public class GamePanel extends JPanel implements Runnable {
     public void addObject(SuperObject obj) {aSetter.list.add(obj);}
     public void removeEnemy(Entity ent) {entities.remove(ent);}
 
-    public GamePanel() {
-        GameLogger.info(LOG_CONTEXT, "|INITIALIZING GAMEPANEL|");
+    public Engine() {
+        GameLogger.info(LOG_CONTEXT, "|INITIALIZING ENGINE|");
         inpkez = new InputHandler(this);
         player = new Player(this,inpkez);
         entities = new CopyOnWriteArrayList<>();
@@ -146,7 +143,7 @@ public class GamePanel extends JPanel implements Runnable {
                 Thread.sleep((long) remainingTime);
                 nextDrawTime += drawInterval;
             } catch (InterruptedException e) {
-                GameLogger.error(LOG_CONTEXT, "Unexpected error occured.",e);
+                GameLogger.error(LOG_CONTEXT, "Unexpected error occurred.",e);
             }
         }
     }

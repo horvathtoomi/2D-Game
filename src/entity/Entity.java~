@@ -23,7 +23,7 @@ public class Entity{
     public Rectangle solidArea = new Rectangle(0,0,48,48);
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
-    public Engine gp;
+    public GamePanel gp;
     protected int maxHealth;
 
     public int getWidth() {return width;}

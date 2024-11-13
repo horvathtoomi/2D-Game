@@ -2,7 +2,7 @@ package entity.attack;
 
 import entity.Entity;
 import entity.enemy.Enemy;
-import main.GamePanel;
+import main.Engine;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,7 +14,7 @@ public class Attack extends Entity {
     public double dx, dy;
     private final int[] diffAttackSpeed = {4, 6, 8, 10};
 
-    public Attack(GamePanel gp,String name,int damage, int startX, int startY, int targetX, int targetY) {
+    public Attack(Engine gp,String name,int damage, int startX, int startY, int targetX, int targetY) {
         super(gp);
         setWorldX(startX);
         setWorldY(startY);

@@ -1,7 +1,7 @@
 package entity;
 
 import main.InputHandler;
-import main.GamePanel;
+import main.Engine;
 import main.UtilityTool;
 import object.*;
 import java.awt.*;
@@ -27,7 +27,7 @@ public class Player extends Entity {
         return inventory;
     }
 
-    public Player(GamePanel panel, InputHandler kezelo) {
+    public Player(Engine panel, InputHandler kezelo) {
         super(panel);
         this.kezelo = kezelo;
         setMaxHealth(100);

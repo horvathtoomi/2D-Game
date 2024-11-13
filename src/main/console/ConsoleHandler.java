@@ -3,18 +3,18 @@ package main.console;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import main.GamePanel;
+import main.Engine;
 import main.logger.GameLogger;
 
 public class ConsoleHandler {
-    private final GamePanel gp;
+    private final Engine gp;
     private final BufferedReader reader;
     private final Commands commands;
     public boolean abortProcess;
     private final Map<String, Command> commandMap;
     private final String LOG_CONTEXT = "[CONSOLE HANDLER]";
 
-    public ConsoleHandler(GamePanel gp) {
+    public ConsoleHandler(Engine gp) {
         this.gp = gp;
         this.reader = new BufferedReader(new InputStreamReader(System.in));
         this.commands = new Commands(gp);
@@ -126,7 +126,7 @@ public class ConsoleHandler {
     }
 
     public void startConsoleInput() {
-        if (gp.getGameState() != GamePanel.GameState.CONSOLE_INPUT) {
+        if (gp.getGameState() != Engine.GameState.CONSOLE_INPUT) {
             GameLogger.warn(LOG_CONTEXT, "Only available in CONSOLE_INPUT state");
             return;
         }
@@ -143,7 +143,7 @@ public class ConsoleHandler {
         }
 
         abortProcess = false;
-        gp.setGameState(GamePanel.GameState.PAUSED);
+        gp.setGameState(Engine.GameState.PAUSED);
         GameLogger.info(LOG_CONTEXT, "EXITING CONSOLE INPUT MODE");
     }
 

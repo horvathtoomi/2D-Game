@@ -1,6 +1,6 @@
 package entity.algorithm;
 
-import main.GamePanel;
+import main.Engine;
 import java.util.*;
 
 public class AStar {
@@ -26,7 +26,7 @@ public class AStar {
         }
     }
 
-    public static ArrayList<int[]> findPath(GamePanel gp, int startX, int startY, int endX, int endY) {
+    public static ArrayList<int[]> findPath(Engine gp, int startX, int startY, int endX, int endY) {
         int rows = gp.getMaxWorldRow();
         int cols = gp.getMaxWorldCol();
 

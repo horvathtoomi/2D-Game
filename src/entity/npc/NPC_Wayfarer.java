@@ -1,13 +1,13 @@
 package entity.npc;
 
 import entity.Entity;
-import main.GamePanel;
+import main.Engine;
 
 import java.util.Random;
 
 public class NPC_Wayfarer extends Entity {
 
-    public NPC_Wayfarer(GamePanel gp) {
+    public NPC_Wayfarer(Engine gp) {
         super(gp);
         direction = "down";
         setSpeed(1);

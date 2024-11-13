@@ -4,7 +4,7 @@ import entity.Entity;
 import entity.enemy.*;
 import main.logger.GameLogger;
 import object.*;
-import main.GamePanel;
+import main.Engine;
 import serializable.FileManager;
 
 import java.io.*;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 
 public class Commands {
-    private final GamePanel gp;
+    private final Engine gp;
     private final PrintWriter writer;
     private static final String LOG_CONTEXT = "[COMMANDS]";
     private static final String RES_SAVE_PATH = "res/save/";
@@ -21,7 +21,7 @@ public class Commands {
     private static final String SPEED = "speed";
     private static final String HEALTH = "health";
 
-    public Commands(GamePanel gp) {
+    public Commands(Engine gp) {
         this.gp = gp;
         this.writer = new PrintWriter(System.out, true);
     }

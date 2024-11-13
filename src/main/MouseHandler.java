@@ -3,9 +3,9 @@ package main;
 import java.awt.event.*;
 
 public class MouseHandler implements MouseListener, MouseMotionListener {
-    private final GamePanel gp;
+    private final Engine gp;
 
-    public MouseHandler(GamePanel gp) {
+    public MouseHandler(Engine gp) {
         this.gp = gp;
     }
 

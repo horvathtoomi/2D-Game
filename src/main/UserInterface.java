@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 public class UserInterface extends JFrame {
-    GamePanel gp;
+    Engine gp;
     transient Graphics2D g2;
     Font arial_40;
     Font arial_80;
@@ -19,7 +19,7 @@ public class UserInterface extends JFrame {
     transient ArrayList<Button> difficultyScreenButtons;
     private static final String LOG_CONTEXT = "[USER INTERFACE]";
 
-    public UserInterface(GamePanel gp) {
+    public UserInterface(Engine gp) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
         arial_80 = new Font("Arial", Font.BOLD, 80);
@@ -95,7 +95,7 @@ public class UserInterface extends JFrame {
         String wonGameText = "YOU WON";
         int x = getXforCenteredText(gameOverText);
         int y = gp.getScreenHeight() / 4;
-        if(gp.getGameState().equals(GamePanel.GameState.FINISHED_LOST))
+        if(gp.getGameState().equals(Engine.GameState.FINISHED_LOST))
             g2.drawString(gameOverText, x, y);
         else
             g2.drawString(wonGameText, x, y);
@@ -122,10 +122,10 @@ public class UserInterface extends JFrame {
         for (int i = 0; i < startScreenButtons.size(); i++) {
             if (startScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> gp.setGameState(GamePanel.GameState.GAME_MODE_SCREEN);
+                    case 0 -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN);
                     case 1 -> {
                         FileManager.loadGame(gp);
-                        gp.setGameState(GamePanel.GameState.RUNNING);
+                        gp.setGameState(Engine.GameState.RUNNING);
                     }
                     default -> System.exit(0); // case 2
                 }
@@ -140,14 +140,14 @@ public class UserInterface extends JFrame {
             if (startScreenButtons.get(i).contains(p)) {
                 switch (i) {
                     case 0 -> {
-                        gp.setGameMode(GamePanel.GameMode.STORY);
-                        gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
+                        gp.setGameMode(Engine.GameMode.STORY);
+                        gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
                     }
                     case 1 -> {
-                        gp.setGameMode(GamePanel.GameMode.CUSTOM);
-                        GamePanel.setupCustomMode();
+                        gp.setGameMode(Engine.GameMode.CUSTOM);
+                        Engine.setupCustomMode();
                     }
-                    case 2 -> gp.setGameState(GamePanel.GameState.START);
+                    case 2 -> gp.setGameState(Engine.GameState.START);
                 }
                 break;
             }
@@ -159,12 +159,12 @@ public class UserInterface extends JFrame {
         for (int i = 0; i < difficultyScreenButtons.size(); i++) {
             if (difficultyScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> gp.setGameDifficulty(GamePanel.GameDifficulty.EASY);
-                    case 1 -> gp.setGameDifficulty(GamePanel.GameDifficulty.MEDIUM);
-                    case 2 -> gp.setGameDifficulty(GamePanel.GameDifficulty.HARD);
-                    default -> gp.setGameDifficulty(GamePanel.GameDifficulty.IMPOSSIBLE); // case 3
+                    case 0 -> gp.setGameDifficulty(Engine.GameDifficulty.EASY);
+                    case 1 -> gp.setGameDifficulty(Engine.GameDifficulty.MEDIUM);
+                    case 2 -> gp.setGameDifficulty(Engine.GameDifficulty.HARD);
+                    default -> gp.setGameDifficulty(Engine.GameDifficulty.IMPOSSIBLE); // case 3
                 }
-                gp.setGameState(GamePanel.GameState.RUNNING);
+                gp.setGameState(Engine.GameState.RUNNING);
                 gp.startGame();
                 break;
             }
@@ -175,10 +175,10 @@ public class UserInterface extends JFrame {
         for (int i = 0; i < endScreenButtons.size(); i++) {
             if (endScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
+                    case 0 -> gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
                     case 1 -> {
                         FileManager.loadGame(gp);
-                        gp.setGameState(GamePanel.GameState.RUNNING);
+                        gp.setGameState(Engine.GameState.RUNNING);
                     }
                     default -> System.exit(0); // case 2
                 }
@@ -191,9 +191,9 @@ public class UserInterface extends JFrame {
         for (int i = 0; i < pauseScreenButtons.size(); i++) {
             if (pauseScreenButtons.get(i).contains(p)) {
                 switch (i) {
-                    case 0 -> gp.setGameState(GamePanel.GameState.RUNNING);
+                    case 0 -> gp.setGameState(Engine.GameState.RUNNING);
                     case 1 -> {
-                        gp.setGameState(GamePanel.GameState.CONSOLE_INPUT);
+                        gp.setGameState(Engine.GameState.CONSOLE_INPUT);
                         try {
                             gp.console.startConsoleInput();
                         } catch (Exception e) {
@@ -203,12 +203,12 @@ public class UserInterface extends JFrame {
                     case 2 -> System.exit(0);
                     case 3 -> {
                         gp.startGame();
-                        gp.setGameState(GamePanel.GameState.DIFFICULTY_SCREEN);
+                        gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
                     }
                     case 4 -> FileManager.saveGame(gp);
                     case 5 -> {
                         FileManager.loadGame(gp);
-                        gp.setGameState(GamePanel.GameState.RUNNING);
+                        gp.setGameState(Engine.GameState.RUNNING);
                     }
                 }
                 break;
