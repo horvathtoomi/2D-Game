@@ -18,8 +18,8 @@ public class TileManager {
     public static int[][] mapTileNum;
     private static final String LOG_CONTEXT = "[TILE MANAGER]";
 
-    public TileManager(Engine gp) {
-        this.gp = gp;
+    public TileManager(Engine engine) {
+        gp = engine;
         tile = new Tile[12];
         getTileImage();
         mapTileNum = new int[gp.getMaxWorldCol()][gp.getMaxWorldRow()];

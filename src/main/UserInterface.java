@@ -119,16 +119,9 @@ public class UserInterface extends JFrame {
     }
 
     public void handleStartScreenClick(Point p) {
-        for (int i = 0; i < startScreenButtons.size(); i++) {
-            if (startScreenButtons.get(i).contains(p)) {
-                switch (i) {
-                    case 0 -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN);
-                    case 1 -> {
-                        FileManager.loadGame(gp);
-                        gp.setGameState(Engine.GameState.RUNNING);
-                    }
-                    default -> System.exit(0); // case 2
-                }
+        for (Button button : startScreenButtons) {
+            if (button.contains(p)) {
+                button.doClick();  // This will trigger the ActionListener
                 break;
             }
         }
@@ -136,19 +129,9 @@ public class UserInterface extends JFrame {
 
 
     public void handleGameModeScreenClick(Point p) {
-        for (int i = 0; i < startScreenButtons.size(); i++) {
-            if (startScreenButtons.get(i).contains(p)) {
-                switch (i) {
-                    case 0 -> {
-                        gp.setGameMode(Engine.GameMode.STORY);
-                        gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
-                    }
-                    case 1 -> {
-                        gp.setGameMode(Engine.GameMode.CUSTOM);
-                        Engine.setupCustomMode();
-                    }
-                    case 2 -> gp.setGameState(Engine.GameState.START);
-                }
+        for (Button button : modeScreenButtons) {
+            if (button.contains(p)) {
+                button.doClick();
                 break;
             }
         }
@@ -156,14 +139,9 @@ public class UserInterface extends JFrame {
 
 
     public void handleDifficultyScreenClick(Point p) {
-        for (int i = 0; i < difficultyScreenButtons.size(); i++) {
-            if (difficultyScreenButtons.get(i).contains(p)) {
-                switch (i) {
-                    case 0 -> gp.setGameDifficulty(Engine.GameDifficulty.EASY);
-                    case 1 -> gp.setGameDifficulty(Engine.GameDifficulty.MEDIUM);
-                    case 2 -> gp.setGameDifficulty(Engine.GameDifficulty.HARD);
-                    default -> gp.setGameDifficulty(Engine.GameDifficulty.IMPOSSIBLE); // case 3
-                }
+        for (Button button : difficultyScreenButtons) {
+            if (button.contains(p)) {
+                button.doClick();
                 gp.setGameState(Engine.GameState.RUNNING);
                 gp.startGame();
                 break;
@@ -172,45 +150,18 @@ public class UserInterface extends JFrame {
     }
 
     public void handleGameOverClick(Point p) {
-        for (int i = 0; i < endScreenButtons.size(); i++) {
-            if (endScreenButtons.get(i).contains(p)) {
-                switch (i) {
-                    case 0 -> gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
-                    case 1 -> {
-                        FileManager.loadGame(gp);
-                        gp.setGameState(Engine.GameState.RUNNING);
-                    }
-                    default -> System.exit(0); // case 2
-                }
+        for (Button button : endScreenButtons) {
+            if (button.contains(p)) {
+                button.doClick();
                 break;
             }
         }
     }
 
     public void handlePauseScreenClick(Point p) {
-        for (int i = 0; i < pauseScreenButtons.size(); i++) {
-            if (pauseScreenButtons.get(i).contains(p)) {
-                switch (i) {
-                    case 0 -> gp.setGameState(Engine.GameState.RUNNING);
-                    case 1 -> {
-                        gp.setGameState(Engine.GameState.CONSOLE_INPUT);
-                        try {
-                            gp.console.startConsoleInput();
-                        } catch (Exception e) {
-                            GameLogger.error(LOG_CONTEXT, "Console input error: {0}", e.getCause());
-                        }
-                    }
-                    case 2 -> System.exit(0);
-                    case 3 -> {
-                        gp.startGame();
-                        gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
-                    }
-                    case 4 -> FileManager.saveGame(gp);
-                    case 5 -> {
-                        FileManager.loadGame(gp);
-                        gp.setGameState(Engine.GameState.RUNNING);
-                    }
-                }
+        for (Button button : pauseScreenButtons) {
+            if (button.contains(p)) {
+                button.doClick();
                 break;
             }
         }
@@ -276,32 +227,74 @@ public class UserInterface extends JFrame {
         }
     }
 
+
     private void initializeScreenButtons() {
         int buttonWidth = 200;
         int buttonHeight = 50;
         int startY = gp.getScreenHeight() / 2;
-
         initButtons("start", gp.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "Start Game");
         initButtons("start", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Load Game");
         initButtons("start", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Quit");
-
+        startScreenButtons.getFirst().addActionListener(e -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN));
+        startScreenButtons.get(1).addActionListener(e -> {
+            FileManager.loadGame(gp);
+            gp.setGameState(Engine.GameState.RUNNING);
+        });
+        startScreenButtons.get(2).addActionListener(e -> System.exit(0));
         initButtons("gamemode", gp.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "Story Mode");
         initButtons("gamemode", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Custom Map");
         initButtons("gamemode", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Back");
-
-
+        modeScreenButtons.getFirst().addActionListener(e -> {
+            gp.setGameMode(Engine.GameMode.STORY);
+            gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
+        });
+        modeScreenButtons.get(1).addActionListener(e -> {
+            gp.setGameMode(Engine.GameMode.CUSTOM);
+            Engine.setupCustomMode();
+        });
+        modeScreenButtons.get(2).addActionListener(e -> gp.setGameState(Engine.GameState.START));
         initButtons("pause", gp.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY, buttonWidth, buttonHeight, "Resume");
         initButtons("pause", gp.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Console Input");
         initButtons("pause", gp.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit");
         initButtons("pause", gp.getScreenWidth() / 2 + buttonWidth / 8, startY, buttonWidth, buttonHeight, "New Game");
         initButtons("pause", gp.getScreenWidth() / 2 + buttonWidth / 8, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Save Game");
         initButtons("pause", gp.getScreenWidth() / 2 + buttonWidth / 8, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Load Game");
+        pauseScreenButtons.getFirst().addActionListener(e -> gp.setGameState(Engine.GameState.RUNNING));
+        pauseScreenButtons.get(1).addActionListener(e -> {
+            gp.setGameState(Engine.GameState.CONSOLE_INPUT);
+            try {
+                gp.console.startConsoleInput();
+            } catch (Exception err) {
+                GameLogger.error(LOG_CONTEXT, "Console input error: {0}", err.getCause());
+            }
+        });
+        pauseScreenButtons.get(2).addActionListener(e -> System.exit(0));
+        pauseScreenButtons.get(3).addActionListener(e -> {
+            gp.startGame();
+            gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
+        });
+        pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(gp));
+        pauseScreenButtons.get(5).addActionListener(e -> {
+            FileManager.loadGame(gp);
+            gp.setGameState(Engine.GameState.RUNNING);
+        });
         initButtons("difficulty", gp.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY, buttonWidth, buttonHeight, "EASY");
         initButtons("difficulty", gp.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY + buttonHeight + 20, buttonWidth, buttonHeight, "MEDIUM");
         initButtons("difficulty", gp.getScreenWidth() / 2 + buttonWidth / 2, startY, buttonWidth, buttonHeight, "HARD");
         initButtons("difficulty", gp.getScreenWidth() / 2 + buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "IMPOSSIBLE");
+        difficultyScreenButtons.getFirst().addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.EASY));
+        difficultyScreenButtons.get(1).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.MEDIUM));
+        difficultyScreenButtons.get(2).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.HARD));
+        difficultyScreenButtons.get(3).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.IMPOSSIBLE));
         initButtons("end", gp.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "New Game");
         initButtons("end", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Load Game");
         initButtons("end", gp.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit");
+        endScreenButtons.getFirst().addActionListener(e -> gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN));
+        endScreenButtons.get(1).addActionListener(e -> {
+            FileManager.loadGame(gp);
+            gp.setGameState(Engine.GameState.RUNNING);
+        });
+        endScreenButtons.get(2).addActionListener(e -> System.exit(0));
     }
+
 }
