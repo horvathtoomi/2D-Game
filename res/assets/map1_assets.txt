@@ -1,7 +1,4 @@
-key 25 8
-key 20 8
-door 18 7
-chest 17 6
-chest 16 8
-chest 8 8
-chest 10 6
+chest 3 3
+chest 5 3
+key 94 93
+door 99 94

@@ -1,7 +1,5 @@
 package main.logger;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +15,6 @@ public final class LogSystem {
     private static final String ANSI_BRIGHT_RED = "\u001B[91m";
     private static final String ANSI_BRIGHT_BLUE = "\u001B[94m";
 
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     private static final int MAX_RECENT_LOGS = 100;
     private static final int LOG_QUEUE_CAPACITY = 10000;
     private static final int LOG_WORKER_THREADS = 2;
@@ -35,7 +32,6 @@ public final class LogSystem {
     private volatile Handler fileHandler;
     private volatile Handler consoleHandler;
     private Formatter consoleFormatter;
-    private final Formatter fileFormatter;
 
     private LogSystem() {
         this.logger = Logger.getLogger(LogSystem.class.getName());
@@ -44,7 +40,6 @@ public final class LogSystem {
         this.loggerExecutor = createLoggerExecutor();
         this.isRunning = new AtomicBoolean(true);
         this.activeLoggers = new AtomicInteger(0);
-        this.fileFormatter = createFileFormatter();
         this.consoleFormatter = createColorFormatter();
 
         initializeLogger();
@@ -77,28 +72,13 @@ public final class LogSystem {
     }
 
     private void initializeLogger() {
-        fileHandler.setFormatter(fileFormatter);
 
         consoleHandler = new ConsoleHandler();
         consoleHandler.setFormatter(consoleFormatter);
         // Configure logger
         logger.setUseParentHandlers(false);
-        logger.addHandler(fileHandler);
         logger.addHandler(consoleHandler);
         logger.setLevel(Level.ALL);
-    }
-
-    private Formatter createFileFormatter() {
-        return new Formatter() {
-            @Override
-            public String format(LogRecord record) {
-                return String.format("[%s] [%s] [%s] %s%n",
-                        TIME_FORMATTER.format(LocalDateTime.now()),
-                        record.getLevel(),
-                        Thread.currentThread().getName(),
-                        record.getMessage());
-            }
-        };
     }
 
     private Formatter createColorFormatter() {
@@ -215,10 +195,6 @@ public final class LogSystem {
         if (logger.isLoggable(Level.FINE)) {
             queueLog(Level.FINE, messageSupplier);
         }
-    }
-
-    public String[] getRecentLogs() {
-        return recentLogs.toArray(new String[0]);
     }
 
     private void shutdownHandlers() {

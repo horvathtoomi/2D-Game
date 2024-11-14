@@ -1,2 +1,5 @@
-SmallEnemy 11 11
-GiantEnemy 13 12
+dragonenemy 95 95
+dragonenemy 94 95
+dragonenemy 93 95
+dragonenemy 17 15
+friendlyenemy 8 8

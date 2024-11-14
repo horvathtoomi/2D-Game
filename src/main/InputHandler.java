@@ -79,7 +79,7 @@ public class InputHandler implements KeyListener {
                 default ->
                         GameLogger.error(LOG_CONTEXT, "SOMETHING UNEXPECTED HAPPENED", new IllegalArgumentException("Unexpected parameter"));
             }
-            GameLogger.info(LOG_CONTEXT, "|GAME RESTARTED AS " + gameModes[mode] + "|");
+            GameLogger.info(LOG_CONTEXT, "|GAME STARTED AS " + gameModes[mode] + "|");
         }
     }
 
@@ -94,6 +94,7 @@ public class InputHandler implements KeyListener {
     }
 
     private void startByKey(Engine.GameDifficulty diff){
+        gp.setGameMode(Engine.GameMode.STORY);
         gp.setGameDifficulty(diff);
         gp.startGame();
         gp.setGameState(Engine.GameState.RUNNING);
@@ -101,7 +102,7 @@ public class InputHandler implements KeyListener {
 
     private void togglePauseState() {
         switch(gp.getGameState()){
-            case RUNNING -> gp.setGameState(Engine.GameState.PAUSED);
+            case RUNNING, CONSOLE_INPUT -> gp.setGameState(Engine.GameState.PAUSED);
             case PAUSED -> gp.setGameState(Engine.GameState.RUNNING);
             case DIFFICULTY_SCREEN -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN);
             default -> gp.setGameState(Engine.GameState.START);

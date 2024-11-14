@@ -1,14 +1,13 @@
 package entity;
 
-import main.Engine;
-import main.UtilityTool;
-import main.logger.GameLogger;
-
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
+import javax.imageio.ImageIO;
+import main.Engine;
+import main.UtilityTool;
+import main.logger.GameLogger;
 
 public class Entity{
     public String name;

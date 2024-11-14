@@ -4,22 +4,26 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import main.Engine;
-import main.logger.GameLogger;
 
 public class ConsoleHandler {
     private final Engine gp;
-    private final BufferedReader reader;
     private final Commands commands;
     public boolean abortProcess;
     private final Map<String, Command> commandMap;
-    private final String LOG_CONTEXT = "[CONSOLE HANDLER]";
+    private ConsoleGUI consoleGUI;
+    private static final String LOG_CONTEXT = "[CONSOLE HANDLER]";
 
     public ConsoleHandler(Engine gp) {
         this.gp = gp;
-        this.reader = new BufferedReader(new InputStreamReader(System.in));
-        this.commands = new Commands(gp);
+        this.commands = new Commands(gp, this);  // Pass ConsoleHandler to Commands
         this.abortProcess = false;
         this.commandMap = initializeCommands();
+    }
+
+    public void printToConsole(String message) {
+        if (consoleGUI != null && consoleGUI.isVisible()) {
+            consoleGUI.appendToConsole(message);
+        }
     }
 
     private Map<String, Command> initializeCommands() {
@@ -27,7 +31,8 @@ public class ConsoleHandler {
 
         map.put("help", args -> {
             if (args.length < 2) {
-                commands.printHelp(" ");
+                String helpText = getHelpText();
+                printToConsole(helpText);
             } else {
                 commands.printHelp(args[1]);
             }
@@ -35,32 +40,43 @@ public class ConsoleHandler {
 
         map.put("reset", name -> {
             gp.startGame();
-            GameLogger.info(LOG_CONTEXT, "GAME HAS BEEN RESET");
+            printToConsole("Game has been reset");
         });
 
-        map.put("exit", name -> abortProcess = true);
+        map.put("exit", name -> {
+            abortProcess = true;
+            if (consoleGUI != null) {
+                consoleGUI.dispose();
+            }
+            gp.setGameState(Engine.GameState.PAUSED);
+        });
+
         map.put("exit_game", name -> System.exit(0));
+
         map.put("remove", args -> {
             if (args.length == 2) {
                 commands.removeEntities(args[1], args[1].equalsIgnoreCase("all"));
             } else {
-                GameLogger.error(LOG_CONTEXT, "Invalid format! Use help remove", new IllegalArgumentException());
+                printToConsole("Invalid format! Use 'help remove' for correct usage");
             }
         });
+
         map.put("save", args -> {
             if (args.length == 2) {
                 commands.saveFile(args[1]);
             } else {
-                GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help save'");
+                printToConsole("Invalid format! Use 'help save' for correct usage");
             }
         });
+
         map.put("load", args -> {
             if (args.length == 2) {
                 commands.loadFile(args[1]);
             } else {
-                GameLogger.error(LOG_CONTEXT, "Invalid format! Use help load", new IllegalArgumentException());
+                printToConsole("Invalid format! Use 'help load' for correct usage");
             }
         });
+
         map.put("set", args -> {
             switch (args.length) {
                 case 4 -> {
@@ -73,78 +89,102 @@ public class ConsoleHandler {
                     }
                 }
                 case 3 -> commands.setGameValue(args[1], args[2]);
-                default -> GameLogger.warn(LOG_CONTEXT,"""
-                        Invalid format for 'set' command.
-                        | Wrong Format | set entity arg1 value
-                        ->entity: *Enemy, Player, args: speed,health,maxhealth""");
+                default -> printToConsole("""
+                    Invalid format for 'set' command.
+                    Usage: set entity arg1 value
+                    Entity types: *Enemy, Player
+                    Arguments: speed, health, maxhealth""");
             }
         });
+
         map.put("get", args -> {
             switch (args.length) {
                 case 3 -> {
                     switch (args[1]) {
                         case "player" -> commands.getGameValue(args[2]);
                         case "smallenemy", "giantenemy", "dragonenemy", "friendlyenemy" ->
-                            commands.getEntity(args[1], args[2]);
-                        default -> GameLogger.warn(LOG_CONTEXT, "Unknown command! Use 'help'");
+                                commands.getEntity(args[1], args[2]);
+                        default -> printToConsole("Unknown entity type! Use 'help' for available commands");
                     }
                 }
                 case 2 -> commands.getGameValue(args[1]);
-                default ->
-                        GameLogger.warn(LOG_CONTEXT,"""
-                        Invalid format for 'get' command.
-                        | Wrong Format | get entity arg1
-                        ->entity: *Enemy, Player, args: speed, health""");
+                default -> printToConsole("""
+                    Invalid format for 'get' command.
+                    Usage: get entity arg1
+                    Entity types: *Enemy, Player
+                    Arguments: speed, health""");
             }
         });
+
         map.put("add", args -> {
             if (args.length == 4) {
                 commands.add(args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]));
             } else {
-                GameLogger.warn(LOG_CONTEXT,"""
-                    Invalid format for 'add'
-                    | add <entity/object> X Y
-                    entity: Giant-,Small-,Dragon-,Friendly-Enemy
-                    object: chest,door,key,boots""");
+                printToConsole("""
+                    Invalid format for 'add' command.
+                    Usage: add <entity/object> X Y
+                    Entities: GiantEnemy, SmallEnemy, DragonEnemy, FriendlyEnemy
+                    Objects: chest, door, key, boots""");
             }
         });
+
+        map.put("teleport", args -> {
+            if(args.length == 3){
+                commands.teleport(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+            }
+            else{
+                printToConsole("""
+                        Invalid format for 'teleport' command.
+                        Usage: teleport X Y
+                        """);
+            }
+        });
+
         map.put("script", args -> {
             if (args.length == 2) {
                 commands.runScript(args[1]);
             } else {
-                GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help'");
+                printToConsole("Invalid format! Use 'help script' for correct usage");
             }
         });
+
         map.put("make", args -> {
             if (args.length == 2) {
-                commands.createFile(args[1], reader);
+                commands.createFile(args[1], new BufferedReader(new InputStreamReader(new ConsoleInputStream())));
             } else {
-                GameLogger.warn(LOG_CONTEXT, "Invalid format! Use 'help'");
+                printToConsole("Invalid format! Use 'help make' for correct usage");
             }
         });
+
         return map;
+    }
+
+    // Custom InputStream that reads from the GUI console
+    private class ConsoleInputStream extends InputStream {
+        private String currentLine = "";
+        private int currentPos = 0;
+
+        @Override
+        public int read() throws IOException {
+            if (currentPos >= currentLine.length()) {
+                // Wait for new input from GUI
+                currentLine = consoleGUI.getInput() + "\n";
+                currentPos = 0;
+            }
+            return currentLine.charAt(currentPos++);
+        }
     }
 
     public void startConsoleInput() {
         if (gp.getGameState() != Engine.GameState.CONSOLE_INPUT) {
-            GameLogger.warn(LOG_CONTEXT, "Only available in CONSOLE_INPUT state");
+            printToConsole("Console is only available in CONSOLE_INPUT state");
             return;
         }
-        GameLogger.info(LOG_CONTEXT, "ENTERING CONSOLE INPUT. TYPE 'exit' to return");
-        printHelp();
 
-        String input;
-        try {
-            while (!abortProcess && (input = reader.readLine()) != null) {
-                executeCommand(input.trim());
-            }
-        } catch (IOException e) {
-            GameLogger.warn(LOG_CONTEXT, "Error occured while reading input: " + e.getMessage());
+        if (consoleGUI == null) {
+            consoleGUI = new ConsoleGUI(gp, this);
         }
-
-        abortProcess = false;
-        gp.setGameState(Engine.GameState.PAUSED);
-        GameLogger.info(LOG_CONTEXT, "EXITING CONSOLE INPUT MODE");
+        consoleGUI.showConsole();
     }
 
     public void executeCommand(String input) {
@@ -156,27 +196,29 @@ public class ConsoleHandler {
         if (command != null) {
             try {
                 command.execute(parts);
-            } catch (IllegalArgumentException exc) {
-                GameLogger.error(LOG_CONTEXT, "COMMAND EXECUTION DID NOT SUCCEED", exc);
+            } catch (Exception exc) {
+                printToConsole("Error executing command: " + exc.getMessage());
             }
         } else {
-            GameLogger.warn(LOG_CONTEXT, "UNKNOWN COMMAND, USE 'help'");
+            printToConsole("Unknown command. Type 'help' for available commands.");
         }
     }
 
-    private void printHelp() {
-        GameLogger.info(LOG_CONTEXT, """
+    private String getHelpText() {
+        return """
             Available commands:
-            \t- help [command]   : Show help for a specific command or list all commands
-            \t- reset            : Reset the game
-            \t- exit             : Exit console mode
-            \t- exit_game        : Exit the game
-            \t- remove <entity>  : Remove entities
-            \t- save/load <file> : Save/Load game state
-            \t- set/get ...      : Set/Get various game values
-            \t- add ...          : Add entities or objects
-            \t- script <file>    : Run a script file
-            \t- make <file>      : Create a new script file
-            Type 'help <command>' for more details about a specific command.""");
+            - help [command]   : Show help for a specific command
+            - reset           : Reset the game
+            - exit           : Exit console mode
+            - exit_game      : Exit the game
+            - remove <entity> : Remove entities
+            - save/load      : Save/Load game state
+            - set/get        : Set/Get game values
+            - add            : Add entities or objects
+            - teleport       : Teleports player
+            - script         : Run a script file
+            - make           : Create a new script file
+            
+            Type 'help <command>' for detailed usage information.""";
     }
 }

@@ -16,3 +16,7 @@ public class Main {
         panel.startGameThread();
     }
 }
+
+/*
+ * To Do: A* algoritmus javitasa, behaviorok ertelmesebbe tetele
+ */

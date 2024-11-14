@@ -82,14 +82,4 @@ public final class GameLogger {
     public static void performance(String context, Supplier<String> messageSupplier) {
         getInstance().performance(() -> context + ": " + messageSupplier.get());
     }
-
-    // Cleanup method
-    public static void cleanup() {
-        synchronized (LOCK) {
-            if (instance != null) {
-                instance.cleanup();
-                instance = null;
-            }
-        }
-    }
 }
