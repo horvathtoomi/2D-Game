@@ -1,0 +1,14 @@
+smallenemy 8 8
+dragonenemy 15 15
+giantenemy 22 22
+smallenemy 30 30
+dragonenemy 38 38
+giantenemy 45 45
+friendlyenemy 52 52
+dragonenemy 60 60
+smallenemy 68 68
+giantenemy 75 75
+dragonenemy 82 82
+friendlyenemy 88 88
+smallenemy 92 92
+dragonenemy 95 95

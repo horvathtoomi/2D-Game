@@ -5,6 +5,7 @@ import main.Engine;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -15,8 +16,8 @@ public class ConsoleGUI extends JFrame {
     private final ScriptModeDocument document;
     private final BlockingQueue<String> inputQueue;
     private final CommandHistory commandHistory;
+    private final CommandCompleter commandCompleter;
     private volatile boolean isScriptMode;
-    private static final String LOG_CONTEXT = "[CONSOLE GUI]";
 
     public ConsoleGUI(Engine gp, ConsoleHandler consoleHandler) {
         super("Game Console");
@@ -25,6 +26,7 @@ public class ConsoleGUI extends JFrame {
         this.inputQueue = new LinkedBlockingQueue<>();
         this.isScriptMode = false;
         this.document = new ScriptModeDocument();
+        this.commandCompleter = new CommandCompleter();
 
         // Set up the main window
         setSize(600, 400);
@@ -48,6 +50,10 @@ public class ConsoleGUI extends JFrame {
         inputField.setFont(new Font("Consolas", Font.PLAIN, 14));
         inputField.setMargin(new Insets(5, 5, 5, 5));
 
+        setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
+        inputField.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
+
+
         // Layout setup
         setLayout(new BorderLayout());
         add(scrollPane, BorderLayout.CENTER);
@@ -65,6 +71,8 @@ public class ConsoleGUI extends JFrame {
 
         // Input handling
         inputField.addActionListener(e -> handleInput());
+
+        // Extended KeyListener
         inputField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -72,6 +80,10 @@ public class ConsoleGUI extends JFrame {
                     case KeyEvent.VK_UP -> inputField.setText(commandHistory.getPrevious());
                     case KeyEvent.VK_DOWN -> inputField.setText(commandHistory.getNext());
                     case KeyEvent.VK_ESCAPE -> dispose();
+                    case KeyEvent.VK_TAB -> {
+                        e.consume();
+                        handleTabCompletion();
+                    }
                 }
             }
         });
@@ -89,6 +101,27 @@ public class ConsoleGUI extends JFrame {
             }
         });
 
+        // Használjunk KeyBinding-ot a tab kezelésére
+        inputField.getInputMap().put(KeyStroke.getKeyStroke("TAB"), "complete");
+        inputField.getActionMap().put("complete", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleTabCompletion();
+            }
+        });
+
+        // A többi billentyű kezelése marad a KeyListener-ben
+        inputField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_UP -> inputField.setText(commandHistory.getPrevious());
+                    case KeyEvent.VK_DOWN -> inputField.setText(commandHistory.getNext());
+                    case KeyEvent.VK_ESCAPE -> dispose();
+                }
+            }
+        });
+
         printWelcomeMessage();
     }
 
@@ -98,8 +131,7 @@ public class ConsoleGUI extends JFrame {
             commandHistory.add(input);
 
             if (isScriptMode) {
-                // Script módban a felhasználói input kezelése
-                document.appendUserInput(input, true);  // Ez fogja csak növelni a sorszámot
+                document.appendUserInput(input, true);
                 inputQueue.offer(input);
 
                 if (input.equalsIgnoreCase("end")) {
@@ -108,14 +140,12 @@ public class ConsoleGUI extends JFrame {
                     document.appendPrompt();
                 }
             } else {
-                // Normál módban a parancs kezelése
                 document.appendPrompt();
                 document.appendUserInput(input, false);
 
                 if (input.startsWith("make")) {
                     isScriptMode = true;
                     document.resetLineNumber();
-                    // Most csak simán rendszerüzenetként jelenítjük meg
                     document.appendSystemMessage("Enter commands for the script (type 'end' to finish):");
                 }
                 consoleHandler.executeCommand(input);
@@ -126,16 +156,40 @@ public class ConsoleGUI extends JFrame {
         }
     }
 
+    private void handleTabCompletion() {
+        String currentInput = inputField.getText().trim();
+        if (currentInput.isEmpty()) {
+            return;
+        }
+
+        // Az utolsó szót keressük, ha több szóból áll a parancs
+        String lastWord = currentInput.substring(currentInput.lastIndexOf(' ') + 1);
+        String completed = commandCompleter.complete(lastWord);
+
+        if (!completed.equals(lastWord)) {
+            // Ha több szóból áll a parancs, csak az utolsót cseréljük
+            if (currentInput.contains(" ")) {
+                String prefix = currentInput.substring(0, currentInput.lastIndexOf(' ') + 1);
+                inputField.setText(prefix + completed);
+            } else {
+                inputField.setText(completed);
+            }
+            // A kurzort a szöveg végére helyezzük
+            inputField.setCaretPosition(inputField.getText().length());
+        }
+
+        // Tartsuk meg a fokuszt az input mezőn
+        inputField.requestFocusInWindow();
+    }
+
     private void scrollToBottom() {
         outputPane.setCaretPosition(document.getLength());
     }
 
     public void appendToConsole(String text) {
         SwingUtilities.invokeLater(() -> {
-            // Rendszerüzenetek mindig sorszám nélkül jelennek meg
             document.appendSystemMessage(text);
             if (isScriptMode) {
-                // Script módban nem adunk új promptot rendszerüzenet után
                 scrollToBottom();
             } else {
                 document.appendPrompt();

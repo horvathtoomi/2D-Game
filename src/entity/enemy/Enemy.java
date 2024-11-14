@@ -99,7 +99,7 @@ public abstract class Enemy extends Entity {
     @Override
     public void update() {
         if(getHealth() <= 0) {
-            GameLogger.info(LOG_CONTEXT, name + "DIES");
+            GameLogger.info(LOG_CONTEXT, name + " DIES");
             gp.removeEnemy(this);
             return;
         }

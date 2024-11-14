@@ -11,7 +11,6 @@ public class ConsoleHandler {
     public boolean abortProcess;
     private final Map<String, Command> commandMap;
     private ConsoleGUI consoleGUI;
-    private static final String LOG_CONTEXT = "[CONSOLE HANDLER]";
 
     public ConsoleHandler(Engine gp) {
         this.gp = gp;
@@ -165,9 +164,8 @@ public class ConsoleHandler {
         private int currentPos = 0;
 
         @Override
-        public int read() throws IOException {
+        public synchronized int read() {
             if (currentPos >= currentLine.length()) {
-                // Wait for new input from GUI
                 currentLine = consoleGUI.getInput() + "\n";
                 currentPos = 0;
             }
@@ -175,7 +173,7 @@ public class ConsoleHandler {
         }
     }
 
-    public void startConsoleInput() {
+    public synchronized void startConsoleInput() {
         if (gp.getGameState() != Engine.GameState.CONSOLE_INPUT) {
             printToConsole("Console is only available in CONSOLE_INPUT state");
             return;
@@ -204,7 +202,7 @@ public class ConsoleHandler {
         }
     }
 
-    private String getHelpText() {
+    private synchronized String getHelpText() {
         return """
             Available commands:
             - help [command]   : Show help for a specific command

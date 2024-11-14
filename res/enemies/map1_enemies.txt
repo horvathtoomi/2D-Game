@@ -1,5 +1,8 @@
-dragonenemy 95 95
-dragonenemy 94 95
-dragonenemy 93 95
-dragonenemy 17 15
-friendlyenemy 8 8
+smallenemy 15 15
+smallenemy 25 25
+dragonenemy 45 45
+giantenemy 35 35
+dragonenemy 55 55
+friendlyenemy 65 65
+smallenemy 75 75
+giantenemy 85 85

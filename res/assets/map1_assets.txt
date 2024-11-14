@@ -1,4 +1,6 @@
-chest 3 3
-chest 5 3
-key 94 93
-door 99 94
+chest 20 20
+key 30 30
+boots 40 40
+sword 50 50
+door 60 60
+chest 70 70

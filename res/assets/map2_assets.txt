@@ -1,4 +1,8 @@
-key 5 5
-sword 6 6
-chest 7 7
-door 8 8
+chest 15 15
+key 25 25
+boots 35 35
+sword 45 45
+door 55 55
+chest 65 65
+sword 75 75
+chest 85 85

@@ -15,7 +15,6 @@ public class ScriptModeDocument extends DefaultStyledDocument {
     private static final String LOG_CONTEXT = "[SCRIPT MODE DOC]";
 
     public ScriptModeDocument() {
-        // Alap stílusok létrehozása
         promptStyle = addStyle("prompt", null);
         StyleConstants.setForeground(promptStyle, Color.GREEN);
         StyleConstants.setFontFamily(promptStyle, "Consolas");
@@ -53,7 +52,6 @@ public class ScriptModeDocument extends DefaultStyledDocument {
     public void appendUserInput(String text, boolean isScriptMode) {
         try {
             if (isScriptMode) {
-                // Csak a tényleges felhasználói inputnál növeljük a sorszámot
                 insertString(getLength(), lineNumber + ". ", numberStyle);
                 insertString(getLength(), text + "\n", scriptModeStyle);
                 lineNumber++;
@@ -67,7 +65,6 @@ public class ScriptModeDocument extends DefaultStyledDocument {
 
     public void appendSystemMessage(String text) {
         try {
-            // Rendszerüzenetek mindig sorszám nélkül
             insertString(getLength(), text + "\n", systemStyle);
         } catch (BadLocationException e) {
             GameLogger.error(LOG_CONTEXT, "Error occurred during system messages:" + e.getMessage(), e);

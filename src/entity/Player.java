@@ -44,7 +44,7 @@ public class Player extends Entity {
 
     public void setDefaultValues() {
         setWorldX(gp.getTileSize() * 5);
-        setWorldY(gp.getTileSize() * 3);
+        setWorldY(gp.getTileSize() * 5);
         setSpeed(3);
         direction = "down";
     }
@@ -213,14 +213,13 @@ public class Player extends Entity {
     }
 
     public void attack(){
-        if(!(getInventory().getCurrent() instanceof Weapon)) {
+        if(!(getInventory().getCurrent() instanceof Weapon weapon)) {
             return;
         }
         long currentTime = System.currentTimeMillis();
         if(currentTime - lastAttackTime < ATTACK_COOLDOWN){
             return;
         }
-        Weapon weapon = (Weapon)getInventory().getCurrent();
         isAttacking = true;
         hasReducedDurability = false;
         weapon.isActive = true;
