@@ -6,3 +6,5 @@ dragonenemy 55 55
 friendlyenemy 65 65
 smallenemy 75 75
 giantenemy 85 85
+npc_wayfarer 7 6
+npc_wayfarer 8 8

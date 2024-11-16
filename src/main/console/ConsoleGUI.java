@@ -101,7 +101,6 @@ public class ConsoleGUI extends JFrame {
             }
         });
 
-        // Használjunk KeyBinding-ot a tab kezelésére
         inputField.getInputMap().put(KeyStroke.getKeyStroke("TAB"), "complete");
         inputField.getActionMap().put("complete", new AbstractAction() {
             @Override
@@ -110,7 +109,6 @@ public class ConsoleGUI extends JFrame {
             }
         });
 
-        // A többi billentyű kezelése marad a KeyListener-ben
         inputField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -162,23 +160,19 @@ public class ConsoleGUI extends JFrame {
             return;
         }
 
-        // Az utolsó szót keressük, ha több szóból áll a parancs
         String lastWord = currentInput.substring(currentInput.lastIndexOf(' ') + 1);
         String completed = commandCompleter.complete(lastWord);
 
         if (!completed.equals(lastWord)) {
-            // Ha több szóból áll a parancs, csak az utolsót cseréljük
             if (currentInput.contains(" ")) {
                 String prefix = currentInput.substring(0, currentInput.lastIndexOf(' ') + 1);
                 inputField.setText(prefix + completed);
             } else {
                 inputField.setText(completed);
             }
-            // A kurzort a szöveg végére helyezzük
             inputField.setCaretPosition(inputField.getText().length());
         }
 
-        // Tartsuk meg a fokuszt az input mezőn
         inputField.requestFocusInWindow();
     }
 

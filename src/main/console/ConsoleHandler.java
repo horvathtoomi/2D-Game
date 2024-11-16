@@ -178,14 +178,14 @@ public class ConsoleHandler {
             printToConsole("Console is only available in CONSOLE_INPUT state");
             return;
         }
-
         if (consoleGUI == null) {
             consoleGUI = new ConsoleGUI(gp, this);
         }
         consoleGUI.showConsole();
+        consoleGUI.appendToConsole(getHelpText());
     }
 
-    public void executeCommand(String input) {
+    public synchronized void executeCommand(String input) {
         if (input.isEmpty()) return;
 
         String[] parts = input.trim().toLowerCase().split("\\s+");
@@ -204,19 +204,20 @@ public class ConsoleHandler {
 
     private synchronized String getHelpText() {
         return """
-            Available commands:
-            - help [command]   : Show help for a specific command
-            - reset           : Reset the game
-            - exit           : Exit console mode
-            - exit_game      : Exit the game
-            - remove <entity> : Remove entities
-            - save/load      : Save/Load game state
-            - set/get        : Set/Get game values
-            - add            : Add entities or objects
-            - teleport       : Teleports player
-            - script         : Run a script file
-            - make           : Create a new script file
-            
+                            Available commands:
+            -------------------------------------------------------
+            | help [command] : Show help for a specific command   |
+            | reset          : Reset the game                     |
+            | exit           : Exit console mode                  |
+            | exit_game      : Exit the game                      |
+            | remove         : Remove entities                    |
+            | save/load      : Save/Load game state               |
+            | set/get        : Set/Get game values                |
+            | add            : Add entities or objects            |
+            | teleport       : Teleports player                   |
+            | script         : Run a script file                  |
+            | make           : Create a new script file           |
+            -------------------------------------------------------
             Type 'help <command>' for detailed usage information.""";
     }
 }

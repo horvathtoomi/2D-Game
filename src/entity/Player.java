@@ -38,15 +38,43 @@ public class Player extends Entity {
         inventory = new Inventory(gp);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
-        setDefaultValues();
         getPlayerImage();
     }
 
     public void setDefaultValues() {
-        setWorldX(gp.getTileSize() * 5);
-        setWorldY(gp.getTileSize() * 5);
+        if(gp.getGameMode().equals(Engine.GameMode.STORY)) {
+            setWorldX(gp.getTileSize() * 5);
+            setWorldY(gp.getTileSize() * 5);
+        }
+        else{
+            int[][] custom_map = gp.tileman.getMapTileNum();
+            if(gp.tileman.getTile(custom_map[gp.getMaxWorldCol()/2][gp.getMaxWorldRow()/2]).collision) {
+                int[] coordinates = getNotSolidTile(custom_map);
+                assert coordinates != null;
+                setWorldX(coordinates[0]);
+                setWorldY(coordinates[1]);
+            }
+            else{
+                setWorldX(gp.getMaxWorldCol()/2);
+                setWorldY(gp.getMaxWorldRow()/2);
+            }
+        }
         setSpeed(3);
         direction = "down";
+    }
+
+    private int[] getNotSolidTile(int[][] custom_map) {
+        int[] coordinates = new int[2];
+        for(int x = 1; x < 100; x++){
+            for(int y = 1; y < 100; y++){
+                if(!(gp.tileman.getTile(custom_map[gp.getMaxWorldCol()/2][gp.getMaxWorldRow()/2]).collision)){
+                    coordinates[0] = x;
+                    coordinates[1] = y;
+                    return coordinates;
+                }
+            }
+        }
+        return null;
     }
 
     public void getPlayerImage() {

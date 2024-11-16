@@ -13,7 +13,9 @@ public class CommandCompleter {
             "set", Arrays.asList("player", "entity", "speed", "health", "maxhealth"),
             "get", Arrays.asList("player", "health", "speed", "maxhealth"),
             "add", Arrays.asList("smallenemy", "giantenemy", "dragonenemy", "friendlyenemy",
-                    "key", "door", "boots", "chest", "sword")
+                    "key", "door", "boots", "chest", "sword"),
+            "help", Arrays.asList("reset", "remove", "save", "load", "set", "get", "add", "teleport",
+                    "script", "make")
     );
 
     public String complete(String input) {

@@ -162,7 +162,7 @@ public class FileManager {
             obj.collision = state.collision;
             obj.opened = state.opened;
             if (obj.opened && obj instanceof OBJ_Chest) {
-                ((OBJ_Chest) obj).image = ((OBJ_Chest) obj).image2;
+                obj.image = obj.image2;
             }
             if (obj instanceof Wearable || obj instanceof Weapon) {
                 obj.setDurability(state.durability);

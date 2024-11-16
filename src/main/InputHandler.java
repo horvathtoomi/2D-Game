@@ -34,18 +34,8 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_Q -> handleQ();
             case KeyEvent.VK_ESCAPE -> togglePauseState();
             case KeyEvent.VK_ENTER -> toggleMenuState();
-            case KeyEvent.VK_L -> {
-                if(gp.getGameState() == Engine.GameState.START || gp.getGameState() == Engine.GameState.FINISHED_LOST || gp.getGameState() == Engine.GameState.FINISHED_WON || gp.getGameState() == Engine.GameState.PAUSED)
-                    FileManager.loadGame(gp);
-                else
-                    GameLogger.warn(LOG_CONTEXT, "CAN NOT LOAD GAME WHILE RUNNING");
-            }
-            case KeyEvent.VK_O -> {
-                if(gp.getGameState() == Engine.GameState.RUNNING || gp.getGameState() == Engine.GameState.PAUSED)
-                    FileManager.saveGame(gp);
-                else
-                    GameLogger.warn(LOG_CONTEXT, "You are not running the game yet!");
-            }
+            case KeyEvent.VK_L -> handleL();
+            case KeyEvent.VK_O -> handleO();
             case KeyEvent.VK_1 -> modeFinder(0);
             case KeyEvent.VK_2 -> modeFinder(1);
             case KeyEvent.VK_3 -> modeFinder(2);
@@ -91,6 +81,20 @@ public class InputHandler implements KeyListener {
         else if(gp.getGameState() == Engine.GameState.RUNNING) {
             gp.player.getInventory().drop();
         }
+    }
+
+    private void handleO() {
+        if (gp.getGameState() == Engine.GameState.RUNNING || gp.getGameState() == Engine.GameState.PAUSED)
+            FileManager.saveGame(gp);
+        else
+            GameLogger.warn(LOG_CONTEXT, "You are not running the game yet!");
+    }
+
+    private void handleL(){
+        if(gp.getGameState() != Engine.GameState.RUNNING)
+            FileManager.loadGame(gp);
+        else
+            GameLogger.warn(LOG_CONTEXT, "CAN NOT LOAD GAME WHILE RUNNING");
     }
 
     private void startByKey(Engine.GameDifficulty diff){

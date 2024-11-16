@@ -46,8 +46,8 @@ public class Commands {
     }
 
     public void add(String obj, int x, int y) {
-        if(!((x<gp.getMaxWorldCol() && x>1) && (y<gp.getMaxWorldRow() && y>1))){
-            consoleHandler.printToConsole("Coordinates must be [2:" + (gp.getMaxWorldCol() -1) + "]");
+        if(!((x<gp.getMaxWorldCol() && x>=1) && (y<gp.getMaxWorldRow() && y>=1))){
+            consoleHandler.printToConsole("Coordinates must be [1:" + (gp.getMaxWorldCol() -1) + "]");
             return;
         }
         obj = obj.toLowerCase();
@@ -61,14 +61,18 @@ public class Commands {
             case "boots" -> gp.addObject(new OBJ_Boots(gp,x * gp.getTileSize(),y * gp.getTileSize()));
             case "chest" -> gp.addObject(new OBJ_Chest(gp,x * gp.getTileSize(),y * gp.getTileSize()));
             case "sword" -> gp.addObject(new OBJ_Sword(gp,x * gp.getTileSize(),y * gp.getTileSize(), 50));
-            default -> consoleHandler.printToConsole("Unknown command or object: " + obj);
+            default -> {
+                consoleHandler.printToConsole("Unknown entity or object: " + obj);
+                return;
+            }
         }
+        consoleHandler.printToConsole(obj + "added to the game");
     }
 
     public void teleport(int x, int y){
         int[][] maphelp = gp.tileman.getMapTileNum();
-        if(x >= gp.getMaxWorldCol() || x < 2 || y >= gp.getMaxWorldRow() || y < 2){
-            GameLogger.warn(LOG_CONTEXT, "Coordinates must be X->[2:" + (gp.getMaxWorldCol() -1) + "] and Y->[2:" + (gp.getMaxWorldRow() -1) + "]");
+        if(x >= gp.getMaxWorldCol() || x < 1 || y >= gp.getMaxWorldRow() || y < 1){
+            GameLogger.warn(LOG_CONTEXT, "Coordinates must be X->[1:" + (gp.getMaxWorldCol() -1) + "] and Y->[1:" + (gp.getMaxWorldRow() -1) + "]");
             return;
         }
         else if(gp.tileman.getTile(maphelp[x][y]).collision){
@@ -104,27 +108,21 @@ public class Commands {
 
     public void createFile(String filename, BufferedReader reader) {
         File saveFile = new File(RES_SCRIPTS_PATH + filename + ".txt");
-        // Új szálat indítunk a fájl írásához
-        new Thread(() -> {
-            try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(saveFile))) {
-                String inputLine;
-                consoleHandler.printToConsole("Enter commands for the script (type 'end' to finish):");
-                while (true) {
-                    inputLine = reader.readLine().trim();
-
-                    if (inputLine.equalsIgnoreCase("end")) {
-                        break;
-                    }
-
-                    fileWriter.write(inputLine);
-                    fileWriter.newLine();
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(saveFile))) {
+            String inputLine;
+            consoleHandler.printToConsole("Enter commands for the script (type 'end' to finish):");
+            while (true) {
+                inputLine = reader.readLine().trim();
+                if (inputLine.equalsIgnoreCase("end")) {
+                    break;
                 }
-
-                consoleHandler.printToConsole(filename + " created and saved successfully.");
-            } catch (IOException e) {
-                consoleHandler.printToConsole("An error occurred while writing to the file: " + e.getMessage());
+                fileWriter.write(inputLine);
+                fileWriter.newLine();
             }
-        }).start();
+            consoleHandler.printToConsole(filename + " created and saved successfully.");
+        } catch (IOException e) {
+            consoleHandler.printToConsole("An error occurred while writing to the file: " + e.getMessage());
+        }
     }
 
     public void runScript(String filename) {
@@ -133,6 +131,7 @@ public class Commands {
             consoleHandler.printToConsole("ERROR: " + filename + " not found");
             return;
         }
+
         try (BufferedReader fileReader = new BufferedReader(new FileReader(scriptFile))) {
             String line;
             boolean inMakeMode = false;
@@ -142,37 +141,43 @@ public class Commands {
                 line = line.trim();
 
                 if (line.startsWith("make")) {
+                    // Start make mode
                     String[] parts = line.split("\\s+");
-                    if(parts.length == 2) {
+                    if (parts.length == 2) {
                         File saveFile = new File(RES_SCRIPTS_PATH + parts[1] + ".txt");
                         fileWriter = new BufferedWriter(new FileWriter(saveFile));
                         inMakeMode = true;
-                        consoleHandler.printToConsole("|Auto-make mode activated for " + parts[1] + "|");
+                        consoleHandler.printToConsole("Entering 'make' mode for file: " + parts[1]);
                     } else {
-                        consoleHandler.printToConsole("INVALID FORMAT");
+                        consoleHandler.printToConsole("Invalid make command in script.");
                         return;
                     }
-                }
-                else if (inMakeMode && line.equalsIgnoreCase("end")) {
-                    consoleHandler.printToConsole("|FILE CREATION FINISHED|");
+                } else if (inMakeMode && line.equalsIgnoreCase("end")) {
+                    // End make mode
+                    fileWriter.close();
+                    consoleHandler.printToConsole("File creation completed.");
                     inMakeMode = false;
-                }
-                else if (inMakeMode) {
+                } else if (inMakeMode) {
+                    // Write to file in make mode
                     fileWriter.write(line);
                     fileWriter.newLine();
-                }
-                else if (!line.isEmpty()) {
-                    gp.console.executeCommand(line);
+                } else {
+                    // Process other commands as usual
+                    consoleHandler.executeCommand(line);
                 }
             }
+
             if (fileWriter != null) {
                 fileWriter.close();
             }
         } catch (IOException e) {
-            consoleHandler.printToConsole("ERROR OCCURRED: " + e.getMessage());
+            consoleHandler.printToConsole("An error occurred while reading the script file: " + e.getMessage());
         }
-        consoleHandler.printToConsole(filename + " executed successfully.");
+
+        consoleHandler.printToConsole("Script execution completed.");
     }
+
+
 
     public void printHelp(String command) {
         switch(command){

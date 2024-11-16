@@ -93,6 +93,7 @@ public class AssetSetter {
             case "friendlyenemy" -> new FriendlyEnemy(gp, x, y);
             case "giantenemy" -> new GiantEnemy(gp, x, y);
             case "smallenemy" -> new SmallEnemy(gp, x, y);
+            case "npc_wayfarer" -> new NPC_Wayfarer(gp, x, y);
             default -> null;
         };
         if(ent != null)
@@ -121,17 +122,10 @@ public class AssetSetter {
 
     public WeaponRarity determineWeaponRarity(){
         int roll = rand.nextInt(100);
-        if(roll < 60) return WeaponRarity.COMMON;
-        if(roll < 85) return WeaponRarity.UNCOMMON;
-        if(roll < 95) return WeaponRarity.RARE;
+        if(roll < 50) return WeaponRarity.COMMON;
+        if(roll < 70) return WeaponRarity.UNCOMMON;
+        if(roll < 85) return WeaponRarity.RARE;
         return WeaponRarity.LEGENDARY;
-    }
-
-    public void setNPC(){
-        NPC_Wayfarer wf = new NPC_Wayfarer(gp);
-        wf.setWorldX(gp.getTileSize()*21);
-        wf.setWorldY(gp.getTileSize()*21);
-        gp.addEntity(wf);
     }
 
 }

@@ -15,6 +15,16 @@ public class NPC_Wayfarer extends Entity {
         name = "NPC_Wayfarer";
     }
 
+    public NPC_Wayfarer(Engine gp, int x, int y) {
+        super(gp);
+        direction = "down";
+        setSpeed(1);
+        getWayfarerImages();
+        name = "NPC_Wayfarer";
+        setWorldX(x);
+        setWorldY(y);
+    }
+
     private void getWayfarerImages(){
             right = scale("npc","right");
             left = scale("npc","left");

@@ -118,7 +118,7 @@ public class Engine extends JPanel implements Runnable {
     public void setupStoryMode(){
         tileman.loadStoryMap(true);
         aSetter.loadLevelAssets(true);
-        aSetter.setNPC();
+        player.setDefaultValues();
     }
 
     public static void setupCustomMode(){

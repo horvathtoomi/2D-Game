@@ -120,6 +120,7 @@ public class TileManager {
             GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");
             createCleanMap();
         }
+        gp.player.setDefaultValues();
     }
 
     private static void createCleanMap() {

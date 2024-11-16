@@ -312,6 +312,14 @@ public class UserInterface extends JFrame {
     }
 
     private void initScreenButtonBehavior(){
+        initStartButtons();
+        initModeButtons();
+        initDiffButtons();
+        initPauseButtons();
+        initGameOverButtons();
+    }
+
+    private void initStartButtons(){
         startScreenButtons.getFirst().addActionListener(e -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN));
         startScreenButtons.get(1).addActionListener(e -> {
             if(FileManager.loadGame(gp))
@@ -320,7 +328,8 @@ public class UserInterface extends JFrame {
                 gp.setGameState(Engine.GameState.START);
         });
         startScreenButtons.get(2).addActionListener(e -> System.exit(0));
-
+    }
+    private void initModeButtons(){
         modeScreenButtons.getFirst().addActionListener(e -> {
             gp.setGameMode(Engine.GameMode.STORY);
             gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
@@ -330,7 +339,16 @@ public class UserInterface extends JFrame {
             Engine.setupCustomMode();
         });
         modeScreenButtons.get(2).addActionListener(e -> gp.setGameState(Engine.GameState.START));
+    }
 
+    private void initDiffButtons(){
+        difficultyScreenButtons.getFirst().addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.EASY));
+        difficultyScreenButtons.get(1).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.MEDIUM));
+        difficultyScreenButtons.get(2).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.HARD));
+        difficultyScreenButtons.get(3).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.IMPOSSIBLE));
+    }
+
+    private void initPauseButtons(){
         pauseScreenButtons.getFirst().addActionListener(e -> gp.setGameState(Engine.GameState.RUNNING));
         pauseScreenButtons.get(1).addActionListener(e -> {
             gp.setGameState(Engine.GameState.CONSOLE_INPUT);
@@ -347,12 +365,9 @@ public class UserInterface extends JFrame {
         });
         pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(gp));
         pauseScreenButtons.get(5).addActionListener(e -> FileManager.loadGame(gp));
+    }
 
-        difficultyScreenButtons.getFirst().addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.EASY));
-        difficultyScreenButtons.get(1).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.MEDIUM));
-        difficultyScreenButtons.get(2).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.HARD));
-        difficultyScreenButtons.get(3).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.IMPOSSIBLE));
-
+    private void initGameOverButtons(){
         endScreenButtons.getFirst().addActionListener(e -> gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN));
         endScreenButtons.get(1).addActionListener(e -> {
             FileManager.loadGame(gp);
@@ -360,6 +375,7 @@ public class UserInterface extends JFrame {
         });
         endScreenButtons.get(2).addActionListener(e -> System.exit(0));
     }
+
 
     private void initializeScreenButtons() {
         int buttonWidth = 200;
