@@ -9,9 +9,12 @@ import main.Engine;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Commands {
     private final Engine gp;
+    private static int numMakeEnd = 0;
     private final ConsoleHandler consoleHandler;
     private static final String RES_SAVE_PATH = "res/save/";
     private static final String RES_SCRIPTS_PATH = "res/scripts/";
@@ -81,11 +84,12 @@ public class Commands {
         }
         gp.player.setWorldX(x * gp.getTileSize());
         gp.player.setWorldY(y * gp.getTileSize());
+        consoleHandler.printToConsole("Player teleported to <" + x + "> <" + y + ">");
     }
 
     public void saveFile(String filename) {
         try {
-            FileManager.saveGameState(gp, RES_SAVE_PATH + filename);
+            FileManager.saveGameState(gp, RES_SAVE_PATH + filename + ".sav");
             consoleHandler.printToConsole(filename + " saved successfully");
         } catch (IOException e) {
             consoleHandler.printToConsole("UNABLE TO SAVE: " + filename + " - " + e.getMessage());
@@ -94,39 +98,63 @@ public class Commands {
 
     public void loadFile(String filename) {
         try {
-            File file = new File(RES_SAVE_PATH + filename);
+            String fileName = RES_SAVE_PATH + filename + ".sav";
+            File file = new File(fileName);
             if (!file.exists()) {
                 consoleHandler.printToConsole(filename + " not found");
                 return;
             }
-            FileManager.loadGameState(gp, RES_SAVE_PATH + filename);
+            FileManager.loadGameState(gp, fileName);
             consoleHandler.printToConsole(filename + " loaded successfully");
         } catch (IOException | ClassNotFoundException e) {
             consoleHandler.printToConsole("UNABLE TO LOAD: " + filename + " - " + e.getMessage());
         }
     }
 
-    public void createFile(String filename, BufferedReader reader) {
-        File saveFile = new File(RES_SCRIPTS_PATH + filename + ".txt");
-        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(saveFile))) {
-            String inputLine;
-            consoleHandler.printToConsole("Enter commands for the script (type 'end' to finish):");
-            while (true) {
-                inputLine = reader.readLine().trim();
-                if (inputLine.equalsIgnoreCase("end")) {
-                    break;
+    public void createFile(String filename, ConsoleGUI gui) {
+        new Thread(() -> {
+            File saveFile = new File(RES_SCRIPTS_PATH + filename + ".txt");
+            try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(saveFile))) {
+                consoleHandler.printToConsole("Enter commands for the script (type 'end' to finish):");
+                while (true) {
+                    String input = gui.getInput();
+
+                    if(input.startsWith("make")){
+                        numMakeEnd++;
+                    }
+
+                    if ("end".equalsIgnoreCase(input.trim())) {
+                        if(numMakeEnd <= 0) {
+                            consoleHandler.printToConsole(filename + " created and saved successfully.");
+                            break;
+                        } else{
+                            numMakeEnd--;
+                        }
+                    }
+                    fileWriter.write(input);
+                    fileWriter.newLine();
                 }
-                fileWriter.write(inputLine);
-                fileWriter.newLine();
+            } catch (IOException e) {
+                consoleHandler.printToConsole("An error occurred while writing to the file: " + e.getMessage());
             }
-            consoleHandler.printToConsole(filename + " created and saved successfully.");
-        } catch (IOException e) {
-            consoleHandler.printToConsole("An error occurred while writing to the file: " + e.getMessage());
-        }
+        }).start();
     }
 
     public void runScript(String filename) {
-        File scriptFile = new File(RES_SCRIPTS_PATH + filename + ".txt");
+        runScript(filename, new HashSet<>());
+    }
+
+    private void runScript(String filename, Set<String> visitedScripts) {
+        String normalizedFilename = RES_SCRIPTS_PATH + filename + ".txt";
+        if (visitedScripts.contains(normalizedFilename)) {
+            consoleHandler.printToConsole(
+            "--------------------------------------------------------\n" +
+            "ERROR: Circular script reference detected: " + filename +
+            "\n----------------------------------------------------------");
+            return;
+        }
+        visitedScripts.add(normalizedFilename);
+        File scriptFile = new File(normalizedFilename);
         if (!scriptFile.exists() || !scriptFile.isFile()) {
             consoleHandler.printToConsole("ERROR: " + filename + " not found");
             return;
@@ -134,48 +162,28 @@ public class Commands {
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(scriptFile))) {
             String line;
-            boolean inMakeMode = false;
-            BufferedWriter fileWriter = null;
-
             while ((line = fileReader.readLine()) != null) {
                 line = line.trim();
-
-                if (line.startsWith("make")) {
-                    // Start make mode
+                if (line.startsWith("script")) {
                     String[] parts = line.split("\\s+");
                     if (parts.length == 2) {
-                        File saveFile = new File(RES_SCRIPTS_PATH + parts[1] + ".txt");
-                        fileWriter = new BufferedWriter(new FileWriter(saveFile));
-                        inMakeMode = true;
-                        consoleHandler.printToConsole("Entering 'make' mode for file: " + parts[1]);
+                        runScript(parts[1], visitedScripts);
                     } else {
-                        consoleHandler.printToConsole("Invalid make command in script.");
-                        return;
+                        consoleHandler.printToConsole("Invalid script command: " + line);
                     }
-                } else if (inMakeMode && line.equalsIgnoreCase("end")) {
-                    // End make mode
-                    fileWriter.close();
-                    consoleHandler.printToConsole("File creation completed.");
-                    inMakeMode = false;
-                } else if (inMakeMode) {
-                    // Write to file in make mode
-                    fileWriter.write(line);
-                    fileWriter.newLine();
                 } else {
-                    // Process other commands as usual
                     consoleHandler.executeCommand(line);
                 }
-            }
-
-            if (fileWriter != null) {
-                fileWriter.close();
             }
         } catch (IOException e) {
             consoleHandler.printToConsole("An error occurred while reading the script file: " + e.getMessage());
         }
 
-        consoleHandler.printToConsole("Script execution completed.");
+        visitedScripts.remove(normalizedFilename);
+
+        consoleHandler.printToConsole("Finished executing script: " + filename);
     }
+
 
 
 
@@ -195,6 +203,7 @@ public class Commands {
             case "remove" -> consoleHandler.printToConsole("""
                     Remove use: remove <entity_name>
                     Where entity_name: <all> <GiantEnemy> <SmallEnemy> <DragonEnemy> <FriendlyEnemy>""");
+            case "teleport" -> consoleHandler.printToConsole("Usage: teleport <X> <Y>, teleports player to: <X> <Y>");
             case "reset" -> consoleHandler.printToConsole("Reset use: reset -resets the game");
             case "save" -> consoleHandler.printToConsole("Save use: save <filename> without extension");
             case "load" -> consoleHandler.printToConsole("Load use: load <filename> without extension");

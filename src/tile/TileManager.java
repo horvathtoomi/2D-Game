@@ -18,9 +18,8 @@ public class TileManager {
     public static int[][] mapTileNum;
     private static final String LOG_CONTEXT = "[TILE MANAGER]";
 
-    public int[][] getMapTileNum() {
-        return mapTileNum;
-    }
+    public int[][] getMapTileNum() {return mapTileNum;}
+
     public Tile getTile(int idx){
         if(idx>tile.length-1 || idx<0){
             GameLogger.warn(LOG_CONTEXT, "Bad indexing");

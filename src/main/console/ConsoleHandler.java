@@ -1,6 +1,5 @@
 package main.console;
 
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import main.Engine;
@@ -37,12 +36,12 @@ public class ConsoleHandler {
             }
         });
 
-        map.put("reset", name -> {
+        map.put("reset", _ -> {
             gp.startGame();
             printToConsole("Game has been reset");
         });
 
-        map.put("exit", name -> {
+        map.put("exit", _ -> {
             abortProcess = true;
             if (consoleGUI != null) {
                 consoleGUI.dispose();
@@ -50,7 +49,7 @@ public class ConsoleHandler {
             gp.setGameState(Engine.GameState.PAUSED);
         });
 
-        map.put("exit_game", name -> System.exit(0));
+        map.put("exit_game", _ -> System.exit(0));
 
         map.put("remove", args -> {
             if (args.length == 2) {
@@ -149,7 +148,7 @@ public class ConsoleHandler {
 
         map.put("make", args -> {
             if (args.length == 2) {
-                commands.createFile(args[1], new BufferedReader(new InputStreamReader(new ConsoleInputStream())));
+                commands.createFile(args[1], consoleGUI);
             } else {
                 printToConsole("Invalid format! Use 'help make' for correct usage");
             }
@@ -158,22 +157,7 @@ public class ConsoleHandler {
         return map;
     }
 
-    // Custom InputStream that reads from the GUI console
-    private class ConsoleInputStream extends InputStream {
-        private String currentLine = "";
-        private int currentPos = 0;
-
-        @Override
-        public synchronized int read() {
-            if (currentPos >= currentLine.length()) {
-                currentLine = consoleGUI.getInput() + "\n";
-                currentPos = 0;
-            }
-            return currentLine.charAt(currentPos++);
-        }
-    }
-
-    public synchronized void startConsoleInput() {
+    public void startConsoleInput() {
         if (gp.getGameState() != Engine.GameState.CONSOLE_INPUT) {
             printToConsole("Console is only available in CONSOLE_INPUT state");
             return;
@@ -185,7 +169,7 @@ public class ConsoleHandler {
         consoleGUI.appendToConsole(getHelpText());
     }
 
-    public synchronized void executeCommand(String input) {
+    public void executeCommand(String input) {
         if (input.isEmpty()) return;
 
         String[] parts = input.trim().toLowerCase().split("\\s+");
@@ -202,7 +186,7 @@ public class ConsoleHandler {
         }
     }
 
-    private synchronized String getHelpText() {
+    private String getHelpText() {
         return """
                             Available commands:
             -------------------------------------------------------

@@ -6,6 +6,7 @@ import main.logger.GameLogger;
 import tile.TileManager;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class AStar {
     private static final int DIAGONAL_COST = 14;
@@ -13,6 +14,10 @@ public class AStar {
     private static final String LOG_CONTEXT = "[A-STAR]";
     private static final double ENTITY_AVOIDANCE_WEIGHT = 3.0;
     private static final int ENTITY_INFLUENCE_RADIUS = 3;
+
+    // Cache for frequently requested paths
+    private static final Map<PathKey, PathCacheEntry> pathCache = new ConcurrentHashMap<>();
+    private static final long CACHE_DURATION = 5000; // 5 seconds cache duration
 
     private static class Cell {
         int heuristicCost = 0;
@@ -39,11 +44,173 @@ public class AStar {
         }
     }
 
-    private static class CellComparator implements Comparator<Cell> {
-        @Override
-        public int compare(Cell c1, Cell c2) {
-            return Double.compare(c1.finalCost, c2.finalCost);
+    private static class PathKey {
+        final int startX, startY, endX, endY;
+        final int hash;
+
+        PathKey(int startX, int startY, int endX, int endY) {
+            this.startX = startX;
+            this.startY = startY;
+            this.endX = endX;
+            this.endY = endY;
+            this.hash = Objects.hash(startX, startY, endX, endY);
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PathKey key = (PathKey) o;
+            return startX == key.startX &&
+                    startY == key.startY &&
+                    endX == key.endX &&
+                    endY == key.endY;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+    }
+
+    private static class PathCacheEntry {
+        final ArrayList<int[]> path;
+        final long timestamp;
+
+        PathCacheEntry(ArrayList<int[]> path) {
+            this.path = new ArrayList<>(path); // Create defensive copy
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        boolean isExpired() {
+            return System.currentTimeMillis() - timestamp > CACHE_DURATION;
+        }
+    }
+
+    static {
+        // Initialize cache cleanup
+        ScheduledExecutorService cleanupExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread thread = new Thread(r, "PathCache-Cleanup");
+            thread.setDaemon(true);
+            return thread;
+        });
+
+        cleanupExecutor.scheduleAtFixedRate(() -> pathCache.entrySet().removeIf(entry -> entry.getValue().isExpired()), CACHE_DURATION, CACHE_DURATION, TimeUnit.MILLISECONDS);
+    }
+
+    public static ArrayList<int[]> findPath(Engine gp, int startX, int startY, int endX, int endY) {
+        // Convert world coordinates to tile coordinates
+        int startI = startY / gp.getTileSize();
+        int startJ = startX / gp.getTileSize();
+        int endI = endY / gp.getTileSize();
+        int endJ = endX / gp.getTileSize();
+
+        // Validate coordinates
+        try {
+            startI = Math.max(Math.min(startI, gp.getMaxWorldRow() - 1), 0);
+            startJ = Math.max(Math.min(startJ, gp.getMaxWorldCol() - 1), 0);
+            endI = Math.max(Math.min(endI, gp.getMaxWorldRow() - 1), 0);
+            endJ = Math.max(Math.min(endJ, gp.getMaxWorldCol() - 1), 0);
+        } catch(Exception e) {
+            GameLogger.error(LOG_CONTEXT, "Invalid coordinates: " + e.getMessage(), e);
+            return null;
+        }
+
+        // Check cache first
+        PathKey key = new PathKey(startI, startJ, endI, endJ);
+        PathCacheEntry cached = pathCache.get(key);
+        if (cached != null && !cached.isExpired()) {
+            return new ArrayList<>(cached.path); // Return defensive copy
+        }
+
+        // Calculate new path
+        ArrayList<int[]> path = calculatePath(gp, startI, startJ, endI, endJ);
+        if (path != null) {
+            pathCache.put(key, new PathCacheEntry(path));
+        }
+
+        return path;
+    }
+
+    private static ArrayList<int[]> calculatePath(Engine gp, int startI, int startJ, int endI, int endJ) {
+        int rows = gp.getMaxWorldRow();
+        int cols = gp.getMaxWorldCol();
+
+        // Initialize grid
+        Cell[][] grid = new Cell[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                grid[i][j] = new Cell(i, j);
+            }
+        }
+
+        // Calculate dynamic costs for entity avoidance
+        Map<Cell, Double> dynamicCosts = calculateDynamicCosts(gp, rows, cols);
+
+        // Initialize open and closed lists
+        PriorityQueue<Cell> openList = new PriorityQueue<>(
+                Comparator.comparingDouble(c -> c.finalCost)
+        );
+        boolean[][] closedList = new boolean[rows][cols];
+
+        // Set start position
+        Cell start = grid[startI][startJ];
+        Cell end = grid[endI][endJ];
+        start.finalCost = 0;
+        openList.add(start);
+
+        while (!openList.isEmpty()) {
+            Cell current = openList.poll();
+
+            if (current.equals(end)) {
+                return reconstructPath(current);
+            }
+
+            closedList[current.i][current.j] = true;
+
+            // Check all neighbors including diagonals
+            for (int i = -1; i <= 1; i++) {
+                for (int j = -1; j <= 1; j++) {
+                    if (i == 0 && j == 0) continue;
+
+                    int nextI = current.i + i;
+                    int nextJ = current.j + j;
+
+                    // Validate coordinates
+                    if (nextI < 0 || nextI >= rows || nextJ < 0 || nextJ >= cols) continue;
+                    if (closedList[nextI][nextJ]) continue;
+                    if (gp.tileman.tile[TileManager.mapTileNum[nextJ][nextI]].collision) continue;
+
+                    Cell neighbor = grid[nextI][nextJ];
+
+                    // Calculate movement cost
+                    double movementCost = (i == 0 || j == 0) ? V_H_COST : DIAGONAL_COST;
+
+                    // Add dynamic cost for entity avoidance
+                    movementCost += dynamicCosts.getOrDefault(neighbor, 0.0);
+
+                    double newCost = current.finalCost + movementCost;
+
+                    // Update neighbor if better path found
+                    if (!openList.contains(neighbor) || newCost < neighbor.finalCost) {
+                        neighbor.heuristicCost = calculateHeuristic(neighbor, endI, endJ);
+                        neighbor.finalCost = newCost + neighbor.heuristicCost;
+                        neighbor.parent = current;
+
+                        if (!openList.contains(neighbor)) {
+                            openList.add(neighbor);
+                        }
+                    }
+                }
+            }
+        }
+
+        return null; // No path found
+    }
+
+    private static int calculateHeuristic(Cell cell, int endI, int endJ) {
+        // Using Manhattan distance as heuristic
+        return Math.abs(cell.i - endI) + Math.abs(cell.j - endJ);
     }
 
     private static Map<Cell, Double> calculateDynamicCosts(Engine gp, int rows, int cols) {
@@ -53,6 +220,7 @@ public class AStar {
             int entityI = entity.getWorldY() / gp.getTileSize();
             int entityJ = entity.getWorldX() / gp.getTileSize();
 
+            // Calculate influence area
             for (int i = Math.max(0, entityI - ENTITY_INFLUENCE_RADIUS);
                  i < Math.min(rows, entityI + ENTITY_INFLUENCE_RADIUS); i++) {
                 for (int j = Math.max(0, entityJ - ENTITY_INFLUENCE_RADIUS);
@@ -72,85 +240,6 @@ public class AStar {
         return dynamicCosts;
     }
 
-    public static ArrayList<int[]> findPath(Engine gp, int startX, int startY, int endX, int endY) {
-        int rows = gp.getMaxWorldRow();
-        int cols = gp.getMaxWorldCol();
-
-        Cell[][] grid = new Cell[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                grid[i][j] = new Cell(i, j);
-            }
-        }
-
-        Map<Cell, Double> dynamicCosts = calculateDynamicCosts(gp, rows, cols);
-        PriorityQueue<Cell> openList = new PriorityQueue<>(new CellComparator());
-        boolean[][] closedList = new boolean[rows][cols];
-
-        int startI = startY / gp.getTileSize();
-        int startJ = startX / gp.getTileSize();
-        int endI = endY / gp.getTileSize();
-        int endJ = endX / gp.getTileSize();
-
-        try {
-            startI = Math.max(Math.min(startI, rows - 1), 0);
-            startJ = Math.max(Math.min(startJ, cols - 1), 0);
-            endI = Math.max(Math.min(endI, rows - 1), 0);
-            endJ = Math.max(Math.min(endJ, cols - 1), 0);
-        } catch(Exception e) {
-            GameLogger.error(LOG_CONTEXT, "Invalid coordinates: " + e.getMessage(), e);
-            return null;
-        }
-
-        Cell start = grid[startI][startJ];
-        Cell end = grid[endI][endJ];
-
-        start.finalCost = 0;
-        openList.add(start);
-
-        while (!openList.isEmpty()) {
-            Cell current = openList.poll();
-
-            if (current.equals(end)) {
-                return reconstructPath(current);
-            }
-
-            closedList[current.i][current.j] = true;
-
-            for (int i = -1; i <= 1; i++) {
-                for (int j = -1; j <= 1; j++) {
-                    if (i == 0 && j == 0) continue;
-
-                    int nextI = current.i + i;
-                    int nextJ = current.j + j;
-
-                    if (nextI < 0 || nextI >= rows || nextJ < 0 || nextJ >= cols) continue;
-                    if (closedList[nextI][nextJ]) continue;
-                    if (gp.tileman.tile[TileManager.mapTileNum[nextJ][nextI]].collision) continue;
-
-                    Cell neighbor = grid[nextI][nextJ];
-                    double movementCost = (i == 0 || j == 0) ? V_H_COST : DIAGONAL_COST;
-
-                    movementCost += dynamicCosts.getOrDefault(neighbor, 0.0);
-
-                    double newCost = current.finalCost + movementCost;
-
-                    if (!openList.contains(neighbor) || newCost < neighbor.finalCost) {
-                        neighbor.heuristicCost = Math.abs(neighbor.i - endI) + Math.abs(neighbor.j - endJ);
-                        neighbor.finalCost = newCost + neighbor.heuristicCost;
-                        neighbor.parent = current;
-
-                        if (!openList.contains(neighbor)) {
-                            openList.add(neighbor);
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
     private static ArrayList<int[]> reconstructPath(Cell end) {
         ArrayList<int[]> path = new ArrayList<>();
         Cell current = end;
@@ -163,4 +252,5 @@ public class AStar {
         Collections.reverse(path);
         return path;
     }
+
 }

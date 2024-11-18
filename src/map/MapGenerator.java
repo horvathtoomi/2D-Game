@@ -24,19 +24,15 @@ public class MapGenerator {
                     new IllegalArgumentException());
             throw new IllegalArgumentException("Invalid image dimensions");
         }
-
         int tilesWidth = width / BLOCK_SIZE;
         int tilesHeight = height / BLOCK_SIZE;
-
         if (tilesWidth > MAX_TILES || tilesHeight > MAX_TILES) {
             GameLogger.error(LOG_CONTEXT,
                     "Map size exceeds maximum limit of " + MAX_TILES + "x" + MAX_TILES + " tiles",
                     new IllegalArgumentException());
             throw new IllegalArgumentException("Map size too large");
         }
-
-        GameLogger.info(LOG_CONTEXT,
-                "New map dimensions set to: " + tilesWidth + "x" + tilesHeight + " tiles");
+        GameLogger.info(LOG_CONTEXT, "New map dimensions set to: " + tilesWidth + "x" + tilesHeight + " tiles");
     }
 
     public static int getNextMapNumber() throws IOException {
@@ -44,10 +40,8 @@ public class MapGenerator {
         if (!Files.exists(matricesDir)) {
             throw new IOException("Map matrices directory does not exist: " + MATRICES_PATH);
         }
-
         Pattern pattern = Pattern.compile("map(\\d+)\\.txt");
         int maxNumber = 0;
-
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(matricesDir)) {
             for (Path path : stream) {
                 String fileName = path.getFileName().toString();
@@ -63,7 +57,6 @@ public class MapGenerator {
 
     public static void processImage(String imagePath) throws IOException {
         BufferedImage image = ImageIO.read(new File(imagePath));
-
         validateImageDimensions(image.getWidth(), image.getHeight());
 
         int mapNumber = getNextMapNumber();
@@ -75,8 +68,7 @@ public class MapGenerator {
         int numBlocksW = image.getWidth() / BLOCK_SIZE;
         int[][] tileMap = new int[numBlocksH][numBlocksW];
 
-        BufferedImage blockAnalysis = new BufferedImage(
-                image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage blockAnalysis = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = blockAnalysis.createGraphics();
 
         for (int row = 0; row < numBlocksH; row++) {

@@ -101,14 +101,12 @@ public class FileManager {
             if (metadata.gameMode == Engine.GameMode.STORY) {
                 List<SerializableEntityState> entityStates = (List<SerializableEntityState>) ois.readObject();
                 gp.setEntities(entityStates.stream()
-                        .map(state -> createEntityFromState(gp, state))
-                        .filter(Objects::nonNull)
+                        .map(state -> createEntityFromState(gp, state)).filter(Objects::nonNull)
                         .collect(Collectors.toCollection(CopyOnWriteArrayList::new)));
 
                 List<SerializableObjectState> objectStates = (List<SerializableObjectState>) ois.readObject();
                 gp.aSetter.list = objectStates.stream()
-                        .map(state -> createObjectFromState(gp, state))
-                        .filter(Objects::nonNull)
+                        .map(state -> createObjectFromState(gp, state)).filter(Objects::nonNull)
                         .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             }
         }

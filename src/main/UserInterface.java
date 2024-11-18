@@ -19,31 +19,31 @@ public class UserInterface extends JFrame {
     transient ArrayList<Button> difficultyScreenButtons;
     private static final String LOG_CONTEXT = "[USER INTERFACE]";
 
-    // Start screen colors
+    // Start screen
     private static final Color START_GRADIENT_TOP = new Color(50, 50, 150);
     private static final Color START_GRADIENT_BOTTOM = new Color(0, 0, 50);
     private static final Color START_BUTTON = new Color(70, 130, 180);
     private static final Color START_BUTTON_HOVER = new Color(100, 149, 237);
 
-    // Mode screen colors
+    // Mode screen
     private static final Color MODE_GRADIENT_TOP = new Color(70, 70, 170);
     private static final Color MODE_GRADIENT_BOTTOM = new Color(20, 20, 70);
     private static final Color MODE_BUTTON = new Color(90, 150, 200);
     private static final Color MODE_BUTTON_HOVER = new Color(120, 169, 255);
 
-    // Difficulty screen colors
+    // Difficulty screen
     private static final Color DIFFICULTY_GRADIENT_TOP = new Color(40, 60, 140);
     private static final Color DIFFICULTY_GRADIENT_BOTTOM = new Color(10, 10, 40);
     private static final Color DIFFICULTY_BUTTON = new Color(60, 120, 170);
     private static final Color DIFFICULTY_BUTTON_HOVER = new Color(80, 139, 227);
 
-    // Pause screen colors
+    // Pause screen
     private static final Color PAUSE_GRADIENT_TOP = new Color(40, 100, 40);
     private static final Color PAUSE_GRADIENT_BOTTOM = new Color(0, 40, 0);
     private static final Color PAUSE_BUTTON = new Color(60, 140, 60);
-    private static final Color PAUSE_BUTTON_HOVER = new Color(80, 160, 80);
+    private static final Color PAUSE_BUTTON_HOVER = new Color(90, 170, 100);
 
-    // Game over screen colors
+    // Game over screen
     private static final Color GAMEOVER_OVERLAY = new Color(120, 0, 0, 180);
     private static final Color GAMEOVER_BUTTON = new Color(140, 40, 40);
     private static final Color GAMEOVER_BUTTON_HOVER = new Color(170, 60, 60);
@@ -222,30 +222,13 @@ public class UserInterface extends JFrame {
 
     public void handleHover(Point p) {
         ArrayList<Button> currentButtons = switch (gp.getGameState()) {
-            case START -> {
-                setButtonColors(startScreenButtons, START_BUTTON);
-                yield startScreenButtons;
-            }
-            case GAME_MODE_SCREEN -> {
-                setButtonColors(modeScreenButtons, MODE_BUTTON);
-                yield modeScreenButtons;
-            }
-            case DIFFICULTY_SCREEN -> {
-                setButtonColors(difficultyScreenButtons, DIFFICULTY_BUTTON);
-                yield difficultyScreenButtons;
-            }
-            case PAUSED -> {
-                setButtonColors(pauseScreenButtons, PAUSE_BUTTON);
-                yield pauseScreenButtons;
-            }
-            case FINISHED_LOST, FINISHED_WON -> {
-                setButtonColors(endScreenButtons, GAMEOVER_BUTTON);
-                yield endScreenButtons;
-            }
+            case START -> startScreenButtons;
+            case GAME_MODE_SCREEN -> modeScreenButtons;
+            case DIFFICULTY_SCREEN -> difficultyScreenButtons;
+            case PAUSED -> pauseScreenButtons;
+            case FINISHED_LOST, FINISHED_WON -> endScreenButtons;
             default -> new ArrayList<>();
         };
-
-        // Handle hover effects
         for (Button button : currentButtons) {
             if (button.contains(p)) {
                 Color hoverColor = switch (gp.getGameState()) {
@@ -258,12 +241,17 @@ public class UserInterface extends JFrame {
                 };
                 button.setBackgroundColor(hoverColor);
             }
-        }
-    }
-
-    private void setButtonColors(ArrayList<Button> buttons, Color defaultColor) {
-        for (Button button : buttons) {
-            button.setBackgroundColor(defaultColor);
+            else{
+                Color normalColor = switch (gp.getGameState()) {
+                    case START -> START_BUTTON;
+                    case GAME_MODE_SCREEN -> MODE_BUTTON;
+                    case DIFFICULTY_SCREEN -> DIFFICULTY_BUTTON;
+                    case PAUSED -> PAUSE_BUTTON;
+                    case FINISHED_LOST, FINISHED_WON -> GAMEOVER_BUTTON;
+                    default -> START_BUTTON;
+                };
+                button.setBackgroundColor(normalColor);
+            }
         }
     }
 
@@ -328,7 +316,11 @@ public class UserInterface extends JFrame {
                 gp.setGameState(Engine.GameState.START);
         });
         startScreenButtons.get(2).addActionListener(e -> System.exit(0));
+        for(Button button : startScreenButtons){
+            button.setBackgroundColor(START_BUTTON);
+        }
     }
+
     private void initModeButtons(){
         modeScreenButtons.getFirst().addActionListener(e -> {
             gp.setGameMode(Engine.GameMode.STORY);
@@ -339,6 +331,9 @@ public class UserInterface extends JFrame {
             Engine.setupCustomMode();
         });
         modeScreenButtons.get(2).addActionListener(e -> gp.setGameState(Engine.GameState.START));
+        for(Button button : modeScreenButtons){
+            button.setBackgroundColor(MODE_BUTTON);
+        }
     }
 
     private void initDiffButtons(){
@@ -346,6 +341,9 @@ public class UserInterface extends JFrame {
         difficultyScreenButtons.get(1).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.MEDIUM));
         difficultyScreenButtons.get(2).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.HARD));
         difficultyScreenButtons.get(3).addActionListener(e -> gp.setGameDifficulty(Engine.GameDifficulty.IMPOSSIBLE));
+        for(Button button : difficultyScreenButtons){
+            button.setBackgroundColor(DIFFICULTY_BUTTON);
+        }
     }
 
     private void initPauseButtons(){
@@ -365,6 +363,9 @@ public class UserInterface extends JFrame {
         });
         pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(gp));
         pauseScreenButtons.get(5).addActionListener(e -> FileManager.loadGame(gp));
+        for(Button button : pauseScreenButtons){
+            button.setBackgroundColor(PAUSE_BUTTON);
+        }
     }
 
     private void initGameOverButtons(){
@@ -374,6 +375,9 @@ public class UserInterface extends JFrame {
             gp.setGameState(Engine.GameState.RUNNING);
         });
         endScreenButtons.get(2).addActionListener(e -> System.exit(0));
+        for(Button button : endScreenButtons){
+            button.setBackgroundColor(GAMEOVER_BUTTON);
+        }
     }
 
 
