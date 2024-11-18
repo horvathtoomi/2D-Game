@@ -171,10 +171,8 @@ public class ConsoleHandler {
 
     public void executeCommand(String input) {
         if (input.isEmpty()) return;
-
         String[] parts = input.trim().toLowerCase().split("\\s+");
         Command command = commandMap.get(parts[0]);
-
         if (command != null) {
             try {
                 command.execute(parts);

@@ -20,6 +20,8 @@ public class ConsoleGUI extends JFrame {
     private final CommandHistory commandHistory;
     private final CommandCompleter commandCompleter;
     private volatile boolean isScriptMode;
+    private boolean isLastCompletionSame = false;
+    private String lastCompletedInput = "";
     private static int numOfMakeEnd = 0;
 
     public ConsoleGUI(Engine gp, ConsoleHandler consoleHandler) {
@@ -166,20 +168,28 @@ public class ConsoleGUI extends JFrame {
         if (currentInput.isEmpty()) {
             return;
         }
-
-        String lastWord = currentInput.substring(currentInput.lastIndexOf(' ') + 1);
-        String completed = commandCompleter.complete(lastWord);
-
-        if (!completed.equals(lastWord)) {
-            if (currentInput.contains(" ")) {
-                String prefix = currentInput.substring(0, currentInput.lastIndexOf(' ') + 1);
-                inputField.setText(prefix + completed);
-            } else {
-                inputField.setText(completed);
-            }
-            inputField.setCaretPosition(inputField.getText().length());
+        if (!currentInput.equals(lastCompletedInput)) {
+            isLastCompletionSame = false;
         }
+        boolean endsWithSpace = inputField.getText().endsWith(" ");
+        String[] parts = currentInput.split("\\s+");
+        String completed;
+        if (endsWithSpace || parts.length > 1) {
+            String mainCommand = parts[0].toLowerCase();
+            String partial = parts.length > 1 ? parts[1].toLowerCase() : "";
+            completed = commandCompleter.complete(mainCommand + " " + partial, isLastCompletionSame);
 
+            int lastSpaceIndex = completed.lastIndexOf(' ');
+            String prefix = parts[0] + " ";
+            inputField.setText(prefix + completed.substring(lastSpaceIndex + 1));
+        }
+        else {
+            completed = commandCompleter.complete(currentInput, isLastCompletionSame);
+            inputField.setText(completed);
+        }
+        isLastCompletionSame = true;
+        lastCompletedInput = inputField.getText().trim();
+        inputField.setCaretPosition(inputField.getText().length());
         inputField.requestFocusInWindow();
     }
 
