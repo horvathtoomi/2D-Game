@@ -58,14 +58,12 @@ public class Attack extends Entity {
             gp.removeEnemy(this);
             return;
         }
-
         Rectangle playerHitbox = new Rectangle(gp.player.getWorldX() + gp.player.solidArea.x, gp.player.getWorldY() + gp.player.solidArea.y, gp.player.solidArea.width, gp.player.solidArea.height); //Width=32, Height=32
         if (solidArea.intersects(playerHitbox.getBounds())) {
-            gp.player.setHealth(Math.max(0,gp.player.getHealth()-damage));
+            gp.player.dealDamage(damage);
             gp.removeEnemy(this);
             return;
         }
-
         for (Entity entity : gp.getEntity()) {
             if (entity instanceof Enemy) {
                 Rectangle entityHitbox = new Rectangle(entity.getWorldX() + entity.solidArea.x,
@@ -73,17 +71,15 @@ public class Attack extends Entity {
                         entity.solidArea.width,
                         entity.solidArea.height);
                 if (solidArea.intersects(entityHitbox)) {
-                    entity.setHealth(Math.max(0,entity.getHealth()-damage));
+                    entity.dealDamage(damage);
                     gp.removeEnemy(this);
                 }
             }
         }
         imageChange++;
         if (imageChange > 5) {
-            if (image == image1)
-                image = image2;
-            else
-                image = image1;
+            if (image == image1) image = image2;
+            else image = image1;
             imageChange = 0;
         }
     }

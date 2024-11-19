@@ -38,13 +38,17 @@ public class Entity{
 
     public void setWidth(int a) {width=a;}
     public void setHeight(int a) {height=a;}
-    public void setWorldX(int a) {worldX = a;}
-    public void setWorldY(int a) {worldY = a;}
+    public void setWorldX(int a) {worldX = Math.max(a,0);}
+    public void setWorldY(int a) {worldY = Math.max(a,0);}
     public void setScreenX(int a) {screenX = a;}
     public void setScreenY(int a) {screenY = a;}
     public void setSpeed(int a) {speed = a;}
     public void setHealth(int a) {health = a;}
     public void setMaxHealth(int a) {maxHealth = a;}
+
+    public void dealDamage(int damage){
+        setHealth(Math.max(getHealth() - damage, 0));
+    }
 
     public Entity(Engine gp) {
         this.gp = gp;

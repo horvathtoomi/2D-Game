@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
-    public boolean isAttacking = false;
+    public static boolean isAttacking = false;
     private boolean hasReducedDurability = false;
     private long lastAttackTime = 0;
     private final InputHandler kezelo;
@@ -23,9 +23,14 @@ public class Player extends Entity {
             right_key, right_boots, right_sword,
             attack_up, attack_down, attack_left, attack_rigth;
 
-    public Inventory getInventory() {
-        return inventory;
+    public void setPlayerHealth(int health) {
+        if(health > maxHealth)
+            setHealth(maxHealth);
+        else
+            setHealth(Math.max(health, 0));
     }
+
+    public Inventory getInventory() {return inventory;}
 
     public Player(Engine panel, InputHandler kezelo) {
         super(panel);
@@ -39,6 +44,8 @@ public class Player extends Entity {
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         getPlayerImage();
+        setSpeed(3);
+        direction = "down";
     }
 
     public void setDefaultValues() {
@@ -59,8 +66,6 @@ public class Player extends Entity {
                 setWorldY(gp.getMaxWorldRow()/2);
             }
         }
-        setSpeed(3);
-        direction = "down";
     }
 
     private int[] getNotSolidTile(int[][] custom_map) {

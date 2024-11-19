@@ -1,6 +1,7 @@
 package object;
 
 import entity.Entity;
+import entity.Player;
 import entity.npc.NPC_Wayfarer;
 import main.Engine;
 
@@ -89,8 +90,9 @@ public abstract class Weapon extends SuperObject {
 
     @Override
     public void use(){
-        if(gp.player.isAttacking)
-            setDurability(getDurability() - getUsageDamage());
+        if(Player.isAttacking) {
+            setDurability(Math.max(getDurability()-getUsageDamage(), 0));
+        }
     }
 
     @Override

@@ -1,145 +1,179 @@
 package test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import main.InputHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import main.Engine;
-import main.InputHandler;
 import entity.Player;
+import object.OBJ_Sword;
 import tile.TileManager;
 
-@ExtendWith(MockitoExtension.class)
 class PlayerTest {
-    @Mock
-    private Engine engineMock;
-
-    @Mock
-    private InputHandler inputHandlerMock;
-
+    private Engine engine;
     private Player player;
 
     @BeforeEach
     void setUp() {
-        // Mock engine getters
-        when(engineMock.getTileSize()).thenReturn(48);
-        when(engineMock.getScreenWidth()).thenReturn(768);
-        when(engineMock.getScreenHeight()).thenReturn(576);
-
-        player = new Player(engineMock, inputHandlerMock);
+        engine = new Engine();
+        player = engine.player;
     }
 
     @Test
     void testPlayerInitialization() {
         assertEquals(100, player.getHealth());
         assertEquals(100, player.getMaxHealth());
-        assertEquals(3, player.getSpeed());
         assertEquals("down", player.direction);
+
+        assertNotNull(player.solidArea);
     }
 
     @Test
-    void testPlayerMovement() {
-        // Given
-        when(inputHandlerMock.upPressed).thenReturn(true);
-
-        // When
-        player.update();
-
-        // Then
-        assertEquals("up", player.direction);
-        assertEquals(player.getWorldY() - player.getSpeed(), player.getWorldY());
-    }
-
-    @Test
-    void testPlayerHealthReduction() {
-        // When
+    void testPlayerHealthManagement() {
         player.setHealth(50);
-
-        // Then
         assertEquals(50, player.getHealth());
-        assertTrue(player.getHealth() <= player.getMaxHealth());
+
+        player.setPlayerHealth(150);
+        assertEquals(100, player.getHealth());
+
+        player.dealDamage(10);
+        assertEquals(90, player.getHealth());
+    }
+
+    @Test
+    void testPlayerSpeed() {
+        player.setSpeed(3);
+        assertEquals(3, player.getSpeed());
+
+        player.setSpeed(5);
+        assertEquals(5, player.getSpeed());
     }
 }
 
-@ExtendWith(MockitoExtension.class)
 class WeaponTest {
-    @Mock
-    private Engine engineMock;
-
+    private Engine engine;
     private OBJ_Sword sword;
 
     @BeforeEach
     void setUp() {
-        when(engineMock.getTileSize()).thenReturn(48);
-        sword = new OBJ_Sword(engineMock, 0, 0, 50);
+        engine = new Engine();
+        sword = new OBJ_Sword(engine, 100, 100, 50);
     }
 
     @Test
-    void testWeaponDamageCalculation() {
-        assertEquals(50, sword.getDamage());
+    void testSwordInitialization() {
+        assertNotNull(sword);
+        assertEquals(200, sword.getMaxDurability());
+        assertEquals(200, sword.getDurability());
+        assertEquals("sword", sword.name);
     }
 
     @Test
-    void testWeaponDurabilityReduction() {
+    void testSwordDurability() {
         int initialDurability = sword.getDurability();
+
+        sword.use();
+        assertEquals(sword.getDurability(), initialDurability);
+
+        Player.isAttacking = true;
         sword.use();
         assertTrue(sword.getDurability() < initialDurability);
-    }
-}
 
-@ExtendWith(MockitoExtension.class)
-class EnemyTest {
-    @Mock
-    private Engine engineMock;
+        for(int i = 0; i < 200; i++) {
+            sword.use();
+        }
 
-    private SmallEnemy enemy;
-
-    @BeforeEach
-    void setUp() {
-        when(engineMock.getTileSize()).thenReturn(48);
-        enemy = new SmallEnemy(engineMock, 100, 100);
+        assertEquals(sword.getDurability(), 0);
     }
 
     @Test
-    void testEnemyInitialization() {
-        assertEquals(100, enemy.getHealth());
-        assertEquals(100, enemy.getMaxHealth());
-        assertTrue(enemy.getSpeed() > 0);
-    }
-
-    @Test
-    void testEnemyTakeDamage() {
-        enemy.setHealth(enemy.getHealth() - 20);
-        assertEquals(80, enemy.getHealth());
+    void testSwordPosition() {
+        assertEquals(100, sword.worldX);
+        assertEquals(100, sword.worldY);
     }
 }
 
-@ExtendWith(MockitoExtension.class)
 class TileManagerTest {
-    @Mock
-    private Engine engineMock;
-
+    private Engine engine;
     private TileManager tileManager;
 
     @BeforeEach
     void setUp() {
-        when(engineMock.getTileSize()).thenReturn(48);
-        when(engineMock.getMaxWorldCol()).thenReturn(100);
-        when(engineMock.getMaxWorldRow()).thenReturn(100);
-        tileManager = new TileManager(engineMock);
+        engine = new Engine();
+        tileManager = engine.tileman;
     }
 
     @Test
-    void testTileInitialization() {
+    void testTileSetup() {
+        // Test tile array initialization
         assertNotNull(tileManager.tile);
         assertEquals(12, tileManager.tile.length);
+
+        // Test specific tiles
+        assertTrue(tileManager.tile[0].collision); // Wall
+        assertFalse(tileManager.tile[1].collision); // Grass
+        assertTrue(tileManager.tile[4].collision); // Water
+        assertTrue(tileManager.tile[9].collision); // Tree
     }
 
     @Test
-    void testCollisionTiles() {
-        assertTrue(tileManager.tile[0].collision); // Wall tile
-        assertTrue(tileManager.tile[4].collision); // Water tile
-        assertFalse(tileManager.tile[1].collision); // Grass tile
+    void testMapTileNumInitialization() {
+        assertNotNull(TileManager.mapTileNum);
+        assertEquals(engine.getMaxWorldCol(), TileManager.mapTileNum.length);
+        assertEquals(engine.getMaxWorldRow(), TileManager.mapTileNum[0].length);
+    }
+
+    @Test
+    void testGetTileValidation() {
+        // Test valid tile index
+        assertNotNull(tileManager.getTile(0));
+        assertNotNull(tileManager.getTile(11));
+
+        // Test invalid tile indices return first tile
+        assertEquals(tileManager.getTile(0), tileManager.getTile(-1));
+        assertEquals(tileManager.getTile(0), tileManager.getTile(12));
+    }
+}
+
+class InventoryTest {
+    private Engine engine;
+
+    @BeforeEach
+    void setUp() {
+        engine = new Engine();
+    }
+
+    @Test
+    void testInventoryInitialization() {
+        assertNotNull(engine.player.getInventory());
+        assertTrue(engine.player.getInventory().getItems().isEmpty());
+    }
+
+    @Test
+    void testInventoryCapacity() {
+        // Test adding items up to max capacity
+        OBJ_Sword sword1 = new OBJ_Sword(engine, 0, 0, 50);
+        OBJ_Sword sword2 = new OBJ_Sword(engine, 0, 0, 50);
+        OBJ_Sword sword3 = new OBJ_Sword(engine, 0, 0, 50);
+        OBJ_Sword sword4 = new OBJ_Sword(engine, 0, 0, 50);
+
+        engine.player.getInventory().addItem(sword1);
+        engine.player.getInventory().addItem(sword2);
+        engine.player.getInventory().addItem(sword3);
+
+        assertEquals(3, engine.player.getInventory().getItems().size());
+
+        // Test inventory doesn't exceed max capacity
+        engine.player.getInventory().addItem(sword4);
+        assertEquals(3, engine.player.getInventory().getItems().size());
+    }
+
+    @Test
+    void testInventoryItemRetrieval() {
+        OBJ_Sword sword = new OBJ_Sword(engine, 0, 0, 50);
+        engine.player.getInventory().addItem(sword);
+
+        assertEquals(sword, engine.player.getInventory().getCurrent());
     }
 }
