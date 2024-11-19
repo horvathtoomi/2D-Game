@@ -24,9 +24,6 @@ public class ConsoleGUI extends JFrame {
     private String lastCompletedInput = "";
     private static int numOfMakeEnd = 0;
 
-    public String getPrevious() {
-        return commandHistory.getPrevious();
-    }
 
     public ConsoleGUI(Engine gp, ConsoleHandler consoleHandler) {
         super("Game Console");
@@ -60,7 +57,6 @@ public class ConsoleGUI extends JFrame {
         inputField.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 
 
-        // Layout setup
         setLayout(new BorderLayout());
         add(scrollPane, BorderLayout.CENTER);
 
@@ -75,10 +71,8 @@ public class ConsoleGUI extends JFrame {
         inputPanel.add(inputField, BorderLayout.CENTER);
         add(inputPanel, BorderLayout.SOUTH);
 
-        // Input handling
         inputField.addActionListener(_ -> handleInput());
 
-        // Extended KeyListener
         inputField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -94,7 +88,6 @@ public class ConsoleGUI extends JFrame {
             }
         });
 
-        // Window closing handling
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override

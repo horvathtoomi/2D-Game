@@ -2,6 +2,8 @@ package main;
 
 import entity.*;
 import object.SuperObject;
+import tile.TileManager;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CollisionChecker {
@@ -29,29 +31,29 @@ public class CollisionChecker {
         switch(entity.direction){
             case "up":
                 entityTopRow = (entityTopWorldY-entity.getSpeed())/gp.getTileSize();
-                tileNum1 = gp.tileman.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = gp.tileman.mapTileNum[entityRightCol][entityTopRow];
+                tileNum1 = TileManager.mapTileNum[entityLeftCol][entityTopRow];
+                tileNum2 = TileManager.mapTileNum[entityRightCol][entityTopRow];
                 if(gp.tileman.tile[tileNum1].collision||gp.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
             case "down":
                 entityBottomRow = (entityBottomWorldY+entity.getSpeed())/gp.getTileSize();
-                tileNum1 = gp.tileman.mapTileNum[entityLeftCol][entityBottomRow];
-                tileNum2 = gp.tileman.mapTileNum[entityRightCol][entityBottomRow];
+                tileNum1 = TileManager.mapTileNum[entityLeftCol][entityBottomRow];
+                tileNum2 = TileManager.mapTileNum[entityRightCol][entityBottomRow];
                 if(gp.tileman.tile[tileNum1].collision||gp.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
             case "left":
                 entityLeftCol = (entityLeftWorldX-entity.getSpeed())/gp.getTileSize();
-                tileNum1 = gp.tileman.mapTileNum[entityLeftCol][entityTopRow];
-                tileNum2 = gp.tileman.mapTileNum[entityLeftCol][entityBottomRow];
+                tileNum1 = TileManager.mapTileNum[entityLeftCol][entityTopRow];
+                tileNum2 = TileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 if(gp.tileman.tile[tileNum1].collision||gp.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
             case "right":
                 entityRightCol = (entityRightWorldX+entity.getSpeed())/gp.getTileSize();
-                tileNum1 = gp.tileman.mapTileNum[entityRightCol][entityTopRow];
-                tileNum2 = gp.tileman.mapTileNum[entityRightCol][entityBottomRow];
+                tileNum1 = TileManager.mapTileNum[entityRightCol][entityTopRow];
+                tileNum2 = TileManager.mapTileNum[entityRightCol][entityBottomRow];
                 if(gp.tileman.tile[tileNum1].collision||gp.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
@@ -67,11 +69,9 @@ public class CollisionChecker {
 
         for(SuperObject obj : gp.aSetter.list) {
             if (obj != null) {
-                // Get entity's solid area position
                 entity.solidArea.x = entity.getWorldX() + entity.solidArea.x;
                 entity.solidArea.y = entity.getWorldY() + entity.solidArea.y;
 
-                // Get object's solid area position
                 obj.solidArea.x = obj.worldX + obj.solidArea.x;
                 obj.solidArea.y = obj.worldY + obj.solidArea.y;
 
@@ -122,7 +122,6 @@ public class CollisionChecker {
                     }
                 }
 
-                // Reset positions
                 entity.solidArea.x = entity.solidAreaDefaultX;
                 entity.solidArea.y = entity.solidAreaDefaultY;
                 obj.solidArea.x = obj.solidAreaDefaultX;
@@ -133,16 +132,14 @@ public class CollisionChecker {
         return index;
     }
 
-    //Check npc/monster collision
     public int checkEntity(Entity entity, CopyOnWriteArrayList<Entity> second){
         int index=999;
         int it = 0;
         for(Entity target : second) {
             if (target != null) {
-                //Get entity's solid area
                 entity.solidArea.x = entity.getWorldX() + entity.solidArea.x;
                 entity.solidArea.y = entity.getWorldY() + entity.solidArea.y;
-                //Get the object's solid area position
+
                 target.solidArea.x = target.getWorldX() + target.solidArea.x;
                 target.solidArea.y = target.getWorldY() + target.solidArea.y;
 
@@ -188,10 +185,8 @@ public class CollisionChecker {
 
     public void checkPlayer(Entity entity){
         if (entity != null) {
-            //Get entity's solid area
             entity.solidArea.x = entity.getWorldX() + entity.solidArea.x;
             entity.solidArea.y = entity.getWorldY() + entity.solidArea.y;
-            //Get the object's solid area position
             gp.player.solidArea.x = gp.player.getWorldX() + gp.player.solidArea.x;
             gp.player.solidArea.y = gp.player.getWorldY() + gp.player.solidArea.y;
 

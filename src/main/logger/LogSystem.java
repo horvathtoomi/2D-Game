@@ -19,8 +19,6 @@ public final class LogSystem {
     private static final int LOG_QUEUE_CAPACITY = 10000;
     private static final int LOG_WORKER_THREADS = 2;
 
-    private static final Level GAME_EVENT = new Level("GAME_EVENT", Level.INFO.intValue() + 1) {};
-    private static final Level ENTITY_EVENT = new Level("ENTITY_EVENT", Level.INFO.intValue() + 2) {};
 
     private final Logger logger;
     private final ConcurrentLinkedQueue<String> recentLogs;
@@ -157,15 +155,6 @@ public final class LogSystem {
         }
     }
 
-    // Public logging methods
-    public void gameState(Supplier<String> messageSupplier) {
-        queueLog(GAME_EVENT, messageSupplier);
-    }
-
-    public void entityEvent(Supplier<String> messageSupplier) {
-        queueLog(ENTITY_EVENT, messageSupplier);
-    }
-
     public void error(String message, Throwable thrown) {
         queueLog(Level.SEVERE, () -> {
             StringBuilder sb = new StringBuilder(message);
@@ -187,16 +176,6 @@ public final class LogSystem {
         queueLog(Level.INFO, messageSupplier);
     }
 
-    public void debug(Supplier<String> messageSupplier) {
-        queueLog(Level.FINE, messageSupplier);
-    }
-
-    public void performance(Supplier<String> messageSupplier) {
-        if (logger.isLoggable(Level.FINE)) {
-            queueLog(Level.FINE, messageSupplier);
-        }
-    }
-
     private void shutdownHandlers() {
         synchronized (INSTANCE_LOCK) {
             if (fileHandler != null) {
@@ -209,19 +188,6 @@ public final class LogSystem {
                 logger.removeHandler(consoleHandler);
                 consoleHandler = null;
             }
-        }
-    }
-
-    public void cleanup() {
-        isRunning.set(false);
-        try {
-            loggerExecutor.shutdown();
-            if (!loggerExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                loggerExecutor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            loggerExecutor.shutdownNow();
         }
     }
 

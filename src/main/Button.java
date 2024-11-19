@@ -22,15 +22,12 @@ public class Button extends JButton {
     }
 
     public void draw(Graphics2D g2) {
-        // Draw background
         g2.setColor(backgroundColor);
         g2.fillRect(x, y, width, height);
 
-        // Draw border
         g2.setColor(Color.WHITE);
         g2.drawRect(x, y, width, height);
 
-        // Draw text
         g2.setColor(textColor);
         g2.setFont(font);
         FontMetrics fm = g2.getFontMetrics();

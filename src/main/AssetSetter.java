@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AssetSetter {
     Engine gp;
-    public List<SuperObject> list; //CopyOnWriteArrayList
+    public List<SuperObject> list;
     private final String[] possibleChestItems = {"key", "boots", "sword"};
     private final Random rand;
     private int mapNum = 1;

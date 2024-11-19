@@ -22,7 +22,6 @@ public class FileManager {
 
     private FileManager() {}
 
-    // Updated entity creators map with all entity types
     private static final Map<String, BiFunction<Engine, SerializableEntityState, Entity>> entityCreators = Map.of(
             "NPC_Wayfarer", (gp, state) -> createEntity(new NPC_Wayfarer(gp), state),
             "DragonEnemy", (gp, state) -> createEntity(new DragonEnemy(gp, state.worldX, state.worldY), state),
@@ -30,7 +29,6 @@ public class FileManager {
             "GiantEnemy", (gp, state) -> createEntity(new GiantEnemy(gp, state.worldX, state.worldY), state)
     );
 
-    // Updated object creators map with all object types
     private static final Map<String, BiFunction<Engine, SerializableObjectState, SuperObject>> objectCreators = Map.of(
             "key", (gp, state) -> createObject(new OBJ_Key(gp, state.worldX, state.worldY), state),
             "door", (gp, state) -> createObject(new OBJ_Door(gp, state.worldX, state.worldY), state),
@@ -41,7 +39,6 @@ public class FileManager {
 
     public static void saveGameState(Engine gp, String filename) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
-            // Save game metadata
             GameMetadata metadata = new GameMetadata(
                     gp.getGameMode(),
                     gp.getGameDifficulty(),
@@ -49,7 +46,6 @@ public class FileManager {
             );
             oos.writeObject(metadata);
 
-            // Save player state with inventory
             SerializablePlayerState playerState = new SerializablePlayerState(
                     gp.player,
                     gp.getGameDifficulty(),
@@ -57,21 +53,17 @@ public class FileManager {
             );
             oos.writeObject(playerState);
 
-            // Save tile map state
             SerializableTileState tileState = new SerializableTileState(
                     TileManager.mapTileNum
             );
             oos.writeObject(tileState);
 
-            // Save entities and objects based on game mode
             if (gp.getGameMode() == Engine.GameMode.STORY) {
-                // Save all entities
                 oos.writeObject(new ArrayList<>(gp.getEntity().stream()
                         .filter(Objects::nonNull)
                         .map(SerializableEntityState::new)
                         .toList()));
 
-                // Save all objects
                 oos.writeObject(new ArrayList<>(gp.aSetter.list.stream()
                         .filter(Objects::nonNull)
                         .map(SerializableObjectState::new)
@@ -82,22 +74,18 @@ public class FileManager {
 
     public static void loadGameState(Engine gp, String filename) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
-            // Load game metadata
             GameMetadata metadata = (GameMetadata) ois.readObject();
             gp.setGameMode(metadata.gameMode);
             gp.setGameDifficulty(metadata.difficulty);
             gp.setStoryLevel(metadata.currentStoryLevel);
 
-            // Load player state and inventory
             SerializablePlayerState playerState = (SerializablePlayerState) ois.readObject();
             updatePlayerState(gp.player, playerState);
             deserializeInventory(gp.player.getInventory(), playerState.inventoryState, gp);
 
-            // Load tile map state
             SerializableTileState tileState = (SerializableTileState) ois.readObject();
             TileManager.mapTileNum = tileState.mapTileNum;
 
-            // Load entities and objects for story mode
             if (metadata.gameMode == Engine.GameMode.STORY) {
                 List<SerializableEntityState> entityStates = (List<SerializableEntityState>) ois.readObject();
                 gp.setEntities(entityStates.stream()
@@ -119,8 +107,7 @@ public class FileManager {
                         item.getDurability(),
                         item.getMaxDurability(),
                         item instanceof Weapon ? ((Weapon) item).getDamage() : 0
-                ))
-                .toList();
+                )).toList();
     }
 
     private static void deserializeInventory(Inventory inventory, List<SerializableInventoryItem> items, Engine gp) {

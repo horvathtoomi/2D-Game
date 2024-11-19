@@ -1,5 +1,6 @@
 package main;
 
+import entity.Player;
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
 import serializable.FileManager;
@@ -53,7 +54,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_D -> rightPressed = false;
             case KeyEvent.VK_E -> {
                 attackPressed = false;
-                gp.player.isAttacking = false;
+                Player.isAttacking = false;
             }
         }
     }

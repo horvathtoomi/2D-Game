@@ -29,20 +29,16 @@ public class GUIMapGenerator extends JFrame {
         JButton chooseMapButton = new JButton("Choose Existing Map");
         JButton generateMapButton = new JButton("Generate New Map");
 
-        // Style buttons
         chooseMapButton.setPreferredSize(new Dimension(200, 40));
         generateMapButton.setPreferredSize(new Dimension(200, 40));
 
-        // Add choose map button
         gbc.gridx = 0;
         gbc.gridy = 0;
         add(chooseMapButton, gbc);
 
-        // Add generate map button
         gbc.gridy = 1;
         add(generateMapButton, gbc);
 
-        // Choose Map Button Action
         chooseMapButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Select Map File");
@@ -75,7 +71,6 @@ public class GUIMapGenerator extends JFrame {
             }
         });
 
-        // Generate Map Button Action
         generateMapButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Select Image File");

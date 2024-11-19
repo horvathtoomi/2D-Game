@@ -60,12 +60,10 @@ public class UserInterface extends JFrame {
         initializeScreenButtons();
     }
 
-    // A draw metódus módosítása a UserInterface osztályban:
     public void draw(Graphics2D g2) {
         this.g2 = g2;
         g2.setFont(arial_40);
 
-        // Enable antialiasing
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         switch (gp.getGameState()) {
@@ -133,10 +131,8 @@ public class UserInterface extends JFrame {
     }
 
     private void drawPauseScreen() {
-        // First draw the game screen
         drawPlayerHealthBar();
 
-        // Then add green gradient overlay
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.9f));
         drawGradientBackground(PAUSE_GRADIENT_TOP, PAUSE_GRADIENT_BOTTOM);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
@@ -154,10 +150,8 @@ public class UserInterface extends JFrame {
     }
 
     private void drawGameEndScreen() {
-        // First draw the game screen
         drawPlayerHealthBar();
 
-        // Add dark red overlay
         g2.setColor(GAMEOVER_OVERLAY);
         g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
 
@@ -266,21 +260,17 @@ public class UserInterface extends JFrame {
         int width = 200;
         int height = 20;
 
-        // Calculate the width of the red health bar
         int maxHealthBarWidth = (int) ((gp.player.getMaxHealth() / 100.0) * width);
         int normalHealthBarWidth = (int) ((gp.player.getHealth() / 100.0) * width);
         g2.setColor(Color.BLACK);
         g2.fillRect(x, y, maxHealthBarWidth, height);
-        // Draw red health bar
         g2.setColor(Color.RED);
         g2.fillRect(x, y, normalHealthBarWidth, height);
 
-        // Draw white border
         g2.setColor(Color.WHITE);
         g2.setStroke(new BasicStroke(2));
         g2.drawRect(x, y, maxHealthBarWidth, height);
 
-        // Draw HP text
         g2.setFont(new Font("Arial", Font.BOLD, 12));
         g2.setColor(Color.WHITE);
         String hpText = gp.player.getHealth() + "/" + gp.player.getMaxHealth() + " HP";

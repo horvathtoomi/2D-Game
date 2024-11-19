@@ -13,7 +13,7 @@ public class SerializableObjectState implements Serializable {
     public int worldX;
     public int worldY;
     public boolean collision;
-    public boolean opened;  // új mező a chest állapotának tárolásához
+    public boolean opened;
     public int durability;
     public int maxDurability;
     public int damage;
@@ -23,7 +23,7 @@ public class SerializableObjectState implements Serializable {
         this.worldX = obj.worldX;
         this.worldY = obj.worldY;
         this.collision = obj.collision;
-        this.opened = obj.opened;  // chest állapot mentése
+        this.opened = obj.opened;
         this.durability = obj.getDurability();
         this.maxDurability = obj.getMaxDurability();
         this.damage = (obj instanceof Weapon) ? ((Weapon) obj).getDamage() : 0;

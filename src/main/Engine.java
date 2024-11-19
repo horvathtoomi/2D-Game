@@ -18,8 +18,8 @@ public class Engine extends JPanel implements Runnable {
     private static final int TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE;
     private static final int MAX_SCREEN_COL = 24;
     private static final int MAX_SCREEN_ROW = 18;
-    private static int MAX_WORLD_COL = 100;
-    private static int MAX_WORLD_ROW = 100;
+    public static int MAX_WORLD_COL = 100;
+    public static int MAX_WORLD_ROW = 100;
     private static final int FPS = 60;
 
     private int currentStoryLevel = 0;

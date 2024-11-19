@@ -9,7 +9,7 @@ public class SerializableInventoryItem implements Serializable {
     String name;
     int durability;
     int maxDurability;
-    int damage;  // csak fegyverek esetén használt
+    int damage;
 
     SerializableInventoryItem(String name, int durability, int maxDurability, int damage) {
         this.name = name;

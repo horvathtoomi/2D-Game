@@ -167,7 +167,6 @@ public class TileManager {
             int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
             int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
 
-            // Adjust these calculations to prevent black screen at map edges
             if (gp.player.getScreenX() > gp.player.getWorldX()) {
                 screenX = worldX;
             }
@@ -183,7 +182,6 @@ public class TileManager {
                 screenY = gp.getScreenHeight() - (gp.getWorldHeight() - worldY);
             }
 
-            // Only draw the tile if it's within the screen bounds
             if (screenX > -gp.getTileSize() && screenX < gp.getScreenWidth() &&
                     screenY > -gp.getTileSize() && screenY < gp.getScreenHeight()) {
                 g2.drawImage(tile[tileNum].image, screenX, screenY, null);

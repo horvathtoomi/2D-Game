@@ -2,7 +2,6 @@ package main.logger;
 
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
-import java.util.function.Supplier;
 
 public final class GameLogger {
     private static volatile LogSystem instance;
@@ -53,16 +52,6 @@ public final class GameLogger {
         }
     }
 
-
-    // Static facade methods for logging
-    public static void gameState(String context, Supplier<String> messageSupplier) {
-        getInstance().gameState(() -> context + ": " + messageSupplier.get());
-    }
-
-    public static void entityEvent(String context, Supplier<String> messageSupplier) {
-        getInstance().entityEvent(() -> context + ": " + messageSupplier.get());
-    }
-
     public static void error(String context, String message, Throwable thrown) {
         getInstance().error(context + ": " + message, thrown);
     }
@@ -73,13 +62,5 @@ public final class GameLogger {
 
     public static void info(String context, String messageSupplier) {
         getInstance().info(() -> context + ": " + messageSupplier);
-    }
-
-    public static void debug(String context, Supplier<String> messageSupplier) {
-        getInstance().debug(() -> context + ": " + messageSupplier.get());
-    }
-
-    public static void performance(String context, Supplier<String> messageSupplier) {
-        getInstance().performance(() -> context + ": " + messageSupplier.get());
     }
 }
