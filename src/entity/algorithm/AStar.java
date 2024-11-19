@@ -15,7 +15,6 @@ public class AStar {
     private static final double ENTITY_AVOIDANCE_WEIGHT = 3.0;
     private static final int ENTITY_INFLUENCE_RADIUS = 3;
 
-    // Cache for frequently requested paths
     private static final Map<PathKey, PathCacheEntry> pathCache = new ConcurrentHashMap<>();
     private static final long CACHE_DURATION = 5000; // 5 seconds cache duration
 
@@ -99,13 +98,11 @@ public class AStar {
     }
 
     public static ArrayList<int[]> findPath(Engine gp, int startX, int startY, int endX, int endY) {
-        // Convert world coordinates to tile coordinates
         int startI = startY / gp.getTileSize();
         int startJ = startX / gp.getTileSize();
         int endI = endY / gp.getTileSize();
         int endJ = endX / gp.getTileSize();
 
-        // Validate coordinates
         try {
             startI = Math.max(Math.min(startI, gp.getMaxWorldRow() - 1), 0);
             startJ = Math.max(Math.min(startJ, gp.getMaxWorldCol() - 1), 0);
@@ -116,14 +113,12 @@ public class AStar {
             return null;
         }
 
-        // Check cache first
         PathKey key = new PathKey(startI, startJ, endI, endJ);
         PathCacheEntry cached = pathCache.get(key);
         if (cached != null && !cached.isExpired()) {
-            return new ArrayList<>(cached.path); // Return defensive copy
+            return new ArrayList<>(cached.path);
         }
 
-        // Calculate new path
         ArrayList<int[]> path = calculatePath(gp, startI, startJ, endI, endJ);
         if (path != null) {
             pathCache.put(key, new PathCacheEntry(path));
@@ -136,7 +131,6 @@ public class AStar {
         int rows = gp.getMaxWorldRow();
         int cols = gp.getMaxWorldCol();
 
-        // Initialize grid
         Cell[][] grid = new Cell[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -144,16 +138,13 @@ public class AStar {
             }
         }
 
-        // Calculate dynamic costs for entity avoidance
         Map<Cell, Double> dynamicCosts = calculateDynamicCosts(gp, rows, cols);
 
-        // Initialize open and closed lists
         PriorityQueue<Cell> openList = new PriorityQueue<>(
                 Comparator.comparingDouble(c -> c.finalCost)
         );
         boolean[][] closedList = new boolean[rows][cols];
 
-        // Set start position
         Cell start = grid[startI][startJ];
         Cell end = grid[endI][endJ];
         start.finalCost = 0;
@@ -168,7 +159,6 @@ public class AStar {
 
             closedList[current.i][current.j] = true;
 
-            // Check all neighbors including diagonals
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
                     if (i == 0 && j == 0) continue;
@@ -176,22 +166,18 @@ public class AStar {
                     int nextI = current.i + i;
                     int nextJ = current.j + j;
 
-                    // Validate coordinates
                     if (nextI < 0 || nextI >= rows || nextJ < 0 || nextJ >= cols) continue;
                     if (closedList[nextI][nextJ]) continue;
                     if (gp.tileman.tile[TileManager.mapTileNum[nextJ][nextI]].collision) continue;
 
                     Cell neighbor = grid[nextI][nextJ];
 
-                    // Calculate movement cost
                     double movementCost = (i == 0 || j == 0) ? V_H_COST : DIAGONAL_COST;
 
-                    // Add dynamic cost for entity avoidance
                     movementCost += dynamicCosts.getOrDefault(neighbor, 0.0);
 
                     double newCost = current.finalCost + movementCost;
 
-                    // Update neighbor if better path found
                     if (!openList.contains(neighbor) || newCost < neighbor.finalCost) {
                         neighbor.heuristicCost = calculateHeuristic(neighbor, endI, endJ);
                         neighbor.finalCost = newCost + neighbor.heuristicCost;
@@ -204,12 +190,10 @@ public class AStar {
                 }
             }
         }
-
-        return null; // No path found
+        return null;
     }
 
     private static int calculateHeuristic(Cell cell, int endI, int endJ) {
-        // Using Manhattan distance as heuristic
         return Math.abs(cell.i - endI) + Math.abs(cell.j - endJ);
     }
 
@@ -220,7 +204,6 @@ public class AStar {
             int entityI = entity.getWorldY() / gp.getTileSize();
             int entityJ = entity.getWorldX() / gp.getTileSize();
 
-            // Calculate influence area
             for (int i = Math.max(0, entityI - ENTITY_INFLUENCE_RADIUS);
                  i < Math.min(rows, entityI + ENTITY_INFLUENCE_RADIUS); i++) {
                 for (int j = Math.max(0, entityJ - ENTITY_INFLUENCE_RADIUS);

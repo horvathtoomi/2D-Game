@@ -18,6 +18,10 @@ public class ConsoleHandler {
         this.commandMap = initializeCommands();
     }
 
+    public ConsoleGUI getConsoleGUI() {
+        return consoleGUI;
+    }
+
     public void printToConsole(String message) {
         if (consoleGUI != null && consoleGUI.isVisible()) {
             consoleGUI.appendToConsole(message);

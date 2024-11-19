@@ -2,7 +2,6 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import main.InputHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import main.Engine;
@@ -11,12 +10,11 @@ import object.OBJ_Sword;
 import tile.TileManager;
 
 class PlayerTest {
-    private Engine engine;
     private Player player;
 
     @BeforeEach
     void setUp() {
-        engine = new Engine();
+        Engine engine = new Engine();
         player = engine.player;
     }
 
@@ -52,12 +50,11 @@ class PlayerTest {
 }
 
 class WeaponTest {
-    private Engine engine;
     private OBJ_Sword sword;
 
     @BeforeEach
     void setUp() {
-        engine = new Engine();
+        Engine engine = new Engine();
         sword = new OBJ_Sword(engine, 100, 100, 50);
     }
 
@@ -73,6 +70,7 @@ class WeaponTest {
     void testSwordDurability() {
         int initialDurability = sword.getDurability();
 
+        Player.isAttacking = false;
         sword.use();
         assertEquals(sword.getDurability(), initialDurability);
 

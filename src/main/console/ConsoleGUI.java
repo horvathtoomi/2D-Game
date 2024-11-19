@@ -24,6 +24,10 @@ public class ConsoleGUI extends JFrame {
     private String lastCompletedInput = "";
     private static int numOfMakeEnd = 0;
 
+    public String getPrevious() {
+        return commandHistory.getPrevious();
+    }
+
     public ConsoleGUI(Engine gp, ConsoleHandler consoleHandler) {
         super("Game Console");
         this.consoleHandler = consoleHandler;

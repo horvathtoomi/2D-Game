@@ -19,7 +19,7 @@ public abstract class Enemy extends Entity {
     private int shootingRate;
 
     private int shootCooldown;
-    private final int SHOOT_COOLDOWN_TIME = 60; // 2 seconds at 60 FPS
+    private final int SHOOT_COOLDOWN_TIME = 60; // 1 seconds at 60 FPS
 
     private int shootAnimationTimer;
     private final int SHOOT_ANIMATION_DURATION = 40;
@@ -29,7 +29,7 @@ public abstract class Enemy extends Entity {
     public ArrayList<int[]> path;
     public int pathIndex;
     protected int updateCounter;
-    protected final int UPDATE_INTERVAL = 90;// Update path every second (assuming 60 FPS)
+    protected final int UPDATE_INTERVAL = 90;
     private final int[] diffSpeed = {1,2,3,4};
     private final int[] diffShootingRate = {200, 150, 100, 50};
     private static final String LOG_CONTEXT = "[ENEMY]";
@@ -139,7 +139,6 @@ public abstract class Enemy extends Entity {
                 }
             }
         }
-        // Shooting logic
         if (random.nextInt(shootingRate) < 1 && shootCooldown == 0) {
             previousDirection = direction;
             direction = "shoot";
@@ -206,7 +205,6 @@ public abstract class Enemy extends Entity {
         double normalizedDx = dx / length;
         double normalizedDy = dy / length;
 
-        // Adjust starting position
         int startX = (int) (getWorldX() + normalizedDx * gp.getTileSize());
         int startY = (int) (getWorldY() + normalizedDy * gp.getTileSize());
         Attack attack = switch(name){

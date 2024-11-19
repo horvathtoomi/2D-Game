@@ -145,7 +145,7 @@ public class Commands {
         String normalizedFilename = RES_SCRIPTS_PATH + filename + ".txt";
         if (visitedScripts.contains(normalizedFilename)) {
             consoleHandler.printToConsole(
-            "--------------------------------------------------------\n" +
+            "\n----------------------------------------------------------\n" +
             "ERROR: Circular script reference detected: " + filename +
             "\n----------------------------------------------------------");
             return;

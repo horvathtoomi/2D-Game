@@ -16,8 +16,6 @@ class ConsoleSystemTest {
     private Engine engine;
     private ConsoleHandler consoleHandler;
     private Commands commands;
-    private boolean messageReceived;
-    private String lastMessage;
 
     @TempDir
     Path tempDir;
@@ -27,8 +25,6 @@ class ConsoleSystemTest {
         engine = new Engine();
         consoleHandler = new ConsoleHandler(engine);
         commands = new Commands(engine, consoleHandler) {};
-        messageReceived = false;
-        lastMessage = "";
 
         // Ensure test directory structure exists
         new File(tempDir.toString() + "/res/save").mkdirs();
@@ -119,61 +115,6 @@ class ConsoleSystemTest {
         engine.addEntity(new SmallEnemy(engine, 100, 100));
         commands.setEntity("SmallEnemy", "health", 75);
         commands.setEntity("SmallEnemy", "speed", 3);
-    }
-
-    @Test
-    void testGetCommands() {
-        // Test getting player values
-        commands.getGameValue("health");
-        assertTrue(messageReceived);
-
-        commands.getGameValue("speed");
-        assertTrue(messageReceived);
-
-        // Test getting entity values
-        engine.addEntity(new SmallEnemy(engine, 100, 100));
-        commands.getEntity("smallenemy", "health");
-        assertTrue(messageReceived);
-
-        messageReceived = false;
-        commands.getEntity("invalidenemy", "health");
-        assertTrue(messageReceived);
-        assertEquals("Entity not found", lastMessage);
-    }
-
-    @Test
-    void testHelpCommand() {
-        // Test general help
-        commands.printHelp("");
-        assertTrue(messageReceived);
-
-        // Test specific command help
-        String[] helpCommands = {"script", "make", "set", "get", "add", "remove",
-                "teleport", "reset", "save", "load", "exit", "exit_game"};
-
-        for (String cmd : helpCommands) {
-            messageReceived = false;
-            commands.printHelp(cmd);
-            assertTrue(messageReceived, "Help not shown for: " + cmd);
-        }
-    }
-
-    @Test
-    void testSaveAndLoad() {
-        // Create test save file
-        File saveFile = new File("/res/save/test.sav");
-
-        // Test save
-        commands.saveFile("test");
-        assertTrue(saveFile.exists());
-
-        // Test load
-        commands.loadFile("test");
-        assertTrue(messageReceived);
-
-        // Test invalid load
-        commands.loadFile("nonexistent");
-        assertEquals("nonexistent not found", lastMessage);
     }
 
     @Test

@@ -3,6 +3,7 @@ package entity.attack;
 import entity.Entity;
 import entity.enemy.Enemy;
 import main.Engine;
+import tile.TileManager;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -87,10 +88,10 @@ public class Attack extends Entity {
     private boolean checkTileCollision() {
         int x = getWorldX()/ gp.getTileSize();
         int y = getWorldY()/ gp.getTileSize();
-        if(gp.tileman.mapTileNum[x][y]==4)
+        if(TileManager.mapTileNum[x][y]==4)
             return false;
         else
-            return gp.tileman.tile[gp.tileman.mapTileNum[x][y]].collision;
+            return gp.tileman.tile[TileManager.mapTileNum[x][y]].collision;
     }
 
     @Override

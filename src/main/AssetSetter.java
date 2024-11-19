@@ -70,7 +70,7 @@ public class AssetSetter {
         }
     }
 
-    private void createObject(String name, int x, int y) {
+    public void createObject(String name, int x, int y) {
         SuperObject obj = switch (name) {
             case "key" -> new OBJ_Key(gp, x, y);
             case "chest" -> new OBJ_Chest(gp, x, y);
@@ -124,7 +124,7 @@ public class AssetSetter {
         int roll = rand.nextInt(100);
         if(roll < 50) return WeaponRarity.COMMON;
         if(roll < 70) return WeaponRarity.UNCOMMON;
-        if(roll < 85) return WeaponRarity.RARE;
+        if(roll < 90) return WeaponRarity.RARE;
         return WeaponRarity.LEGENDARY;
     }
 

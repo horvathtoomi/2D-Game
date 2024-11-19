@@ -19,7 +19,7 @@ public class CommandCompleter {
     );
 
     private String lastCompletion = null;
-    private List<String> currentCompletions = new ArrayList<>();
+    private final List<String> currentCompletions = new ArrayList<>();
     private int currentIndex = -1;
 
     public String complete(String input, boolean isNextCompletion) {
@@ -102,11 +102,5 @@ public class CommandCompleter {
         commands.stream()
                 .filter(cmd -> !cmd.startsWith(partial.substring(0, Math.min(1, partial.length()))))
                 .sorted().forEach(currentCompletions::add);
-    }
-
-    public void reset() {
-        lastCompletion = null;
-        currentCompletions.clear();
-        currentIndex = -1;
     }
 }
