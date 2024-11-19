@@ -27,14 +27,12 @@ class MapSystemTest {
         engine = new Engine();
         tileManager = engine.tileman;
 
-        // Create temporary directory structure
         tempDir = Files.createTempDirectory("game-test");
         createTestDirectories();
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        // Clean up temporary files
         Files.walk(tempDir)
                 .sorted(Comparator.reverseOrder())
                 .forEach(path -> {
@@ -62,12 +60,10 @@ class MapSystemTest {
             assertNotNull(tileManager.tile);
             assertEquals(12, tileManager.tile.length);
 
-            // Test specific tiles
             assertNotNull(tileManager.tile[0]); // Wall
             assertNotNull(tileManager.tile[1]); // Grass
             assertNotNull(tileManager.tile[4]); // Water
 
-            // Test collision properties
             assertTrue(tileManager.tile[0].collision); // Wall should have collision
             assertFalse(tileManager.tile[1].collision); // Grass should not have collision
             assertTrue(tileManager.tile[4].collision); // Water should have collision
@@ -76,11 +72,9 @@ class MapSystemTest {
         @Test
         @DisplayName("Should handle tile boundary cases")
         void testTileBoundaries() {
-            // Test invalid tile indices
             assertNotNull(tileManager.getTile(-1));
             assertNotNull(tileManager.getTile(12));
 
-            // Should return first tile for invalid indices
             assertEquals(tileManager.getTile(0), tileManager.getTile(-1));
             assertEquals(tileManager.getTile(0), tileManager.getTile(12));
         }
@@ -106,14 +100,11 @@ class MapSystemTest {
         @Test
         @DisplayName("Should validate image dimensions correctly")
         void testImageDimensionValidation() {
-            // Create test images
             BufferedImage validImage = new BufferedImage(32, 32, BufferedImage.TYPE_INT_RGB);
             BufferedImage invalidImage = new BufferedImage(30, 30, BufferedImage.TYPE_INT_RGB);
 
-            // Test valid dimensions
             assertDoesNotThrow(() -> MapGenerator.processImage(createTempImage(validImage, "valid.png")));
 
-            // Test invalid dimensions
             assertThrows(IllegalArgumentException.class,
                     () -> MapGenerator.processImage(createTempImage(invalidImage, "invalid.png")));
         }
@@ -124,12 +115,10 @@ class MapSystemTest {
             BufferedImage testBlock = new BufferedImage(16, 16, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2d = testBlock.createGraphics();
 
-            // Test grass color mapping
             g2d.setColor(new Color(37, 166, 22)); // Light green (grass)
             g2d.fillRect(0, 0, 16, 16);
             assertEquals(1, ColorAnalyzer.getClosestTile(ColorAnalyzer.getDominantColor(testBlock)));
 
-            // Test water color mapping
             g2d.setColor(new Color(80, 119, 219)); // Blue (water)
             g2d.fillRect(0, 0, 16, 16);
             assertEquals(4, ColorAnalyzer.getClosestTile(ColorAnalyzer.getDominantColor(testBlock)));
@@ -145,13 +134,11 @@ class MapSystemTest {
         @Test
         @DisplayName("Should load story map correctly")
         void testStoryMapLoading() throws IOException {
-            // Create test story map file
             createTestStoryMapFile();
 
             tileManager.loadStoryMap(true);
             assertNotNull(TileManager.mapTileNum);
 
-            // Test map dimensions
             assertEquals(engine.getMaxWorldCol(), TileManager.mapTileNum.length);
             assertEquals(engine.getMaxWorldRow(), TileManager.mapTileNum[0].length);
         }
@@ -159,26 +146,22 @@ class MapSystemTest {
         @Test
         @DisplayName("Should handle missing map files")
         void testMissingMapHandling() {
-            // Delete any existing map files to test error handling
             assertDoesNotThrow(() -> tileManager.loadStoryMap(true));
         }
 
         @Test
         @DisplayName("Should load custom map correctly")
         void testCustomMapLoading() throws IOException {
-            // Create test custom map file
             Path customMapPath = createTestCustomMapFile();
 
             TileManager.loadCustomMap(customMapPath.toString());
             assertNotNull(TileManager.mapTileNum);
 
-            // Verify map contents
             assertTrue(TileManager.mapTileNum[0][0] >= 0);
             assertTrue(TileManager.mapTileNum[0][0] < tileManager.tile.length);
         }
     }
 
-    // Helper methods
     private String createTempImage(BufferedImage image, String filename) throws IOException {
         Path imagePath = tempDir.resolve(filename);
         ImageIO.write(image, "PNG", imagePath.toFile());

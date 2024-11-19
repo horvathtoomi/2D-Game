@@ -30,10 +30,8 @@ class CollisionCheckerTest {
         entity.setWorldY(0);
 
         collisionChecker.checkTile(entity);
-        // Edge of map should have collision
         assertTrue(entity.collisionOn);
 
-        // Move entity to non-collision tile
         entity.setWorldX(engine.getTileSize() * 2);
         entity.setWorldY(engine.getTileSize() * 2);
         entity.collisionOn = false;
@@ -79,13 +77,13 @@ class ColorSystemTest {
 
     @Test
     void testGetClosestTile() {
-        Color grassColor = new Color(37, 166, 22); // Light green
+        Color grassColor = new Color(37, 166, 22);
         int tileNumber = ColorAnalyzer.getClosestTile(grassColor);
-        assertEquals(1, tileNumber); // Assuming 1 is grass tile
+        assertEquals(1, tileNumber);
 
-        Color waterColor = new Color(80, 119, 219); // Blue
+        Color waterColor = new Color(80, 119, 219);
         tileNumber = ColorAnalyzer.getClosestTile(waterColor);
-        assertEquals(4, tileNumber); // Assuming 4 is water tile
+        assertEquals(4, tileNumber);
     }
 }
 
@@ -116,11 +114,9 @@ class NPCTest {
     void testWayfarerMovement() {
         NPC_Wayfarer wayfarer = new NPC_Wayfarer(engine);
 
-        // Force action update
         wayfarer.actionLockCounter = 120;
         wayfarer.setAction();
 
-        // Direction should change after action
         assertTrue(wayfarer.direction.equals("up") ||
                 wayfarer.direction.equals("down") ||
                 wayfarer.direction.equals("left") ||
@@ -142,7 +138,6 @@ class EntityTest {
         entity.setWorldX(100);
         entity.setWorldY(100);
 
-        // Test screen position calculations
         entity.setScreenX(entity.getWorldX() - engine.player.getWorldX() + engine.player.getScreenX());
         entity.setScreenY(entity.getWorldY() - engine.player.getWorldY() + engine.player.getScreenY());
 
@@ -154,7 +149,6 @@ class EntityTest {
     void testEntityBoundaries() {
         Entity entity = new NPC_Wayfarer(engine);
 
-        // Test world boundaries
         entity.setWorldX(-100);
         entity.setWorldY(-100);
 

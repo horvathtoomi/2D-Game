@@ -24,16 +24,13 @@ class SerializationTest {
         engine = new Engine();
         tempDir = Files.createTempDirectory("game-saves");
 
-        // Create save directory structure
         Files.createDirectories(tempDir.resolve("res/save"));
 
-        // Initialize game state with test data
         initializeTestGameState();
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        // Clean up temporary files
         Files.walk(tempDir)
                 .sorted(Comparator.reverseOrder())
                 .forEach(path -> {
@@ -46,19 +43,16 @@ class SerializationTest {
     }
 
     private void initializeTestGameState() {
-        // Set game mode and difficulty
         engine.setGameMode(Engine.GameMode.STORY);
         engine.setGameDifficulty(Engine.GameDifficulty.MEDIUM);
         engine.setStoryLevel(2);
 
-        // Set player state
         engine.player.setHealth(75);
         engine.player.setWorldX(100);
         engine.player.setWorldY(200);
         engine.player.setSpeed(4);
         engine.player.direction = "right";
 
-        // Add inventory items
         engine.player.getInventory().addItem(new OBJ_Sword(engine, 0, 0, 50));
         engine.player.getInventory().addItem(new OBJ_Key(engine, 0, 0));
 
@@ -67,7 +61,6 @@ class SerializationTest {
         engine.addEntity(new GiantEnemy(engine, 400, 400));
         engine.addEntity(new DragonEnemy(engine, 500, 500));
 
-        // Add objects
         engine.aSetter.list.add(new OBJ_Chest(engine, 600, 600));
         engine.aSetter.list.add(new OBJ_Door(engine, 700, 700));
     }
@@ -155,7 +148,6 @@ class SerializationTest {
             assertEquals(75, engine.player.getHealth());
             assertEquals(4, engine.player.getSpeed());
 
-            // Check entities
             assertTrue(engine.getEntity().stream()
                     .anyMatch(e -> e instanceof SmallEnemy));
             assertTrue(engine.getEntity().stream()
@@ -163,7 +155,6 @@ class SerializationTest {
             assertTrue(engine.getEntity().stream()
                     .anyMatch(e -> e instanceof DragonEnemy));
 
-            // Check objects
             assertTrue(engine.aSetter.list.stream()
                     .anyMatch(o -> o instanceof OBJ_Chest));
             assertTrue(engine.aSetter.list.stream()
@@ -242,7 +233,6 @@ class SerializationTest {
     @Test
     @DisplayName("Should handle version compatibility")
     void testVersionCompatibility() {
-        // Verify serialVersionUID is present in all serializable classes
         assertDoesNotThrow(() -> {
             Class.forName("serializable.GameMetadata").getDeclaredField("serialVersionUID");
             Class.forName("serializable.SerializablePlayerState").getDeclaredField("serialVersionUID");

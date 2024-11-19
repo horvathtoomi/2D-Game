@@ -35,7 +35,6 @@ class EnhancedEngineTest {
         @Test
         @DisplayName("Should create and add objects correctly")
         void testObjectCreation() {
-            // Test all object types
             assetSetter.list.clear();
 
             assetSetter.createObject("key", 100, 100);
@@ -82,8 +81,6 @@ class EnhancedEngineTest {
                     case LEGENDARY -> legendaryCount++;
                 }
             }
-
-            // Check probability distribution
             assertTrue(commonCount > uncommonCount);
             assertTrue(rareCount > legendaryCount);
         }
@@ -104,7 +101,6 @@ class EnhancedEngineTest {
         void testTileCollision() {
             Entity entity = new NPC_Wayfarer(engine);
 
-            // Test all directions
             String[] directions = {"up", "down", "left", "right"};
             for(String direction : directions) {
                 entity.direction = direction;
@@ -138,12 +134,10 @@ class EnhancedEngineTest {
         @Test
         @DisplayName("Should process damage correctly")
         void testDamageSystem() {
-            // Test player damage
             int initialHealth = engine.player.getHealth();
             engine.player.setHealth(initialHealth - 20);
             assertEquals(initialHealth - 20, engine.player.getHealth());
 
-            // Test enemy damage
             SmallEnemy enemy = new SmallEnemy(engine, 100, 100);
             int enemyInitialHealth = enemy.getHealth();
             enemy.setHealth(enemyInitialHealth - 30);
@@ -156,12 +150,10 @@ class EnhancedEngineTest {
             OBJ_Sword sword = new OBJ_Sword(engine, 0, 0, 50);
             engine.player.getInventory().addItem(sword);
 
-            // Test attack state
             Player.isAttacking = false;
             engine.player.attack();
             assertTrue(Player.isAttacking);
 
-            // Test weapon durability
             int initialDurability = sword.getDurability();
             sword.use();
             assertTrue(sword.getDurability() < initialDurability);
@@ -186,7 +178,6 @@ class EnhancedEngineTest {
         void testInventoryManagement() {
             Inventory inventory = engine.player.getInventory();
 
-            // Test adding items
             OBJ_Sword sword = new OBJ_Sword(engine, 0, 0, 50);
             OBJ_Key key = new OBJ_Key(engine, 0, 0);
             OBJ_Boots boots = new OBJ_Boots(engine, 0, 0);
@@ -197,12 +188,10 @@ class EnhancedEngineTest {
 
             assertEquals(3, inventory.getItems().size());
 
-            // Test inventory rotation
             SuperObject firstItem = inventory.getCurrent();
             inventory.rotate();
             assertNotEquals(firstItem, inventory.getCurrent());
 
-            // Test item removal
             inventory.removeItem("sword");
             assertEquals(2, inventory.getItems().size());
         }

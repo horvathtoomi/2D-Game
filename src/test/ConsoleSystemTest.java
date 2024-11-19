@@ -26,32 +26,27 @@ class ConsoleSystemTest {
         consoleHandler = new ConsoleHandler(engine);
         commands = new Commands(engine, consoleHandler) {};
 
-        // Ensure test directory structure exists
         new File(tempDir.toString() + "/res/save").mkdirs();
         new File(tempDir.toString() + "/res/scripts").mkdirs();
     }
 
     @Test
     void testRemoveEntities() {
-        // Add test entities
         engine.addEntity(new SmallEnemy(engine, 100, 100));
         engine.addEntity(new GiantEnemy(engine, 200, 200));
         engine.addEntity(new DragonEnemy(engine, 300, 300));
 
         int initialSize = engine.getEntity().size();
 
-        // Test removing specific entity type
         commands.removeEntities("SmallEnemy", false);
         assertEquals(initialSize - 1, engine.getEntity().size());
 
-        // Test removing all entities
         commands.removeEntities("all", true);
         assertTrue(engine.getEntity().isEmpty());
     }
 
     @Test
     void testAddEntities() {
-        // Test adding different entity types
         commands.add("smallenemy", 5, 5);
         commands.add("giantenemy", 10, 10);
         commands.add("dragonenemy", 15, 15);
@@ -59,18 +54,15 @@ class ConsoleSystemTest {
 
         assertEquals(4, engine.getEntity().size());
 
-        // Test invalid coordinates
         commands.add("smallenemy", -1, -1);
         assertEquals(4, engine.getEntity().size());
 
-        // Test invalid entity type
         commands.add("invalidenemy", 5, 5);
         assertEquals(4, engine.getEntity().size());
     }
 
     @Test
     void testAddObjects() {
-        // Test adding different object types
         commands.add("key", 5, 5);
         commands.add("door", 10, 10);
         commands.add("chest", 15, 15);
@@ -86,32 +78,28 @@ class ConsoleSystemTest {
         int initialY = engine.player.getWorldY();
 
         for(int i = 0; i < 12; i++) {
-                engine.tileman.getTile(i).collision = false;
+            engine.tileman.getTile(i).collision = false;
         }
 
         commands.teleport(11, 11);
         assertNotEquals(initialX, engine.player.getWorldX());
         assertNotEquals(initialY, engine.player.getWorldY());
 
-        // Test invalid coordinates
         commands.teleport(-1, -1);
         commands.teleport(1000, 1000);
     }
 
     @Test
     void testSetCommands() {
-        // Test setting player values
         commands.setGameValue("health", "50");
         assertEquals(50, engine.player.getHealth());
 
         commands.setGameValue("speed", "5");
         assertEquals(5, engine.player.getSpeed());
 
-        // Test setting entity values
         commands.setAll("speed", 4);
         commands.setAll("health", 100);
 
-        // Test setting specific entity
         engine.addEntity(new SmallEnemy(engine, 100, 100));
         commands.setEntity("SmallEnemy", "health", 75);
         commands.setEntity("SmallEnemy", "speed", 3);
@@ -119,7 +107,6 @@ class ConsoleSystemTest {
 
     @Test
     void testScriptCommands() throws IOException {
-        // Create test script file
         File scriptFile = new File(tempDir.toString() + "/res/scripts/test.txt");
         try (FileWriter writer = new FileWriter(scriptFile)) {
             writer.write("add smallenemy 10 10\n");
@@ -127,23 +114,19 @@ class ConsoleSystemTest {
             writer.write("teleport 15 15\n");
         }
 
-        // Test script execution
         commands.runScript("test");
 
-        // Test creating script
         ConsoleGUI mockGui = new ConsoleGUI(engine, consoleHandler);
         commands.createFile("newscript", mockGui);
     }
 
     @Test
     void testGameStateCommands() {
-        // Test game state changes
         assertEquals(Engine.GameState.START, engine.getGameState());
 
         engine.setGameState(Engine.GameState.RUNNING);
         assertEquals(Engine.GameState.RUNNING, engine.getGameState());
 
-        // Test difficulty changes
         engine.setGameDifficulty(Engine.GameDifficulty.EASY);
         assertEquals(Engine.GameDifficulty.EASY, engine.getGameDifficulty());
 

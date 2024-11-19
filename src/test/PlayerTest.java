@@ -124,11 +124,9 @@ class TileManagerTest {
 
     @Test
     void testGetTileValidation() {
-        // Test valid tile index
         assertNotNull(tileManager.getTile(0));
         assertNotNull(tileManager.getTile(11));
 
-        // Test invalid tile indices return first tile
         assertEquals(tileManager.getTile(0), tileManager.getTile(-1));
         assertEquals(tileManager.getTile(0), tileManager.getTile(12));
     }
@@ -150,7 +148,6 @@ class InventoryTest {
 
     @Test
     void testInventoryCapacity() {
-        // Test adding items up to max capacity
         OBJ_Sword sword1 = new OBJ_Sword(engine, 0, 0, 50);
         OBJ_Sword sword2 = new OBJ_Sword(engine, 0, 0, 50);
         OBJ_Sword sword3 = new OBJ_Sword(engine, 0, 0, 50);
@@ -162,7 +159,6 @@ class InventoryTest {
 
         assertEquals(3, engine.player.getInventory().getItems().size());
 
-        // Test inventory doesn't exceed max capacity
         engine.player.getInventory().addItem(sword4);
         assertEquals(3, engine.player.getInventory().getItems().size());
     }

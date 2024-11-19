@@ -74,10 +74,8 @@ class ButtonTest {
 
     @Test
     void testButtonContains() {
-        // Test point inside button
         assertTrue(button.contains(new Point(150, 125)));
 
-        // Test points outside button
         assertFalse(button.contains(new Point(50, 125)));
         assertFalse(button.contains(new Point(350, 125)));
         assertFalse(button.contains(new Point(150, 75)));
@@ -88,7 +86,6 @@ class ButtonTest {
     void testButtonColor() {
         Color newColor = new Color(255, 0, 0);
         button.setBackgroundColor(newColor);
-        // Since getBackgroundColor isn't public, we can only test that setBackgroundColor doesn't throw exception
         assertDoesNotThrow(() -> button.setBackgroundColor(newColor));
     }
 }
