@@ -73,6 +73,8 @@ public abstract class Weapon extends SuperObject {
             );
             if (hitbox.intersects(entityHitbox)) {
                 entity.setHealth(entity.getHealth() - getDamage());
+                if(entity.getHealth() <= 0)
+                    eng.player.defeatedEnemies++;
             }
         }
     }

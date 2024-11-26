@@ -18,7 +18,7 @@ public class ConsoleHandler {
 
     public ConsoleHandler(Engine eng) {
         this.eng = eng;
-        this.commands = new Commands(eng, this);  // Pass ConsoleHandler to Commands
+        this.commands = new Commands(eng, this);
         this.abortProcess = false;
         this.commandMap = initializeCommands();
     }

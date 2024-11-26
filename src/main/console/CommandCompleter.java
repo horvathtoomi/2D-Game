@@ -1,6 +1,7 @@
 package main.console;
 
 import java.util.*;
+import java.io.File;
 
 /**
  * A parancs kiegészítő osztály, amely kezeli a konzol parancsok automatikus kiegészítését.
@@ -9,7 +10,8 @@ import java.util.*;
 public class CommandCompleter {
 
     private String lastCompletion = null;
-    private final List<String> currentCompletions = new ArrayList<>();
+    private final List<String> currentCompletions = new ArrayList<>(getScriptFiles());
+    private List<String> scriptFiles = new ArrayList<>();
     private int currentIndex = -1;
 
     private final List<String> commands = Arrays.asList(
@@ -35,33 +37,71 @@ public class CommandCompleter {
         if (input == null || input.isEmpty()) {
             return "";
         }
-
         String[] parts = input.trim().split("\\s+");
-        boolean hasTrailingSpace = input.endsWith(" ");
-
-        if (parts.length == 1 && !hasTrailingSpace) {
+        boolean hasSpaceAtTheEnd = input.endsWith(" ");
+        if (parts.length == 1 && !hasSpaceAtTheEnd) {
             return completeMainCommand(parts[0], isNextCompletion);
-        } else {
+        }
+        else {
             String mainCommand = parts[0].toLowerCase();
-            String partial = hasTrailingSpace ? "" : parts[parts.length - 1].toLowerCase();
+            String partial = hasSpaceAtTheEnd ? "" : parts[parts.length - 1].toLowerCase();
 
-            if (!isNextCompletion || !Objects.equals(lastCompletion, partial)) {
-                initializeCompletions(mainCommand, partial, hasTrailingSpace);
+            if ("script".equals(mainCommand)) {
+                if (!hasSpaceAtTheEnd) {
+                    currentCompletions.clear();
+                    currentIndex = -1;
+                    lastCompletion = partial;
+
+                    if ("script".startsWith(partial)) {
+                        currentCompletions.add("script");
+                    }
+                } else {
+                    currentCompletions.clear();
+                    currentIndex = -1;
+                    lastCompletion = partial;
+                    scriptFiles = getScriptFiles();
+                    if (currentCompletions.isEmpty()) {
+                        currentCompletions.addAll(scriptFiles);
+                    }
+                }
+            } else {
+                if (!isNextCompletion || !Objects.equals(lastCompletion, partial)) {
+                    initializeCompletions(mainCommand, partial, hasSpaceAtTheEnd);
+                }
             }
             if (currentIndex >= currentCompletions.size() - 1) {
                 currentIndex = -1;
             }
-
             if (!currentCompletions.isEmpty()) {
                 currentIndex++;
                 lastCompletion = currentCompletions.get(currentIndex);
-                return String.join(" ", Arrays.copyOf(parts, parts.length - (hasTrailingSpace ? 0 : 1)))
-                        + (hasTrailingSpace ? "" : " ") + lastCompletion;
+                return String.join(" ", Arrays.copyOf(parts, parts.length - (hasSpaceAtTheEnd ? 0 : 1))) + (hasSpaceAtTheEnd ? "" : " ") + lastCompletion;
             }
-
             return input;
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private String completeMainCommand(String partial, boolean isNextCompletion) {
         if (!isNextCompletion || !Objects.equals(lastCompletion, partial)) {
@@ -97,6 +137,22 @@ public class CommandCompleter {
                     .sorted().forEach(currentCompletions::add);
         }
     }
+
+    public List<String> getScriptFiles() {
+        List<String> scriptFiles = new ArrayList<>();
+        File scriptDir = new File("res/scripts");
+        if (scriptDir.exists() && scriptDir.isDirectory()) {
+            File[] files = scriptDir.listFiles((dir, name) -> name.endsWith(".txt"));
+            if (files != null) {
+                for (File file : files) {
+                    scriptFiles.add(file.getName().replace(".txt", ""));
+                }
+                Collections.sort(scriptFiles);
+            }
+        }
+        return scriptFiles;
+    }
+
 
     private void initializeMainCompletions(String partial) {
         currentCompletions.clear();

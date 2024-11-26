@@ -24,6 +24,7 @@ public class Player extends Entity {
     private static final long ATTACK_COOLDOWN = 500;
     private static final int INTERACTION_COOLDOWN = 30; // frames
     private int interactionTimer = 0;
+    public int defeatedEnemies = 0;
     private BufferedImage up_key, up_boots, up_sword,
             down_key, down_boots, down_sword,
             left_key, left_boots, left_sword,
@@ -131,9 +132,7 @@ public class Player extends Entity {
         if (interactionTimer > 0) {
             interactionTimer--;
         }
-
         setSpeed(inventory.getCurrent() instanceof OBJ_Boots ? 4 : 3);
-
         if (!kezelo.attackPressed && isAttacking) {
             isAttacking = false;
             hasReducedDurability = false;
@@ -298,12 +297,7 @@ public class Player extends Entity {
         return y;
     }
 
-    @Override
-    public void draw(Graphics2D g2){
-        BufferedImage image = getStateImage();
-        int x = setAdjustedX();
-        int y = setAdjustedY();
-
+    private void imageDraw(Graphics2D g2, BufferedImage image, int x, int y){
         if(image == attack_up)
             g2.drawImage(image,x,y - eng.getTileSize(),null);
         else if(image == attack_down)
@@ -314,6 +308,14 @@ public class Player extends Entity {
             g2.drawImage(image,x,y,null);
         else
             g2.drawImage(image, x, y, null);
+    }
+
+    @Override
+    public void draw(Graphics2D g2){
+        BufferedImage image = getStateImage();
+        int x = setAdjustedX();
+        int y = setAdjustedY();
+        imageDraw(g2, image, x, y);
         inventory.draw(g2);
     }
 

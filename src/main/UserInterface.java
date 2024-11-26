@@ -2,7 +2,7 @@ package main;
 
 import main.logger.GameLogger;
 import serializable.FileManager;
-
+import leaderboard.LeaderboardDialog;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -143,8 +143,6 @@ public class UserInterface extends JFrame {
     }
 
     private void drawPauseScreen() {
-        drawPlayerHealthBar();
-
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.9f));
         drawGradientBackground(PAUSE_GRADIENT_TOP, PAUSE_GRADIENT_BOTTOM);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
@@ -162,8 +160,6 @@ public class UserInterface extends JFrame {
     }
 
     private void drawGameEndScreen() {
-        drawPlayerHealthBar();
-
         g2.setColor(GAMEOVER_OVERLAY);
         g2.fillRect(0, 0, eng.getScreenWidth(), eng.getScreenHeight());
 
@@ -327,6 +323,10 @@ public class UserInterface extends JFrame {
                 eng.setGameState(Engine.GameState.START);
         });
         startScreenButtons.get(2).addActionListener(e -> System.exit(0));
+        startScreenButtons.get(3).addActionListener(e ->{
+            LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
+            dialog.showDialog();
+        });
         for(Button button : startScreenButtons){
             button.setBackgroundColor(START_BUTTON);
         }
@@ -374,6 +374,10 @@ public class UserInterface extends JFrame {
         });
         pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(eng));
         pauseScreenButtons.get(5).addActionListener(e -> FileManager.loadGame(eng));
+        pauseScreenButtons.get(6).addActionListener(e -> {
+            LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
+            dialog.showDialog();
+        });
         for(Button button : pauseScreenButtons){
             button.setBackgroundColor(PAUSE_BUTTON);
         }
@@ -386,6 +390,10 @@ public class UserInterface extends JFrame {
             eng.setGameState(Engine.GameState.RUNNING);
         });
         endScreenButtons.get(2).addActionListener(e -> System.exit(0));
+        endScreenButtons.get(3).addActionListener(e -> {
+            LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
+            dialog.showDialog();
+        });
         for(Button button : endScreenButtons){
             button.setBackgroundColor(GAMEOVER_BUTTON);
         }
@@ -399,6 +407,7 @@ public class UserInterface extends JFrame {
         initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "Start Game");
         initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Load Game");
         initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Quit");
+        initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Leaderboard");
 
         initButtons("gamemode", eng.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "Story Mode");
         initButtons("gamemode", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Custom Map");
@@ -410,6 +419,8 @@ public class UserInterface extends JFrame {
         initButtons("pause", eng.getScreenWidth() / 2 + buttonWidth / 8, startY, buttonWidth, buttonHeight, "New Game");
         initButtons("pause", eng.getScreenWidth() / 2 + buttonWidth / 8, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Save Game");
         initButtons("pause", eng.getScreenWidth() / 2 + buttonWidth / 8, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Load Game");
+        initButtons("pause", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Leaderboard");
+
 
         initButtons("difficulty", eng.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY, buttonWidth, buttonHeight, "EASY");
         initButtons("difficulty", eng.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY + buttonHeight + 20, buttonWidth, buttonHeight, "MEDIUM");
@@ -419,6 +430,8 @@ public class UserInterface extends JFrame {
         initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "New Game");
         initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Load Game");
         initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit");
+        initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Leaderboard");
+
 
         initScreenButtonBehavior();
     }

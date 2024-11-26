@@ -1,0 +1,5 @@
+get health
+get speed
+set friendlyenemy health 100
+exit
+exit_game

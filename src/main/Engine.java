@@ -7,7 +7,7 @@ import main.logger.GameLogger;
 import map.MapGenerator;
 import object.SuperObject;
 import tile.TileManager;
-
+import leaderboard.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Engine extends JPanel implements Runnable {
 
+    private String playerName;
     private static final int ORIGINAL_TILE_SIZE = 16;
     private static final int SCALE = 3;
     private static final int TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE;
@@ -34,15 +35,15 @@ public class Engine extends JPanel implements Runnable {
     private final transient int[][] endPoints = {
             {100 * TILE_SIZE, 94 * TILE_SIZE},
             {TILE_SIZE, 85 * TILE_SIZE},
-            {3,3},
-            {5,5}
+            {3 * TILE_SIZE, 3 * TILE_SIZE},
+            {3 * TILE_SIZE, 3 * TILE_SIZE}
     };
 
     private final transient int[][] spawnPoints = {
             {6 * TILE_SIZE,4 * TILE_SIZE},
             {5 * TILE_SIZE, 10 * TILE_SIZE},
             {14 * TILE_SIZE, 54 * TILE_SIZE},
-            {TILE_SIZE, TILE_SIZE}
+            {95 * TILE_SIZE, 95 * TILE_SIZE}
     };
 
     public Player player;
@@ -50,6 +51,7 @@ public class Engine extends JPanel implements Runnable {
     public transient Thread gameThread;
     public transient TileManager tileman;
     private CopyOnWriteArrayList<Entity> entities;
+    private final GameTimer gameTimer = new GameTimer();
     public final transient InputHandler inpkez;
     public final transient ConsoleHandler console;
     public final transient CollisionChecker cChecker;
@@ -134,6 +136,7 @@ public class Engine extends JPanel implements Runnable {
         tileman.loadStoryMap(true);
         aSetter.loadLevelAssets(true);
         player.setDefaultValues();
+        playerName = JOptionPane.showInputDialog(null, "Enter your player name:", "Set Username", JOptionPane.PLAIN_MESSAGE);
     }
 
     /**
@@ -157,13 +160,15 @@ public class Engine extends JPanel implements Runnable {
      */
     public void run() {
         GameLogger.info(LOG_CONTEXT, "|STARTING GAME LOOP|");
-        double drawInterval = 1_000_000_000.0 / FPS; //Setting the game's FPS
+        double drawInterval = 1_000_000_000.0 / FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
         while (gameThread != null) {
             if(player.getHealth()<=0 && gameState == GameState.RUNNING)
                 gameState=GameState.FINISHED_LOST;
             else if(gameState == GameState.RUNNING)
                 update();
+            else
+                gameTimer.stop();
             repaint();
             try {
                 double remainingTime = nextDrawTime - System.nanoTime();
@@ -181,15 +186,14 @@ public class Engine extends JPanel implements Runnable {
      * Frissíti a játékost, entitásokat és objektumokat.
      */
     public void update() {
-        if(gameState == GameState.RUNNING) {
-            player.update();
-            entities.removeIf(Objects::isNull);
-            aSetter.list.removeIf(Objects::isNull);
-            entities.forEach(Entity::update);
-            aSetter.list.forEach(SuperObject::update);
-            player.getInventory().update();
-            checkLevelCompletion();
-        }
+        gameTimer.start();
+        player.update();
+        entities.removeIf(Objects::isNull);
+        aSetter.list.removeIf(Objects::isNull);
+        entities.forEach(Entity::update);
+        aSetter.list.forEach(SuperObject::update);
+        player.getInventory().update();
+        checkLevelCompletion();
     }
 
     /**
@@ -220,6 +224,7 @@ public class Engine extends JPanel implements Runnable {
         entities.clear();
         aSetter.list.clear();
         player = new Player(this, inpkez);
+        gameTimer.reset();
         if(gameMode.equals(GameMode.STORY)) {
             setupStoryMode();
             gameMode = GameMode.STORY;
@@ -232,7 +237,6 @@ public class Engine extends JPanel implements Runnable {
 
     /**
      * Ellenőrzi, hogy a játékos a célterületen belül van-e.
-     *
      * @return true ha a játékos a célterületen belül van
      */
     public boolean isPlayerWithinRadius() {
@@ -244,17 +248,22 @@ public class Engine extends JPanel implements Runnable {
      * Ellenőrzi a pályaszint teljesítését és kezeli a következő szintre lépést.
      */
     public void checkLevelCompletion() {
-        if(!isPlayerWithinRadius()) {
-            return;
-        }
+        if(!isPlayerWithinRadius()) {return;}
         if(currentStoryLevel < MAX_STORY_LEVEL) {
             currentStoryLevel++;
             tileman.loadStoryMap(false);
             aSetter.loadLevelAssets(false);
             player.setWorldX(spawnPoints[currentStoryLevel][0]);
             player.setWorldY(spawnPoints[currentStoryLevel][1]);
-        } else{
+        } else {
             gameState = GameState.FINISHED_WON;
+            if (playerName != null && !playerName.trim().isEmpty()) {
+                LeaderboardEntry entry = new LeaderboardEntry(
+                        playerName, gameTimer.getElapsedTimeInSeconds(),
+                        getGameDifficulty(), player.defeatedEnemies, player.getHealth()
+                );
+                LeaderboardManager.getInstance().addEntry(entry);
+            }
         }
     }
 
