@@ -4,24 +4,37 @@ import entity.Player;
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
 import serializable.FileManager;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+/**
+ * Az InputHandler osztály felelős a billentyűzet bemenet kezeléséért.
+ * Kezeli a játékos irányítását és a játék vezérlőparancsait.
+ */
 public class InputHandler implements KeyListener {
-    Engine gp;
+    Engine eng;
     public boolean upPressed, downPressed, leftPressed,rightPressed, attackPressed;
     private final ConsoleHandler consoleHandler;
     private static final String LOG_CONTEXT = "[INPUT HANDLER]";
 
-    public InputHandler(Engine gp) {
-        this.gp =gp;
-        consoleHandler = new ConsoleHandler(gp);
+    /**
+     * Létrehoz egy új bevitel kezelőt.
+     * @param eng a játékmotor példánya
+     */
+    public InputHandler(Engine eng) {
+        this.eng = eng;
+        consoleHandler = new ConsoleHandler(eng);
     }
 
     @Override
     public void keyTyped(KeyEvent e) {}
 
 
+    /**
+     * Kezeli a billentyű lenyomás eseményeket.
+     * @param e a billentyű esemény
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
@@ -31,7 +44,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_A -> leftPressed = true;
             case KeyEvent.VK_D -> rightPressed = true;
             case KeyEvent.VK_E -> attackPressed = true;
-            case KeyEvent.VK_F -> gp.player.getInventory().rotate();
+            case KeyEvent.VK_F -> eng.player.getInventory().rotate();
             case KeyEvent.VK_Q -> handleQ();
             case KeyEvent.VK_ESCAPE -> togglePauseState();
             case KeyEvent.VK_ENTER -> toggleMenuState();
@@ -59,8 +72,12 @@ public class InputHandler implements KeyListener {
         }
     }
 
+    /**
+     * Kezeli a játékmód kiválasztását.
+     * @param mode a kiválasztott mód indexe
+     */
     private void modeFinder(int mode){
-        if(gp.getGameState() == Engine.GameState.DIFFICULTY_SCREEN) {
+        if(eng.getGameState() == Engine.GameState.DIFFICULTY_SCREEN) {
             String[] gameModes = {"EASY", "NORMAL", "HARD", "IMPOSSIBLE"};
             switch (mode) {
                 case 0 -> startByKey(Engine.GameDifficulty.EASY);
@@ -75,54 +92,54 @@ public class InputHandler implements KeyListener {
     }
 
     private void handleQ(){
-        if (gp.getGameState() == Engine.GameState.PAUSED) {
-            gp.setGameState(Engine.GameState.CONSOLE_INPUT);
+        if (eng.getGameState() == Engine.GameState.PAUSED) {
+            eng.setGameState(Engine.GameState.CONSOLE_INPUT);
             consoleHandler.startConsoleInput();
         }
-        else if(gp.getGameState() == Engine.GameState.RUNNING) {
-            gp.player.getInventory().drop();
+        else if(eng.getGameState() == Engine.GameState.RUNNING) {
+            eng.player.getInventory().drop();
         }
     }
 
     private void handleO() {
-        if (gp.getGameState() == Engine.GameState.RUNNING || gp.getGameState() == Engine.GameState.PAUSED)
-            FileManager.saveGame(gp);
+        if (eng.getGameState() == Engine.GameState.RUNNING || eng.getGameState() == Engine.GameState.PAUSED)
+            FileManager.saveGame(eng);
         else
             GameLogger.warn(LOG_CONTEXT, "You are not running the game yet!");
     }
 
     private void handleL(){
-        if(gp.getGameState() != Engine.GameState.RUNNING)
-            FileManager.loadGame(gp);
+        if(eng.getGameState() != Engine.GameState.RUNNING)
+            FileManager.loadGame(eng);
         else
             GameLogger.warn(LOG_CONTEXT, "CAN NOT LOAD GAME WHILE RUNNING");
     }
 
     private void startByKey(Engine.GameDifficulty diff){
-        gp.setGameMode(Engine.GameMode.STORY);
-        gp.setGameDifficulty(diff);
-        gp.startGame();
-        gp.setGameState(Engine.GameState.RUNNING);
+        eng.setGameMode(Engine.GameMode.STORY);
+        eng.setGameDifficulty(diff);
+        eng.startGame();
+        eng.setGameState(Engine.GameState.RUNNING);
     }
 
     private void togglePauseState() {
-        switch(gp.getGameState()){
-            case RUNNING, CONSOLE_INPUT -> gp.setGameState(Engine.GameState.PAUSED);
-            case PAUSED -> gp.setGameState(Engine.GameState.RUNNING);
-            case DIFFICULTY_SCREEN -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN);
-            default -> gp.setGameState(Engine.GameState.START);
+        switch(eng.getGameState()){
+            case RUNNING, CONSOLE_INPUT -> eng.setGameState(Engine.GameState.PAUSED);
+            case PAUSED -> eng.setGameState(Engine.GameState.RUNNING);
+            case DIFFICULTY_SCREEN -> eng.setGameState(Engine.GameState.GAME_MODE_SCREEN);
+            default -> eng.setGameState(Engine.GameState.START);
         }
     }
 
     private void toggleMenuState() {
-        switch(gp.getGameState()){
-            case PAUSED -> gp.setGameState(Engine.GameState.RUNNING);
-            case START, FINISHED_LOST, FINISHED_WON -> gp.setGameState(Engine.GameState.GAME_MODE_SCREEN);
-            case GAME_MODE_SCREEN -> gp.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
+        switch(eng.getGameState()){
+            case PAUSED -> eng.setGameState(Engine.GameState.RUNNING);
+            case START, FINISHED_LOST, FINISHED_WON -> eng.setGameState(Engine.GameState.GAME_MODE_SCREEN);
+            case GAME_MODE_SCREEN -> eng.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
             case DIFFICULTY_SCREEN -> {
-                gp.setGameMode(Engine.GameMode.STORY);
-                gp.setGameState(Engine.GameState.RUNNING);
-                gp.setupStoryMode();
+                eng.setGameMode(Engine.GameMode.STORY);
+                eng.setGameState(Engine.GameState.RUNNING);
+                eng.setupStoryMode();
             }
         }
     }

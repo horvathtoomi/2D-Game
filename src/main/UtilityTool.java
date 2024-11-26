@@ -1,10 +1,21 @@
 package main;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
+/**
+ * A UtilityTool osztály segédfunkciókat biztosít a játék számára.
+ * Főként képmanipulációs műveleteket tartalmaz.
+ */
 public class UtilityTool {
 
+    /**
+     * Átméretez egy képet a megadott méretekre.
+     * @param img az eredeti kép
+     * @param newWidth az új szélesség
+     * @param newHeight az új magasság
+     * @return az átméretezett kép
+     */
     public BufferedImage scaleImage(BufferedImage img, int newWidth, int newHeight) {
         BufferedImage scaledImage = new BufferedImage(newWidth, newHeight, 2);
         Graphics2D g2 = scaledImage.createGraphics();

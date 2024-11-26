@@ -1,13 +1,13 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import main.Engine;
 import entity.Player;
+import main.Engine;
 import object.OBJ_Sword;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import tile.TileManager;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerTest {
     private Player player;

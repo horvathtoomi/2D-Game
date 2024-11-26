@@ -1,5 +1,8 @@
 package map;
 
+/**
+ * A TileColor osztály egy csempe típushoz tartozó színt reprezentál.
+ */
 public class TileColor {
     public final int r;
     public final int g;

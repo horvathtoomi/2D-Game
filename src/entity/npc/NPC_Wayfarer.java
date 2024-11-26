@@ -5,8 +5,18 @@ import main.Engine;
 
 import java.util.Random;
 
+/**
+ * A játékban megjelenő NPC osztály.
+ * Wayfarer karaktert reprezentál, aki a pályán mozog.
+ */
 public class NPC_Wayfarer extends Entity {
 
+    /**
+     * Létrehoz egy új vándor NPC-t megadott pozícióval.
+     * @param gp a játékmotor példánya
+     * // @param x kezdő X koordináta
+     * // @param y kezdő Y koordináta
+     */
     public NPC_Wayfarer(Engine gp) {
         super(gp);
         direction = "down";

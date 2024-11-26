@@ -1,55 +1,83 @@
 package serializable;
 
-import entity.*;
-import entity.enemy.*;
+import entity.Entity;
+import entity.Inventory;
+import entity.Player;
+import entity.enemy.DragonEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import entity.npc.NPC_Wayfarer;
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import main.*;
+import main.Engine;
 import main.logger.GameLogger;
 import object.*;
 import tile.TileManager;
 
 import javax.swing.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
+/**
+ * A FileManager osztály felelős a játék állapotának mentéséért és betöltéséért.
+ * Kezeli a játék adatainak szerializációját és deszerializációját.
+ */
 public class FileManager {
     private static final String LOG_CONTEXT = "[FILE MANAGER]";
     private static final String SAVE_EXTENSION = ".sav";
 
+    /**
+     * Privát konstruktor a példányosítás megakadályozásához.
+     * A FileManager csak statikus metódusokat tartalmaz.
+     */
     private FileManager() {}
 
+    /**
+     * EntityCreator térkép az entitások létrehozásához.
+     * Kulcs: entitás típus neve, Érték: entitás létrehozó függvény
+     */
     private static final Map<String, BiFunction<Engine, SerializableEntityState, Entity>> entityCreators = Map.of(
-            "NPC_Wayfarer", (gp, state) -> createEntity(new NPC_Wayfarer(gp), state),
-            "DragonEnemy", (gp, state) -> createEntity(new DragonEnemy(gp, state.worldX, state.worldY), state),
-            "SmallEnemy", (gp, state) -> createEntity(new SmallEnemy(gp, state.worldX, state.worldY), state),
-            "GiantEnemy", (gp, state) -> createEntity(new GiantEnemy(gp, state.worldX, state.worldY), state)
+            "NPC_Wayfarer", (eng, state) -> createEntity(new NPC_Wayfarer(eng), state),
+            "DragonEnemy", (eng, state) -> createEntity(new DragonEnemy(eng, state.worldX, state.worldY), state),
+            "SmallEnemy", (eng, state) -> createEntity(new SmallEnemy(eng, state.worldX, state.worldY), state),
+            "GiantEnemy", (eng, state) -> createEntity(new GiantEnemy(eng, state.worldX, state.worldY), state)
     );
 
+    /**
+     * ObjectCreator térkép az objektumok létrehozásához.
+     * Kulcs: objektum típus neve, Érték: objektum létrehozó függvény
+     */
     private static final Map<String, BiFunction<Engine, SerializableObjectState, SuperObject>> objectCreators = Map.of(
-            "key", (gp, state) -> createObject(new OBJ_Key(gp, state.worldX, state.worldY), state),
-            "door", (gp, state) -> createObject(new OBJ_Door(gp, state.worldX, state.worldY), state),
-            "chest", (gp, state) -> createObject(new OBJ_Chest(gp, state.worldX, state.worldY), state),
-            "boots", (gp, state) -> createObject(new OBJ_Boots(gp, state.worldX, state.worldY), state),
-            "sword", (gp, state) -> createObject(new OBJ_Sword(gp, state.worldX, state.worldY, state.damage), state)
+            "key", (eng, state) -> createObject(new OBJ_Key(eng, state.worldX, state.worldY), state),
+            "door", (eng, state) -> createObject(new OBJ_Door(eng, state.worldX, state.worldY), state),
+            "chest", (eng, state) -> createObject(new OBJ_Chest(eng, state.worldX, state.worldY), state),
+            "boots", (eng, state) -> createObject(new OBJ_Boots(eng, state.worldX, state.worldY), state),
+            "sword", (eng, state) -> createObject(new OBJ_Sword(eng, state.worldX, state.worldY, state.damage), state)
     );
 
-    public static void saveGameState(Engine gp, String filename) throws IOException {
+    /**
+     * Elmenti a játék aktuális állapotát egy fájlba.
+     * @param eng a játékmotor példánya
+     * @param filename a mentési fájl neve
+     * @throws IOException ha a fájl írása sikertelen
+     */
+    public static void saveGameState(Engine eng, String filename) throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
             GameMetadata metadata = new GameMetadata(
-                    gp.getGameMode(),
-                    gp.getGameDifficulty(),
-                    gp.getStoryLevel()
+                    eng.getGameMode(),
+                    eng.getGameDifficulty(),
+                    eng.getStoryLevel()
             );
             oos.writeObject(metadata);
 
             SerializablePlayerState playerState = new SerializablePlayerState(
-                    gp.player,
-                    gp.getGameDifficulty(),
-                    serializeInventory(gp.player.getInventory())
+                    eng.player,
+                    eng.getGameDifficulty(),
+                    serializeInventory(eng.player.getInventory())
             );
             oos.writeObject(playerState);
 
@@ -58,13 +86,13 @@ public class FileManager {
             );
             oos.writeObject(tileState);
 
-            if (gp.getGameMode() == Engine.GameMode.STORY) {
-                oos.writeObject(new ArrayList<>(gp.getEntity().stream()
+            if (eng.getGameMode() == Engine.GameMode.STORY) {
+                oos.writeObject(new ArrayList<>(eng.getEntity().stream()
                         .filter(Objects::nonNull)
                         .map(SerializableEntityState::new)
                         .toList()));
 
-                oos.writeObject(new ArrayList<>(gp.aSetter.list.stream()
+                oos.writeObject(new ArrayList<>(eng.aSetter.list.stream()
                         .filter(Objects::nonNull)
                         .map(SerializableObjectState::new)
                         .toList()));
@@ -72,34 +100,46 @@ public class FileManager {
         }
     }
 
-    public static void loadGameState(Engine gp, String filename) throws IOException, ClassNotFoundException {
+    /**
+     * Betölti a játék állapotát egy mentési fájlból.
+     * @param eng a játékmotor példánya
+     * @param filename a mentési fájl neve
+     * @throws IOException ha a fájl olvasása sikertelen
+     * @throws ClassNotFoundException ha az objektumok deszerializációja sikertelen
+     */
+    public static void loadGameState(Engine eng, String filename) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
             GameMetadata metadata = (GameMetadata) ois.readObject();
-            gp.setGameMode(metadata.gameMode);
-            gp.setGameDifficulty(metadata.difficulty);
-            gp.setStoryLevel(metadata.currentStoryLevel);
+            eng.setGameMode(metadata.gameMode);
+            eng.setGameDifficulty(metadata.difficulty);
+            eng.setStoryLevel(metadata.currentStoryLevel);
 
             SerializablePlayerState playerState = (SerializablePlayerState) ois.readObject();
-            updatePlayerState(gp.player, playerState);
-            deserializeInventory(gp.player.getInventory(), playerState.inventoryState, gp);
+            updatePlayerState(eng.player, playerState);
+            deserializeInventory(eng.player.getInventory(), playerState.inventoryState, eng);
 
             SerializableTileState tileState = (SerializableTileState) ois.readObject();
             TileManager.mapTileNum = tileState.mapTileNum;
 
             if (metadata.gameMode == Engine.GameMode.STORY) {
                 List<SerializableEntityState> entityStates = (List<SerializableEntityState>) ois.readObject();
-                gp.setEntities(entityStates.stream()
-                        .map(state -> createEntityFromState(gp, state)).filter(Objects::nonNull)
+                eng.setEntities(entityStates.stream()
+                        .map(state -> createEntityFromState(eng, state)).filter(Objects::nonNull)
                         .collect(Collectors.toCollection(CopyOnWriteArrayList::new)));
 
                 List<SerializableObjectState> objectStates = (List<SerializableObjectState>) ois.readObject();
-                gp.aSetter.list = objectStates.stream()
-                        .map(state -> createObjectFromState(gp, state)).filter(Objects::nonNull)
+                eng.aSetter.list = objectStates.stream()
+                        .map(state -> createObjectFromState(eng, state)).filter(Objects::nonNull)
                         .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             }
         }
     }
 
+    /**
+     * Szerializálja a leltár tartalmát.
+     * @param inventory a szerializálandó leltár
+     * @return a szerializált leltárelemek listája
+     */
     private static List<SerializableInventoryItem> serializeInventory(Inventory inventory) {
         return inventory.getItems().stream()
                 .map(item -> new SerializableInventoryItem(
@@ -110,13 +150,19 @@ public class FileManager {
                 )).toList();
     }
 
-    private static void deserializeInventory(Inventory inventory, List<SerializableInventoryItem> items, Engine gp) {
+    /**
+     * Deszerializálja és helyreállítja a leltár tartalmát.
+     * @param inventory a célként szolgáló leltár
+     * @param items a szerializált leltárelemek listája
+     * @param eng a játékmotor példánya
+     */
+    private static void deserializeInventory(Inventory inventory, List<SerializableInventoryItem> items, Engine eng) {
         inventory.getItems().clear();
         for (SerializableInventoryItem item : items) {
             SuperObject obj = switch (item.name) {
-                case "sword" -> new OBJ_Sword(gp, 0, 0, item.damage);
-                case "boots" -> new OBJ_Boots(gp, 0, 0);
-                case "key" -> new OBJ_Key(gp, 0, 0);
+                case "sword" -> new OBJ_Sword(eng, 0, 0, item.damage);
+                case "boots" -> new OBJ_Boots(eng, 0, 0);
+                case "key" -> new OBJ_Key(eng, 0, 0);
                 default -> null;
             };
             if (obj != null) {
@@ -129,6 +175,12 @@ public class FileManager {
         }
     }
 
+    /**
+     * Létrehoz egy entitást a szerializált állapotából.
+     * @param entity az alapértelmezett entitás
+     * @param state a szerializált állapot
+     * @return a helyreállított entitás
+     */
     private static Entity createEntity(Entity entity, SerializableEntityState state) {
         if (entity != null) {
             entity.setWorldX(state.worldX);
@@ -140,6 +192,12 @@ public class FileManager {
         return entity;
     }
 
+    /**
+     * Létrehoz egy objektumot a szerializált állapotából.
+     * @param obj az alapértelmezett objektum
+     * @param state a szerializált állapot
+     * @return a helyreállított objektum
+     */
     private static SuperObject createObject(SuperObject obj, SerializableObjectState state) {
         if (obj != null) {
             obj.worldX = state.worldX;
@@ -160,16 +218,21 @@ public class FileManager {
         return obj;
     }
 
-    private static Entity createEntityFromState(Engine gp, SerializableEntityState state) {
+    private static Entity createEntityFromState(Engine eng, SerializableEntityState state) {
         BiFunction<Engine, SerializableEntityState, Entity> creator = entityCreators.get(state.type);
-        return creator != null ? creator.apply(gp, state) : null;
+        return creator != null ? creator.apply(eng, state) : null;
     }
 
-    private static SuperObject createObjectFromState(Engine gp, SerializableObjectState state) {
+    private static SuperObject createObjectFromState(Engine eng, SerializableObjectState state) {
         BiFunction<Engine, SerializableObjectState, SuperObject> creator = objectCreators.get(state.name);
-        return creator != null ? creator.apply(gp, state) : null;
+        return creator != null ? creator.apply(eng, state) : null;
     }
 
+    /**
+     * Frissíti a játékos állapotát a szerializált adatok alapján.
+     * @param player a frissítendő játékos
+     * @param state a szerializált játékos állapot
+     */
     private static void updatePlayerState(Player player, SerializablePlayerState state) {
         player.setWorldX(state.worldX);
         player.setWorldY(state.worldY);
@@ -179,9 +242,14 @@ public class FileManager {
         player.setMaxHealth(state.maxHealth);
     }
 
-    public static void saveGame(Engine gp) {
+    /**
+     * Felhasználói felülettel ellátott mentési funkció.
+     * Megjeleníti a mentési párbeszédablakot és kezeli a felhasználói interakciót.
+     * @param eng a játékmotor példánya
+     */
+    public static void saveGame(Engine eng) {
         GameLogger.info(LOG_CONTEXT, "SAVING PENDING");
-        String filename = JOptionPane.showInputDialog(gp, "Enter a name for your save file:");
+        String filename = JOptionPane.showInputDialog(eng, "Enter a name for your save file:");
 
         if (filename != null && !filename.trim().isEmpty()) {
             try {
@@ -193,7 +261,7 @@ public class FileManager {
                 File saveFile = new File(saveDir, filename + SAVE_EXTENSION);
 
                 if (saveFile.exists()) {
-                    int choice = JOptionPane.showConfirmDialog(gp,
+                    int choice = JOptionPane.showConfirmDialog(eng,
                             "A save file with this name already exists. Do you want to overwrite it?",
                             "Overwrite Save",
                             JOptionPane.YES_NO_OPTION);
@@ -203,12 +271,12 @@ public class FileManager {
                     }
                 }
 
-                saveGameState(gp, saveFile.getPath());
+                saveGameState(eng, saveFile.getPath());
                 GameLogger.info(LOG_CONTEXT, "GAME SAVED SUCCESSFULLY");
-                JOptionPane.showMessageDialog(gp, "Game saved successfully.");
+                JOptionPane.showMessageDialog(eng, "Game saved successfully.");
             } catch (IOException e) {
                 GameLogger.error(LOG_CONTEXT, "ERROR SAVING GAME: " + e.getMessage(), e);
-                JOptionPane.showMessageDialog(gp, "Error saving game: " + e.getMessage(),
+                JOptionPane.showMessageDialog(eng, "Error saving game: " + e.getMessage(),
                         "Save Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
@@ -216,12 +284,18 @@ public class FileManager {
         }
     }
 
-    public static boolean loadGame(Engine gp) {
+    /**
+     * Felhasználói felülettel ellátott betöltési funkció.
+     * Megjeleníti a betöltési párbeszédablakot és kezeli a felhasználói interakciót.
+     * @param eng a játékmotor példánya
+     * @return true ha a betöltés sikeres volt, false egyébként
+     */
+    public static boolean loadGame(Engine eng) {
         GameLogger.info(LOG_CONTEXT, "LOAD PENDING");
         File saveDir = new File("res/save");
         if (!saveDir.exists() || saveDir.list() == null ||
                 Objects.requireNonNull(saveDir.list()).length == 0) {
-            JOptionPane.showMessageDialog(gp, "No save files found.",
+            JOptionPane.showMessageDialog(eng, "No save files found.",
                     "Load Game", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
@@ -231,7 +305,7 @@ public class FileManager {
             return false;
         }
 
-        String selectedFile = (String) JOptionPane.showInputDialog(gp,
+        String selectedFile = (String) JOptionPane.showInputDialog(eng,
                 "Choose a save file to load:",
                 "Load Game",
                 JOptionPane.QUESTION_MESSAGE,
@@ -241,13 +315,13 @@ public class FileManager {
 
         if (selectedFile != null) {
             try {
-                loadGameState(gp, new File(saveDir, selectedFile).getPath());
+                loadGameState(eng, new File(saveDir, selectedFile).getPath());
                 GameLogger.info(LOG_CONTEXT, "GAME LOADED SUCCESSFULLY");
-                JOptionPane.showMessageDialog(gp, "Game loaded successfully.");
+                JOptionPane.showMessageDialog(eng, "Game loaded successfully.");
                 return true;
             } catch (IOException | ClassNotFoundException e) {
                 GameLogger.error(LOG_CONTEXT, "ERROR LOADING GAME: " + e.getMessage(), e);
-                JOptionPane.showMessageDialog(gp, "Error loading game: " + e.getMessage(),
+                JOptionPane.showMessageDialog(eng, "Error loading game: " + e.getMessage(),
                         "Load Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {

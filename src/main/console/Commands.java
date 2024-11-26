@@ -1,18 +1,25 @@
 package main.console;
 
 import entity.Entity;
-import entity.enemy.*;
-import main.logger.GameLogger;
-import serializable.FileManager;
-import object.*;
+import entity.enemy.DragonEnemy;
+import entity.enemy.FriendlyEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import main.Engine;
+import main.logger.GameLogger;
+import object.*;
+import serializable.FileManager;
 
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A játék konzol parancsait kezelő osztály.
+ * Végrehajtja a különböző játékbeli műveleteket a konzol parancsok alapján.
+ */
 public class Commands {
-    private final Engine gp;
+    private final Engine eng;
     private static int numMakeEnd = 0;
     private final ConsoleHandler consoleHandler;
     private static final String RES_SAVE_PATH = "res/save/";
@@ -22,21 +29,26 @@ public class Commands {
     private static final String HEALTH = "health";
     private static final String LOG_CONTEXT = "[COMMANDS]";
 
-    public Commands(Engine gp, ConsoleHandler consoleHandler) {
-        this.gp = gp;
+    public Commands(Engine eng, ConsoleHandler consoleHandler) {
+        this.eng = eng;
         this.consoleHandler = consoleHandler;
     }
 
+    /**
+     * Eltávolítja a megadott típusú entitásokat a játékból.
+     * @param entityType az entitás típusa
+     * @param removeAll ha igaz, minden entitást eltávolít
+     */
     public void removeEntities(String entityType, boolean removeAll) {
         int count = 0;
-        for (Entity entity : gp.getEntity()) {
+        for (Entity entity : eng.getEntity()) {
             if(removeAll) {
-                gp.removeEnemy(entity);
+                eng.removeEnemy(entity);
                 count++;
             }
             else {
                 if (entity.getClass().getSimpleName().equalsIgnoreCase(entityType)) {
-                    gp.removeEnemy(entity);
+                    eng.removeEnemy(entity);
                     count++;
                 }
             }
@@ -47,22 +59,28 @@ public class Commands {
             consoleHandler.printToConsole("No such entity as: " + entityType);
     }
 
+    /**
+     * Új objektumot vagy entitást ad a játékhoz.
+     * @param obj az objektum vagy entitás típusa
+     * @param x X koordináta
+     * @param y Y koordináta
+     */
     public void add(String obj, int x, int y) {
-        if(!((x<gp.getMaxWorldCol() && x>=1) && (y<gp.getMaxWorldRow() && y>=1))){
-            consoleHandler.printToConsole("Coordinates must be [1:" + (gp.getMaxWorldCol() -1) + "]");
+        if(!((x< eng.getMaxWorldCol() && x>=1) && (y< eng.getMaxWorldRow() && y>=1))){
+            consoleHandler.printToConsole("Coordinates must be [1:" + (eng.getMaxWorldCol() -1) + "]");
             return;
         }
         obj = obj.toLowerCase();
         switch(obj){
-            case "giantenemy" -> gp.addEntity(new GiantEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "smallenemy" -> gp.addEntity(new SmallEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "friendlyenemy" -> gp.addEntity(new FriendlyEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "dragonenemy" -> gp.addEntity(new DragonEnemy(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "key" -> gp.addObject(new OBJ_Key(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "door" -> gp.addObject(new OBJ_Door(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "boots" -> gp.addObject(new OBJ_Boots(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "chest" -> gp.addObject(new OBJ_Chest(gp,x * gp.getTileSize(),y * gp.getTileSize()));
-            case "sword" -> gp.addObject(new OBJ_Sword(gp,x * gp.getTileSize(),y * gp.getTileSize(), 50));
+            case "giantenemy" -> eng.addEntity(new GiantEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "smallenemy" -> eng.addEntity(new SmallEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "friendlyenemy" -> eng.addEntity(new FriendlyEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "dragonenemy" -> eng.addEntity(new DragonEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "key" -> eng.addObject(new OBJ_Key(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "door" -> eng.addObject(new OBJ_Door(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "boots" -> eng.addObject(new OBJ_Boots(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "chest" -> eng.addObject(new OBJ_Chest(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "sword" -> eng.addObject(new OBJ_Sword(eng,x * eng.getTileSize(),y * eng.getTileSize(), 50));
             default -> {
                 consoleHandler.printToConsole("Unknown entity or object: " + obj);
                 return;
@@ -72,23 +90,23 @@ public class Commands {
     }
 
     public void teleport(int x, int y){
-        int[][] maphelp = gp.tileman.getMapTileNum();
-        if(x >= gp.getMaxWorldCol() || x < 1 || y >= gp.getMaxWorldRow() || y < 1){
-            GameLogger.warn(LOG_CONTEXT, "Coordinates must be X->[1:" + (gp.getMaxWorldCol() -1) + "] and Y->[1:" + (gp.getMaxWorldRow() -1) + "]");
+        int[][] maphelp = eng.tileman.getMapTileNum();
+        if(x >= eng.getMaxWorldCol() || x < 1 || y >= eng.getMaxWorldRow() || y < 1){
+            GameLogger.warn(LOG_CONTEXT, "Coordinates must be X->[1:" + (eng.getMaxWorldCol() -1) + "] and Y->[1:" + (eng.getMaxWorldRow() -1) + "]");
             return;
         }
-        else if(gp.tileman.getTile(maphelp[x][y]).collision){
+        else if(eng.tileman.getTile(maphelp[x][y]).collision){
             GameLogger.warn(LOG_CONTEXT, "Can not teleport on a solid tile!");
             return;
         }
-        gp.player.setWorldX(x * gp.getTileSize());
-        gp.player.setWorldY(y * gp.getTileSize());
+        eng.player.setWorldX(x * eng.getTileSize());
+        eng.player.setWorldY(y * eng.getTileSize());
         consoleHandler.printToConsole("Player teleported to <" + x + "> <" + y + ">");
     }
 
     public void saveFile(String filename) {
         try {
-            FileManager.saveGameState(gp, RES_SAVE_PATH + filename + ".sav");
+            FileManager.saveGameState(eng, RES_SAVE_PATH + filename + ".sav");
             consoleHandler.printToConsole(filename + " saved successfully");
         } catch (IOException e) {
             consoleHandler.printToConsole("UNABLE TO SAVE: " + filename + " - " + e.getMessage());
@@ -103,7 +121,7 @@ public class Commands {
                 consoleHandler.printToConsole(filename + " not found");
                 return;
             }
-            FileManager.loadGameState(gp, fileName);
+            FileManager.loadGameState(eng, fileName);
             consoleHandler.printToConsole(filename + " loaded successfully");
         } catch (IOException | ClassNotFoundException e) {
             consoleHandler.printToConsole("UNABLE TO LOAD: " + filename + " - " + e.getMessage());
@@ -141,6 +159,10 @@ public class Commands {
         runScript(filename, new HashSet<>());
     }
 
+    /**
+     * Végrehajtja a script fájlban található parancsokat.
+     * @param filename a script fájl neve
+     */
     private void runScript(String filename, Set<String> visitedScripts) {
         String normalizedFilename = RES_SCRIPTS_PATH + filename + ".txt";
         if (visitedScripts.contains(normalizedFilename)) {
@@ -234,7 +256,7 @@ public class Commands {
                 consoleHandler.printToConsole("Value not valid! (0:8)");
                 return;
             }
-            for(Entity entity : gp.getEntity())
+            for(Entity entity : eng.getEntity())
                 entity.setSpeed(value);
         }
         else if(attribute.equals(HEALTH)) {
@@ -243,7 +265,7 @@ public class Commands {
                 return;
             }
             else {
-                for(Entity entity : gp.getEntity())
+                for(Entity entity : eng.getEntity())
                     entity.setHealth(value);
             }
         }
@@ -260,9 +282,9 @@ public class Commands {
                 consoleHandler.printToConsole("Value not valid! (0:8)");
                 return;
             }
-            for (int i = 0; i < gp.getEntity().size(); i++) {
-                if (gp.getEntity().get(i).getName().equalsIgnoreCase(name)) {
-                    gp.getEntity().get(i).setSpeed(value);
+            for (int i = 0; i < eng.getEntity().size(); i++) {
+                if (eng.getEntity().get(i).getName().equalsIgnoreCase(name)) {
+                    eng.getEntity().get(i).setSpeed(value);
                     entityIndex = i;
                     break;
                 }
@@ -273,9 +295,9 @@ public class Commands {
                 consoleHandler.printToConsole("Value not valid! (0:5000)");
                 return;
             }
-            for (int i = 0; i < gp.getEntity().size(); i++) {
-                if (gp.getEntity().get(i).getName().equalsIgnoreCase(name)) {
-                    gp.getEntity().get(i).setHealth(value);
+            for (int i = 0; i < eng.getEntity().size(); i++) {
+                if (eng.getEntity().get(i).getName().equalsIgnoreCase(name)) {
+                    eng.getEntity().get(i).setHealth(value);
                     entityIndex = i;
                     break;
                 }
@@ -286,13 +308,13 @@ public class Commands {
         }
 
         if(entityIndex != -1)
-            consoleHandler.printToConsole(gp.getEntity().get(entityIndex).getName() + " " + attribute + " set to: " + value);
+            consoleHandler.printToConsole(eng.getEntity().get(entityIndex).getName() + " " + attribute + " set to: " + value);
         else
             consoleHandler.printToConsole("Entity not found");
     }
 
     public void getEntity(String name, String attribute) {
-        for (Entity entity : gp.getEntity()) {
+        for (Entity entity : eng.getEntity()) {
             if (entity.getName().toLowerCase().equals(name)) {
                 if (attribute.equals(SPEED)) {
                     consoleHandler.printToConsole(entity.getName() + " speed: " + entity.getSpeed());
@@ -315,11 +337,11 @@ public class Commands {
         if(val > 0 && val <= 5001) {
             switch (variable) {
                 case HEALTH -> {
-                    if (gp.player.getMaxHealth() < val) {
+                    if (eng.player.getMaxHealth() < val) {
                         consoleHandler.printToConsole("Value exceeded max health | Change maxhealth first");
                         return;
                     }
-                    gp.player.setHealth(val);
+                    eng.player.setHealth(val);
                     consoleHandler.printToConsole("Player health set to " + val);
                 }
                 case "maxhealth" -> {
@@ -327,15 +349,15 @@ public class Commands {
                         consoleHandler.printToConsole("Value exceeded health limit (" + healthLimit + ")");
                         return;
                     }
-                    if (val < gp.player.getMaxHealth()) {
-                        if (val > gp.player.getHealth()) {
-                            gp.player.setMaxHealth(val);
+                    if (val < eng.player.getMaxHealth()) {
+                        if (val > eng.player.getHealth()) {
+                            eng.player.setMaxHealth(val);
                         } else {
-                            gp.player.setMaxHealth(val);
-                            gp.player.setHealth(val);
+                            eng.player.setMaxHealth(val);
+                            eng.player.setHealth(val);
                         }
                     } else {
-                        gp.player.setMaxHealth(val);
+                        eng.player.setMaxHealth(val);
                     }
                     consoleHandler.printToConsole("Player maxhealth set to " + val);
                 }
@@ -344,7 +366,7 @@ public class Commands {
                         consoleHandler.printToConsole("Value exceeded speed limit (" + speedLimit + ")");
                         return;
                     }
-                    gp.player.setSpeed(val);
+                    eng.player.setSpeed(val);
                     consoleHandler.printToConsole("Player speed set to " + val);
                 }
                 default -> consoleHandler.printToConsole(UNKNOWN_ATTRIBUTE + variable);
@@ -356,9 +378,9 @@ public class Commands {
 
     public void getGameValue(String variable) {
         switch (variable) {
-            case HEALTH -> consoleHandler.printToConsole("Player health: " + gp.player.getHealth());
-            case "maxhealth" -> consoleHandler.printToConsole("Player max health: " + gp.player.getMaxHealth());
-            case SPEED -> consoleHandler.printToConsole("Player speed: " + gp.player.getSpeed());
+            case HEALTH -> consoleHandler.printToConsole("Player health: " + eng.player.getHealth());
+            case "maxhealth" -> consoleHandler.printToConsole("Player max health: " + eng.player.getMaxHealth());
+            case SPEED -> consoleHandler.printToConsole("Player speed: " + eng.player.getSpeed());
             default -> consoleHandler.printToConsole("VARIABLE NOT FOUND");
         }
     }

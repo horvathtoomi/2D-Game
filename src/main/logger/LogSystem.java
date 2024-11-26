@@ -3,9 +3,13 @@ package main.logger;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.*;
 import java.util.function.Supplier;
+import java.util.logging.*;
 
+/**
+ * A naplózó rendszer alapvető működését megvalósító osztály.
+ * Kezeli a naplófájlokat, a naplózási szinteket és a formázást.
+ */
 public final class LogSystem {
     private static volatile LogSystem instance;
     private static final Object INSTANCE_LOCK = new Object();
@@ -57,6 +61,10 @@ public final class LogSystem {
         return result;
     }
 
+    /**
+     * Létrehozza a naplózó szálakat kezelő ExecutorService-t.
+     * @return az inicializált ExecutorService
+     */
     private ExecutorService createLoggerExecutor() {
         return Executors.newFixedThreadPool(LOG_WORKER_THREADS, new ThreadFactory() {
             private final AtomicInteger counter = new AtomicInteger();
@@ -99,12 +107,19 @@ public final class LogSystem {
         };
     }
 
+    /**
+     * Elindítja a naplózó szálakat.
+     */
     private void startLogWorkers() {
         for (int i = 0; i < LOG_WORKER_THREADS; i++) {
             loggerExecutor.submit(this::processLogQueue);
         }
     }
 
+    /**
+     * Feldolgozza a naplózási sorban lévő bejegyzéseket.
+     * Külön szálban fut, amíg a rendszer aktív.
+     */
     private void processLogQueue() {
         activeLoggers.incrementAndGet();
         try {
@@ -128,6 +143,11 @@ public final class LogSystem {
         }
     }
 
+    /**
+     * Sorba állítja a naplózási kéréseket.
+     * @param level a naplózási szint
+     * @param messageSupplier az üzenet szolgáltató függvény
+     */
     private void queueLog(Level level, Supplier<String> messageSupplier) {
         if (logger.isLoggable(level) && isRunning.get()) {
             try {
@@ -148,6 +168,11 @@ public final class LogSystem {
         }
     }
 
+    /**
+     * Hozzáadja a bejegyzést a legutóbbi naplók listájához.
+     * @param level a naplózási szint
+     * @param message az üzenet
+     */
     private void addToRecentLogs(Level level, String message) {
         recentLogs.offer(String.format("[%s] %s", level, message));
         while (recentLogs.size() > MAX_RECENT_LOGS) {
@@ -155,6 +180,11 @@ public final class LogSystem {
         }
     }
 
+    /**
+     * Hibaüzenet naplózása kivétellel.
+     * @param message az üzenet
+     * @param thrown a kivétel
+     */
     public void error(String message, Throwable thrown) {
         queueLog(Level.SEVERE, () -> {
             StringBuilder sb = new StringBuilder(message);
@@ -168,10 +198,18 @@ public final class LogSystem {
         });
     }
 
+    /**
+     * Figyelmeztetés naplózása.
+     * @param messageSupplier az üzenet szolgáltató függvény
+     */
     public void warn(Supplier<String> messageSupplier) {
         queueLog(Level.WARNING, messageSupplier);
     }
 
+    /**
+     * Információs üzenet naplózása.
+     * @param messageSupplier az üzenet szolgáltató függvény
+     */
     public void info(Supplier<String> messageSupplier) {
         queueLog(Level.INFO, messageSupplier);
     }
@@ -191,6 +229,10 @@ public final class LogSystem {
         }
     }
 
+    /**
+     * Beállítja a konzol kimenet formázóját.
+     * @param formatter az új formázó
+     */
     public void setConsoleFormatter(Formatter formatter) {
         this.consoleFormatter = formatter;
         if (consoleHandler != null) {

@@ -1,17 +1,20 @@
 package object;
 
+import main.Engine;
+import main.logger.GameLogger;
+
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 
-import main.Engine;
-import main.logger.GameLogger;
-
-import javax.imageio.ImageIO;
-
+/**
+ * A SuperObject osztály az összes játékban szereplő tárgy ősosztálya.
+ * Alapvető tulajdonságokat és viselkedéseket definiál.
+ */
 public abstract class SuperObject{
-    public Engine gp;
+    public Engine eng;
     public BufferedImage image, image1, image2;
     public String name;
     private static final String LOG_CONTEXT = "[SUPER OBJECT]";
@@ -40,8 +43,16 @@ public abstract class SuperObject{
     public void setDurability(int a){durability = a;}
     public void setUsageDamage(int a){usageDamage = a;}
 
-    protected SuperObject(Engine gp, int x, int y, String name, String imageName) {
-        this.gp = gp;
+    /**
+     * Létrehoz egy új tárgyat.
+     * @param eng játékmotor példány
+     * @param x kezdő X pozíció
+     * @param y kezdő Y pozíció
+     * @param name tárgy neve
+     * @param imageName a tárgy képének neve
+     */
+    protected SuperObject(Engine eng, int x, int y, String name, String imageName) {
+        this.eng = eng;
         this.worldX = x;
         this.worldY = y;
         this.name = name;
@@ -53,6 +64,10 @@ public abstract class SuperObject{
         image = image1;
     }
 
+    /**
+     * A tárgy használatát kezelő metódus.
+     * Az alosztályok felülírhatják saját viselkedés megvalósításához.
+     */
     public void use(){}
 
     public void draw(Graphics2D g2, Engine gp) {

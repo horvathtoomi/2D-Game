@@ -1,14 +1,21 @@
 package entity;
 
-import main.InputHandler;
 import main.Engine;
+import main.InputHandler;
 import main.UtilityTool;
-import object.*;
+import object.OBJ_Boots;
+import object.OBJ_Key;
+import object.SuperObject;
+import object.Weapon;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+/**
+ * A játékos karaktert reprezentáló osztály.
+ * Kezeli a játékos mozgását, támadását és interakcióit.
+ */
 public class Player extends Entity {
-
     public static boolean isAttacking = false;
     private boolean hasReducedDurability = false;
     private long lastAttackTime = 0;
@@ -32,15 +39,20 @@ public class Player extends Entity {
 
     public Inventory getInventory() {return inventory;}
 
+    /**
+     * Létrehoz egy új játékos karaktert.
+     * @param panel a játékmotor példánya
+     * @param kezelo a bevitel kezelő példánya
+     */
     public Player(Engine panel, InputHandler kezelo) {
         super(panel);
         this.kezelo = kezelo;
         setMaxHealth(100);
         setHealth(100);
-        setScreenX(gp.getScreenWidth() / 2 - (gp.getTileSize() / 2));
-        setScreenY(gp.getScreenHeight() / 2 - (gp.getTileSize() / 2));
+        setScreenX(eng.getScreenWidth() / 2 - (eng.getTileSize() / 2));
+        setScreenY(eng.getScreenHeight() / 2 - (eng.getTileSize() / 2));
         solidArea = new Rectangle(8, 16, 32, 32);
-        inventory = new Inventory(gp);
+        inventory = new Inventory(eng);
         solidAreaDefaultX = solidArea.x;
         solidAreaDefaultY = solidArea.y;
         getPlayerImage();
@@ -49,21 +61,21 @@ public class Player extends Entity {
     }
 
     public void setDefaultValues() {
-        if(gp.getGameMode().equals(Engine.GameMode.STORY)) {
-            setWorldX(gp.getTileSize() * 5);
-            setWorldY(gp.getTileSize() * 5);
+        if(eng.getGameMode().equals(Engine.GameMode.STORY)) {
+            setWorldX(eng.getTileSize() * 5);
+            setWorldY(eng.getTileSize() * 5);
         }
         else{
-            int[][] custom_map = gp.tileman.getMapTileNum();
-            if(gp.tileman.getTile(custom_map[gp.getMaxWorldCol()/2][gp.getMaxWorldRow()/2]).collision) {
+            int[][] custom_map = eng.tileman.getMapTileNum();
+            if(eng.tileman.getTile(custom_map[eng.getMaxWorldCol()/2][eng.getMaxWorldRow()/2]).collision) {
                 int[] coordinates = getNotSolidTile(custom_map);
                 assert coordinates != null;
                 setWorldX(coordinates[0]);
                 setWorldY(coordinates[1]);
             }
             else{
-                setWorldX(gp.getMaxWorldCol()/2);
-                setWorldY(gp.getMaxWorldRow()/2);
+                setWorldX(eng.getMaxWorldCol()/2);
+                setWorldY(eng.getMaxWorldRow()/2);
             }
         }
     }
@@ -72,7 +84,7 @@ public class Player extends Entity {
         int[] coordinates = new int[2];
         for(int x = 1; x < 100; x++){
             for(int y = 1; y < 100; y++){
-                if(!(gp.tileman.getTile(custom_map[gp.getMaxWorldCol()/2][gp.getMaxWorldRow()/2]).collision)){
+                if(!(eng.tileman.getTile(custom_map[eng.getMaxWorldCol()/2][eng.getMaxWorldRow()/2]).collision)){
                     coordinates[0] = x;
                     coordinates[1] = y;
                     return coordinates;
@@ -104,12 +116,16 @@ public class Player extends Entity {
         attack_left = scale("player", "attack_left");
         attack_rigth = scale("player", "attack_rigth");
         UtilityTool uTool = new UtilityTool();
-        attack_up = uTool.scaleImage(attack_up, gp.getTileSize(), gp.getTileSize() * 2);
-        attack_down = uTool.scaleImage(attack_down, gp.getTileSize(), gp.getTileSize() * 2);
-        attack_left = uTool.scaleImage(attack_left, gp.getTileSize() * 2, gp.getTileSize());
-        attack_rigth = uTool.scaleImage(attack_rigth, gp.getTileSize() * 2, gp.getTileSize());
+        attack_up = uTool.scaleImage(attack_up, eng.getTileSize(), eng.getTileSize() * 2);
+        attack_down = uTool.scaleImage(attack_down, eng.getTileSize(), eng.getTileSize() * 2);
+        attack_left = uTool.scaleImage(attack_left, eng.getTileSize() * 2, eng.getTileSize());
+        attack_rigth = uTool.scaleImage(attack_rigth, eng.getTileSize() * 2, eng.getTileSize());
     }
 
+    /**
+     * Frissíti a játékos állapotát.
+     * Kezeli a mozgást, támadást és interakciókat.
+     */
     @Override
     public void update() {
         if (interactionTimer > 0) {
@@ -135,9 +151,9 @@ public class Player extends Entity {
 
             //Check Tile Collision
             collisionOn = false;
-            gp.cChecker.checkTile(this);
+            eng.cChecker.checkTile(this);
 
-            int objIndex = gp.cChecker.checkObject(this, true);
+            int objIndex = eng.cChecker.checkObject(this, true);
             if (objIndex != 999 && interactionTimer == 0) {
                 interactWithObject(objIndex);
                 interactionTimer = INTERACTION_COOLDOWN;
@@ -160,32 +176,32 @@ public class Player extends Entity {
 
 
     private void interactWithObject(int index) {
-        if (index < gp.aSetter.list.size()) {
-            SuperObject obj = gp.aSetter.list.get(index);
+        if (index < eng.aSetter.list.size()) {
+            SuperObject obj = eng.aSetter.list.get(index);
 
             switch (obj.name) {
                 case "key", "sword", "boots" -> {
                     if (!inventory.isFull()) {
                         inventory.addItem(obj);
-                        gp.aSetter.list.remove(obj);
+                        eng.aSetter.list.remove(obj);
                     }
                 }
                 case "door" -> {
-                    if (gp.aSetter.list.get(index).collision) {
+                    if (eng.aSetter.list.get(index).collision) {
                         if (inventory.equalsKey()) {
                             inventory.removeItem("key");
-                            gp.aSetter.list.get(index).collision = false;
-                            gp.aSetter.list.get(index).image = gp.aSetter.list.get(index).image2;
+                            eng.aSetter.list.get(index).collision = false;
+                            eng.aSetter.list.get(index).image = eng.aSetter.list.get(index).image2;
                         }
                     }
                 }
                 case "chest" -> {
                     if (!obj.opened) {
-                        gp.aSetter.list.get(index).image = gp.aSetter.list.get(index).image2;
-                        gp.aSetter.list.get(index).opened = true;
-                        int offsetX = obj.worldX + gp.getTileSize() / 2;
-                        int offsetY = obj.worldY + gp.getTileSize() / 2;
-                        gp.aSetter.spawnItemFromChest(offsetX, offsetY);
+                        eng.aSetter.list.get(index).image = eng.aSetter.list.get(index).image2;
+                        eng.aSetter.list.get(index).opened = true;
+                        int offsetX = obj.worldX + eng.getTileSize() / 2;
+                        int offsetY = obj.worldY + eng.getTileSize() / 2;
+                        eng.aSetter.spawnItemFromChest(offsetX, offsetY);
                     }
                 }
             }
@@ -259,16 +275,16 @@ public class Player extends Entity {
         lastAttackTime = currentTime;
 
         weapon.updateHitbox(getWorldX(), getWorldY(), direction);
-        weapon.checkHit(gp.getEntity());
+        weapon.checkHit(eng.getEntity());
     }
 
     private int setAdjustedX(){
         int x = getScreenX();
         if(getScreenX() > getWorldX())
             x = getWorldX();
-        int rightOffset = gp.getScreenWidth() - getScreenX();
-        if (rightOffset > gp.getWorldWidth() - getWorldX())
-            x = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
+        int rightOffset = eng.getScreenWidth() - getScreenX();
+        if (rightOffset > eng.getWorldWidth() - getWorldX())
+            x = eng.getScreenWidth() - (eng.getWorldWidth() - getWorldX());
         return x;
     }
 
@@ -276,9 +292,9 @@ public class Player extends Entity {
         int y = getScreenY();
         if(getScreenY() > getWorldY())
             y = getWorldY();
-        int bottomOffset = gp.getScreenHeight() - getScreenY();
-        if (bottomOffset > gp.getWorldHeight() - getWorldY())
-            y = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
+        int bottomOffset = eng.getScreenHeight() - getScreenY();
+        if (bottomOffset > eng.getWorldHeight() - getWorldY())
+            y = eng.getScreenHeight() - (eng.getWorldHeight() - getWorldY());
         return y;
     }
 
@@ -289,11 +305,11 @@ public class Player extends Entity {
         int y = setAdjustedY();
 
         if(image == attack_up)
-            g2.drawImage(image,x,y - gp.getTileSize(),null);
+            g2.drawImage(image,x,y - eng.getTileSize(),null);
         else if(image == attack_down)
             g2.drawImage(image,x,y,null);
         else if(image == attack_left)
-            g2.drawImage(image,x - gp.getTileSize(),y,null);
+            g2.drawImage(image,x - eng.getTileSize(),y,null);
         else if(image == attack_rigth)
             g2.drawImage(image,x,y,null);
         else

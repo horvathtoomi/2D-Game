@@ -2,6 +2,9 @@ package object;
 
 import java.awt.*;
 
+/**
+ * A fegyverek ritkaságát definiáló enum.
+ */
 public enum WeaponRarity {
     COMMON(1.0f, Color.GRAY),
     UNCOMMON(1.2f, Color.GREEN),
@@ -11,6 +14,11 @@ public enum WeaponRarity {
     public final float damageMultiplier;
     public final Color color;
 
+    /**
+     * Létrehoz egy új ritkaság típust.
+     * @param damageMultiplier sebzés szorzó
+     * @param color fényeffekt színe
+     */
     WeaponRarity(float damageMultiplier, Color color) {
         this.damageMultiplier = damageMultiplier;
         this.color = color;

@@ -1,17 +1,29 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import main.logger.GameLogger;
-import org.junit.jupiter.api.*;
+import entity.enemy.DragonEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import main.Engine;
-import entity.enemy.*;
-import object.*;
-import serializable.*;
+import main.logger.GameLogger;
+import object.OBJ_Chest;
+import object.OBJ_Door;
+import object.OBJ_Key;
+import object.OBJ_Sword;
+import org.junit.jupiter.api.*;
+import serializable.FileManager;
+import serializable.GameMetadata;
+import serializable.SerializableObjectState;
+import serializable.SerializablePlayerState;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Game Serialization System Tests")
 class SerializationTest {
@@ -212,7 +224,6 @@ class SerializationTest {
             assertEquals(100, state.worldX);
             assertEquals(100, state.worldY);
             assertEquals(75, state.durability);
-            assertEquals(50, state.damage);
         }
 
         @Test

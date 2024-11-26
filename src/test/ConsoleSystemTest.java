@@ -1,16 +1,22 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
+import entity.enemy.DragonEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import main.Engine;
-import main.console.*;
-import entity.enemy.*;
+import main.console.Commands;
+import main.console.ConsoleGUI;
+import main.console.ConsoleHandler;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ConsoleSystemTest {
     private Engine engine;

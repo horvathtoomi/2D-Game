@@ -1,29 +1,48 @@
 package main;
 
 import entity.Entity;
-import entity.enemy.*;
+import entity.enemy.DragonEnemy;
+import entity.enemy.FriendlyEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import entity.npc.NPC_Wayfarer;
 import main.logger.GameLogger;
 import object.*;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Az AsssetSetter osztály felelős a játék objektumainak és ellenségeinek
+ * inicializálásáért és kezeléséért.
+ */
 public class AssetSetter {
-    Engine gp;
+    Engine eng;
     public List<SuperObject> list;
     private final String[] possibleChestItems = {"key", "boots", "sword"};
     private final Random rand;
     private int mapNum = 1;
     private static final String LOG_CONTEXT = "[ASSET SETTER]";
 
-    public AssetSetter(Engine gp) {
-        this.gp = gp;
+    /**
+     * Létrehoz egy új AssetSetter példányt.
+     * @param eng a játékmotor példánya
+     */
+    public AssetSetter(Engine eng) {
+        this.eng = eng;
         list = new CopyOnWriteArrayList<>();
         rand = new Random();
     }
 
+    /**
+     * Betölti a pályához tartozó objektumokat és ellenségeket.
+     * @param restart jelzi, hogy újrakezdésről van-e szó
+     */
     public void loadLevelAssets(boolean restart){
         try {
             setEnemies(restart);
@@ -33,6 +52,11 @@ public class AssetSetter {
         }
     }
 
+    /**
+     * Beállítja a pálya objektumait a konfigurációs fájl alapján.
+     * @param restart jelzi, hogy újrakezdésről van-e szó
+     * @throws IOException ha a fájl nem olvasható
+     */
     public void setObject(boolean restart) throws IOException {
         if(restart) {
             mapNum = 1;
@@ -44,14 +68,19 @@ public class AssetSetter {
                 String[] parts = line.split(" ");
                 if (parts.length != 3) continue;
                 String name = parts[0];
-                int x = Integer.parseInt(parts[1]) * gp.getTileSize();
-                int y = Integer.parseInt(parts[2]) * gp.getTileSize();
+                int x = Integer.parseInt(parts[1]) * eng.getTileSize();
+                int y = Integer.parseInt(parts[2]) * eng.getTileSize();
                 createObject(name, x, y);
             }
             mapNum++;
         }
     }
 
+    /**
+     * Beállítja a pálya ellenségeit a konfigurációs fájl alapján.
+     * @param restart jelzi, hogy újrakezdésről van-e szó
+     * @throws IOException ha a fájl nem olvasható
+     */
     public void setEnemies(boolean restart) throws IOException {
         if(restart) {
             mapNum = 1;
@@ -63,20 +92,26 @@ public class AssetSetter {
                 String[] parts = line.split(" ");
                 if (parts.length != 3) continue;
                 String name = parts[0];
-                int x = Integer.parseInt(parts[1]) * gp.getTileSize();
-                int y = Integer.parseInt(parts[2]) * gp.getTileSize();
+                int x = Integer.parseInt(parts[1]) * eng.getTileSize();
+                int y = Integer.parseInt(parts[2]) * eng.getTileSize();
                 createEnemy(name, x, y);
             }
         }
     }
 
+    /**
+     * Létrehoz egy új objektumot a megadott paraméterek alapján.
+     * @param name az objektum neve
+     * @param x X koordináta
+     * @param y Y koordináta
+     */
     public void createObject(String name, int x, int y) {
         SuperObject obj = switch (name) {
-            case "key" -> new OBJ_Key(gp, x, y);
-            case "chest" -> new OBJ_Chest(gp, x, y);
-            case "door" -> new OBJ_Door(gp, x, y);
-            case "boots" -> new OBJ_Boots(gp, x, y);
-            case "sword" -> new OBJ_Sword(gp, x, y, 50);
+            case "key" -> new OBJ_Key(eng, x, y);
+            case "chest" -> new OBJ_Chest(eng, x, y);
+            case "door" -> new OBJ_Door(eng, x, y);
+            case "boots" -> new OBJ_Boots(eng, x, y);
+            case "sword" -> new OBJ_Sword(eng, x, y, 50);
             default -> null;
         };
         if (obj != null) {
@@ -87,27 +122,38 @@ public class AssetSetter {
         }
     }
 
+    /**
+     * Létrehoz egy új ellenséget a megadott paraméterek alapján.
+     * @param name az ellenség típusa
+     * @param x X koordináta
+     * @param y Y koordináta
+     */
     private void createEnemy(String name, int x, int y) {
         Entity ent = switch (name.toLowerCase()){
-            case "dragonenemy" -> new DragonEnemy(gp, x, y);
-            case "friendlyenemy" -> new FriendlyEnemy(gp, x, y);
-            case "giantenemy" -> new GiantEnemy(gp, x, y);
-            case "smallenemy" -> new SmallEnemy(gp, x, y);
-            case "npc_wayfarer" -> new NPC_Wayfarer(gp, x, y);
+            case "dragonenemy" -> new DragonEnemy(eng, x, y);
+            case "friendlyenemy" -> new FriendlyEnemy(eng, x, y);
+            case "giantenemy" -> new GiantEnemy(eng, x, y);
+            case "smallenemy" -> new SmallEnemy(eng, x, y);
+            case "npc_wayfarer" -> new NPC_Wayfarer(eng, x, y);
             default -> null;
         };
         if(ent != null)
-            gp.addEntity(ent);
+            eng.addEntity(ent);
         else
             GameLogger.error(LOG_CONTEXT, "Unexpected type listed in one of the enemies file", new IllegalArgumentException("ILLEGAL ARGUMENT"));
     }
 
+    /**
+     * Létrehoz egy véletlenszerű tárgyat egy láda kinyitásakor.
+     * @param x a láda X koordinátája
+     * @param y a láda Y koordinátája
+     */
     public void spawnItemFromChest(int x, int y) {
         String randomItem = possibleChestItems[rand.nextInt(possibleChestItems.length)];
         SuperObject newItem = null;
         switch (randomItem) {
-            case "key" -> newItem = new OBJ_Key(gp, x, y);
-            case "boots" -> newItem = new OBJ_Boots(gp, x, y);
+            case "key" -> newItem = new OBJ_Key(eng, x, y);
+            case "boots" -> newItem = new OBJ_Boots(eng, x, y);
             case "sword" -> newItem = createRandomSword(x,y);
         }
         if (newItem != null) {
@@ -115,11 +161,21 @@ public class AssetSetter {
         }
     }
 
+    /**
+     * Létrehoz egy véletlenszerű tulajdonságokkal rendelkező kardot.
+     * @param x a kard X koordinátája
+     * @param y a kard Y koordinátája
+     * @return az elkészített Weapon objektum
+     */
     private Weapon createRandomSword(int x, int y) {
         int damageBonus = rand.nextInt(11) -5;
-        return new OBJ_Sword(gp, x, y, 20 + damageBonus);
+        return new OBJ_Sword(eng, x, y, 20 + damageBonus);
     }
 
+    /**
+     * Meghatározza egy fegyver ritkaságát véletlenszerűen.
+     * @return a meghatározott WeaponRarity érték
+     */
     public WeaponRarity determineWeaponRarity(){
         int roll = rand.nextInt(100);
         if(roll < 50) return WeaponRarity.COMMON;

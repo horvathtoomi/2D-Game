@@ -2,9 +2,16 @@ package main.console;
 
 import main.logger.GameLogger;
 
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
 import java.awt.*;
 
+/**
+ * A script módban használt dokumentum osztály.
+ * Kezeli a script szerkesztés speciális megjelenítését.
+ */
 public class ScriptModeDocument extends DefaultStyledDocument {
     private int lineNumber = 1;
     private final Style promptStyle;
@@ -41,6 +48,9 @@ public class ScriptModeDocument extends DefaultStyledDocument {
         StyleConstants.setFontSize(systemStyle, 14);
     }
 
+    /**
+     * Hozzáad egy prompt karaktert a dokumentumhoz.
+     */
     public void appendPrompt() {
         try {
             insertString(getLength(), "> ", promptStyle);
@@ -49,6 +59,11 @@ public class ScriptModeDocument extends DefaultStyledDocument {
         }
     }
 
+    /**
+     * Hozzáad egy felhasználói bevitelt a dokumentumhoz.
+     * @param text a bevitt szöveg
+     * @param isScriptMode jelzi, hogy script módban vagyunk-e
+     */
     public void appendUserInput(String text, boolean isScriptMode) {
         try {
             if (isScriptMode) {

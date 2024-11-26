@@ -1,17 +1,19 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import object.WeaponRarity;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import main.Engine;
-import main.CollisionChecker;
-import map.TileColor;
-import map.ColorAnalyzer;
 import entity.Entity;
 import entity.npc.NPC_Wayfarer;
-import java.awt.Color;
+import main.CollisionChecker;
+import main.Engine;
+import map.ColorAnalyzer;
+import map.TileColor;
+import object.WeaponRarity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.awt.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CollisionCheckerTest {
     private Engine engine;

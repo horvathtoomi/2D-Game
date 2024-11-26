@@ -1,14 +1,19 @@
 package entity;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.Objects;
-import javax.imageio.ImageIO;
 import main.Engine;
 import main.UtilityTool;
 import main.logger.GameLogger;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Objects;
+
+/**
+ * A játék alapvető entitás osztálya, minden mozgó játékelem ősosztálya.
+ * Tartalmazza az általános tulajdonságokat és metódusokat, amiket minden entitás használ.
+ */
 public class Entity{
     public String name;
     private int worldX, worldY;
@@ -22,7 +27,7 @@ public class Entity{
     public Rectangle solidArea = new Rectangle(0,0,48,48);
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
-    public Engine gp;
+    public Engine eng;
     protected int maxHealth;
 
     public int getWidth() {return width;}
@@ -50,20 +55,28 @@ public class Entity{
         setHealth(Math.max(getHealth() - damage, 0));
     }
 
-    public Entity(Engine gp) {
-        this.gp = gp;
-        width = gp.getTileSize();
-        height = gp.getTileSize();
+    /**
+     * Létrehoz egy új entitást.
+     * @param eng a játékmotor példánya
+     */
+    public Entity(Engine eng) {
+        this.eng = eng;
+        width = eng.getTileSize();
+        height = eng.getTileSize();
     }
 
+    /**
+     * Az entitás cselekvésének meghatározása.
+     * Az alosztályok felülírhatják saját viselkedés implementálásához.
+     */
     public void setAction(){}
 
     public void update(){
         setAction();
         collisionOn = false;
-        gp.cChecker.checkTile(this);
-        gp.cChecker.checkObject(this,false);
-        gp.cChecker.checkPlayer(this);
+        eng.cChecker.checkTile(this);
+        eng.cChecker.checkObject(this,false);
+        eng.cChecker.checkPlayer(this);
         if(!collisionOn){
             switch (direction) {
                 case "up":
@@ -91,8 +104,8 @@ public class Entity{
             case "shoot" -> shoot;
             default -> null;
         };
-        int screenX = getWorldX() - gp.player.getWorldX() + gp.player.getScreenX();
-        int screenY = getWorldY() - gp.player.getWorldY() + gp.player.getScreenY();
+        int screenX = getWorldX() - eng.player.getWorldX() + eng.player.getScreenX();
+        int screenY = getWorldY() - eng.player.getWorldY() + eng.player.getScreenY();
 
         screenX = adjustScreenX(screenX);
         screenY = adjustScreenY(screenY);
@@ -103,27 +116,27 @@ public class Entity{
     }
 
     protected boolean isValidScreenXY(int screenX, int screenY){
-        return screenX > -gp.getTileSize() && screenX < gp.getScreenWidth() + gp.getTileSize() && screenY > -gp.getTileSize() && screenY < gp.getScreenHeight() + gp.getTileSize();
+        return screenX > -eng.getTileSize() && screenX < eng.getScreenWidth() + eng.getTileSize() && screenY > -eng.getTileSize() && screenY < eng.getScreenHeight() + eng.getTileSize();
     }
 
     protected int adjustScreenY(int screenY){
-        if (gp.player.getScreenY() > gp.player.getWorldY()) {
+        if (eng.player.getScreenY() > eng.player.getWorldY()) {
             screenY = getWorldY();
         }
-        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
-        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
-            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - getWorldY());
+        int bottomOffset = eng.getScreenHeight() - eng.player.getScreenY();
+        if (bottomOffset > eng.getWorldHeight() - eng.player.getWorldY()) {
+            screenY = eng.getScreenHeight() - (eng.getWorldHeight() - getWorldY());
         }
         return screenY;
     }
 
     protected int adjustScreenX(int screenX){
-        if (gp.player.getScreenX() > gp.player.getWorldX()) {
+        if (eng.player.getScreenX() > eng.player.getWorldX()) {
             screenX = getWorldX();
         }
-        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
-        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
-            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - getWorldX());
+        int rightOffset = eng.getScreenWidth() - eng.player.getScreenX();
+        if (rightOffset > eng.getWorldWidth() - eng.player.getWorldX()) {
+            screenX = eng.getScreenWidth() - (eng.getWorldWidth() - getWorldX());
         }
         return screenX;
     }
@@ -133,7 +146,7 @@ public class Entity{
         BufferedImage bufim = null;
         try{
             bufim = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png")));
-            bufim = uTool.scaleImage(bufim, gp.getTileSize(), gp.getTileSize());
+            bufim = uTool.scaleImage(bufim, eng.getTileSize(), eng.getTileSize());
         }catch(IOException e){
             GameLogger.error("[ENTITY]", "Failed to load image: " + e.getMessage(), e);
         }

@@ -3,6 +3,10 @@ package main.logger;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+/**
+ * A játék naplózó rendszerének központi osztálya.
+ * Kezeli a különböző típusú üzenetek naplózását és formázását.
+ */
 public final class GameLogger {
     private static volatile LogSystem instance;
     private static final Object LOCK = new Object();
@@ -14,6 +18,11 @@ public final class GameLogger {
 
     private GameLogger() {}
 
+    /**
+     * Visszaadja a LogSystem példányt, szükség esetén létrehozza azt.
+     * Thread-safe implementáció, double-checked locking mintával.
+     * @return a LogSystem példány
+     */
     private static LogSystem getInstance() {
         LogSystem result = instance;
         if (result == null) {
@@ -52,14 +61,30 @@ public final class GameLogger {
         }
     }
 
+    /**
+     * Naplózza a hibaüzeneteket.
+     * @param context a naplózási kontextus
+     * @param message a hibaüzenet
+     * @param thrown a kivétel objektum
+     */
     public static void error(String context, String message, Throwable thrown) {
         getInstance().error(context + ": " + message, thrown);
     }
 
+    /**
+     * Naplózza a figyelmeztetéseket.
+     * @param context a naplózási kontextus
+     * @param messageSupplier az üzenet szolgáltató függvény
+     */
     public static void warn(String context, String messageSupplier) {
         getInstance().warn(() -> context + ": " + messageSupplier);
     }
 
+    /**
+     * Naplózza az információs üzeneteket.
+     * @param context a naplózási kontextus
+     * @param messageSupplier az üzenet szolgáltató függvény
+     */
     public static void info(String context, String messageSupplier) {
         getInstance().info(() -> context + ": " + messageSupplier);
     }

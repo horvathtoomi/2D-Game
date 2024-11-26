@@ -9,6 +9,9 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * A fegyver absztrakt ősosztálya.
+ */
 public abstract class Weapon extends SuperObject {
     protected int damage;
     protected int range;
@@ -30,9 +33,20 @@ public abstract class Weapon extends SuperObject {
     public int getDamage() {return damage;}
     public void setDamage(int damage) {this.damage = damage;}
 
-    public Weapon(Engine gp, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
-        super(gp, x, y, name, imageName);
-        this.rarity = gp.aSetter.determineWeaponRarity();
+    /**
+     * Létrehoz egy új fegyvert.
+     * @param eng játékmotor példány
+     * @param x kezdő X pozíció
+     * @param y kezdő Y pozíció
+     * @param name fegyver neve
+     * @param imageName a fegyver képének neve
+     * @param damage alap sebzés
+     * @param range hatótáv
+     * @param attackSpeed támadási sebesség
+     */
+    public Weapon(Engine eng, int x, int y, String name, String imageName, int damage, int range, int attackSpeed) {
+        super(eng, x, y, name, imageName);
+        this.rarity = eng.aSetter.determineWeaponRarity();
         this.damage = damage;
         this.range = range;
         this.attackSpeed = attackSpeed;
@@ -40,10 +54,10 @@ public abstract class Weapon extends SuperObject {
 
     public void updateHitbox(int playerWorldX, int playerWorldY, String direction) {
         switch(direction) {
-            case "up" -> hitbox.setBounds(playerWorldX + 8, playerWorldY - gp.getTileSize(), 32, gp.getTileSize());
-            case "down" -> hitbox.setBounds(playerWorldX + 8, playerWorldY + gp.getTileSize(), 32, gp.getTileSize());
-            case "left" -> hitbox.setBounds(playerWorldX - gp.getTileSize(), playerWorldY + 8, gp.getTileSize(), 32);
-            case "right" -> hitbox.setBounds(playerWorldX + gp.getTileSize(), playerWorldY + 8, gp.getTileSize(), 32);
+            case "up" -> hitbox.setBounds(playerWorldX + 8, playerWorldY - eng.getTileSize(), 32, eng.getTileSize());
+            case "down" -> hitbox.setBounds(playerWorldX + 8, playerWorldY + eng.getTileSize(), 32, eng.getTileSize());
+            case "left" -> hitbox.setBounds(playerWorldX - eng.getTileSize(), playerWorldY + 8, eng.getTileSize(), 32);
+            case "right" -> hitbox.setBounds(playerWorldX + eng.getTileSize(), playerWorldY + 8, eng.getTileSize(), 32);
         }
     }
 
@@ -82,46 +96,46 @@ public abstract class Weapon extends SuperObject {
     }
 
     @Override
-    public void draw(Graphics2D g2, Engine gp) {
-        int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
-        int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
+    public void draw(Graphics2D g2, Engine eng) {
+        int screenX = worldX - eng.player.getWorldX() + eng.player.getScreenX();
+        int screenY = worldY - eng.player.getWorldY() + eng.player.getScreenY();
 
-        if (gp.player.getScreenX() > gp.player.getWorldX()) {
+        if (eng.player.getScreenX() > eng.player.getWorldX()) {
             screenX = worldX;
         }
-        if (gp.player.getScreenY() > gp.player.getWorldY()) {
+        if (eng.player.getScreenY() > eng.player.getWorldY()) {
             screenY = worldY;
         }
-        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
-        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
-            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - worldX);
+        int rightOffset = eng.getScreenWidth() - eng.player.getScreenX();
+        if (rightOffset > eng.getWorldWidth() - eng.player.getWorldX()) {
+            screenX = eng.getScreenWidth() - (eng.getWorldWidth() - worldX);
         }
-        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
-        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
-            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - worldY);
+        int bottomOffset = eng.getScreenHeight() - eng.player.getScreenY();
+        if (bottomOffset > eng.getWorldHeight() - eng.player.getWorldY()) {
+            screenY = eng.getScreenHeight() - (eng.getWorldHeight() - worldY);
         }
 
-        if (worldX + gp.getTileSize() > gp.player.getWorldX() - gp.player.getScreenX() &&
-                worldX - gp.getTileSize() < gp.player.getWorldX() + gp.player.getScreenX() &&
-                worldY + gp.getTileSize() > gp.player.getWorldY() - gp.player.getScreenY() &&
-                worldY - gp.getTileSize() < gp.player.getWorldY() + gp.player.getScreenY()) {
+        if (worldX + eng.getTileSize() > eng.player.getWorldX() - eng.player.getScreenX() &&
+                worldX - eng.getTileSize() < eng.player.getWorldX() + eng.player.getScreenX() &&
+                worldY + eng.getTileSize() > eng.player.getWorldY() - eng.player.getScreenY() &&
+                worldY - eng.getTileSize() < eng.player.getWorldY() + eng.player.getScreenY()) {
 
             drawGlow(g2, screenX, screenY, OUTER_GLOW_SCALE, glowOpacity / 2);
             drawGlow(g2, screenX, screenY, INNER_GLOW_SCALE, glowOpacity);
-            g2.drawImage(image, screenX, screenY, gp.getTileSize(), gp.getTileSize(), null);
+            g2.drawImage(image, screenX, screenY, eng.getTileSize(), eng.getTileSize(), null);
 
             updateGlowAnimation();
         }
     }
 
     private void drawGlow(Graphics2D g2, int screenX, int screenY, float scale, float opacity) {
-        int size = (int)(gp.getTileSize() * scale);
-        int offset = (size - gp.getTileSize()) / 2;
+        int size = (int)(eng.getTileSize() * scale);
+        int offset = (size - eng.getTileSize()) / 2;
 
         Composite originalComposite = g2.getComposite();
 
         RadialGradientPaint gradient = new RadialGradientPaint(
-                new Point2D.Float(screenX + gp.getTileSize()/2f, screenY + gp.getTileSize()/2f),
+                new Point2D.Float(screenX + eng.getTileSize()/2f, screenY + eng.getTileSize()/2f),
                 size/2f,
                 new float[]{0.0f, 1.0f},
                 new Color[]{

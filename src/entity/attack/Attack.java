@@ -8,6 +8,10 @@ import tile.TileManager;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+/**
+ * Alap Attack osztály, amely a játékban előforduló összes attack ősosztálya.
+ * Kezeli a támadások alapvető tulajdonságait, mozgását és ütközésdetektálását.
+ */
 public class Attack extends Entity {
     int imageChange = 0;
     public BufferedImage image, image1, image2;
@@ -15,8 +19,8 @@ public class Attack extends Entity {
     public double dx, dy;
     private final int[] diffAttackSpeed = {4, 6, 8, 10};
 
-    public Attack(Engine gp,String name,int damage, int startX, int startY, int targetX, int targetY) {
-        super(gp);
+    public Attack(Engine eng,String name,int damage, int startX, int startY, int targetX, int targetY) {
+        super(eng);
         setWorldX(startX);
         setWorldY(startY);
         this.name = name;
@@ -31,8 +35,13 @@ public class Attack extends Entity {
         solidArea = new Rectangle(getWorldX() + 3, getWorldY() + 4, 30, 30);
     }
 
+    /**
+     * Inicializálja a támadás sebzését a játék nehézségi szintje alapján.
+     *
+     * @param extra további sebzés érték, ami hozzáadódik az alap sebzéshez
+     */
     private void initializeDamage(int extra){
-        switch(gp.getGameDifficulty()){
+        switch(eng.getGameDifficulty()){
             case EASY -> this.damage = 30 + extra;
             case MEDIUM -> this.damage = 50 + extra;
             case HARD -> this.damage = 99 + extra;
@@ -40,8 +49,11 @@ public class Attack extends Entity {
         }
     }
 
+    /**
+     * Beállítja a támadás sebességét a játék nehézségi szintje alapján.
+     */
     private void initializeSpeed(){
-        switch(gp.getGameDifficulty()){
+        switch(eng.getGameDifficulty()){
             case EASY -> setSpeed(diffAttackSpeed[0]);
             case MEDIUM -> setSpeed(diffAttackSpeed[1]);
             case HARD -> setSpeed(diffAttackSpeed[2]);
@@ -56,16 +68,16 @@ public class Attack extends Entity {
         solidArea.setLocation(getWorldX() + 3, getWorldY() + 4);
 
         if (checkTileCollision()) {
-            gp.removeEnemy(this);
+            eng.removeEnemy(this);
             return;
         }
-        Rectangle playerHitbox = new Rectangle(gp.player.getWorldX() + gp.player.solidArea.x, gp.player.getWorldY() + gp.player.solidArea.y, gp.player.solidArea.width, gp.player.solidArea.height); //Width=32, Height=32
+        Rectangle playerHitbox = new Rectangle(eng.player.getWorldX() + eng.player.solidArea.x, eng.player.getWorldY() + eng.player.solidArea.y, eng.player.solidArea.width, eng.player.solidArea.height); //Width=32, Height=32
         if (solidArea.intersects(playerHitbox.getBounds())) {
-            gp.player.dealDamage(damage);
-            gp.removeEnemy(this);
+            eng.player.dealDamage(damage);
+            eng.removeEnemy(this);
             return;
         }
-        for (Entity entity : gp.getEntity()) {
+        for (Entity entity : eng.getEntity()) {
             if (entity instanceof Enemy) {
                 Rectangle entityHitbox = new Rectangle(entity.getWorldX() + entity.solidArea.x,
                         entity.getWorldY() + entity.solidArea.y,
@@ -73,7 +85,7 @@ public class Attack extends Entity {
                         entity.solidArea.height);
                 if (solidArea.intersects(entityHitbox)) {
                     entity.dealDamage(damage);
-                    gp.removeEnemy(this);
+                    eng.removeEnemy(this);
                 }
             }
         }
@@ -86,18 +98,18 @@ public class Attack extends Entity {
     }
 
     private boolean checkTileCollision() {
-        int x = getWorldX()/ gp.getTileSize();
-        int y = getWorldY()/ gp.getTileSize();
+        int x = getWorldX()/ eng.getTileSize();
+        int y = getWorldY()/ eng.getTileSize();
         if(TileManager.mapTileNum[x][y]==4)
             return false;
         else
-            return gp.tileman.tile[TileManager.mapTileNum[x][y]].collision;
+            return eng.tileman.tile[TileManager.mapTileNum[x][y]].collision;
     }
 
     @Override
     public void draw(Graphics2D g2) {
-        setScreenX(getWorldX() - gp.player.getWorldX() + gp.player.getScreenX());
-        setScreenY(getWorldY() - gp.player.getWorldY() + gp.player.getScreenY());
+        setScreenX(getWorldX() - eng.player.getWorldX() + eng.player.getScreenX());
+        setScreenY(getWorldY() - eng.player.getWorldY() + eng.player.getScreenY());
         setScreenX(adjustScreenX(getScreenX()));
         setScreenY(adjustScreenY(getScreenY()));
         if (isValidScreenXY(getScreenX(), getScreenY())) {

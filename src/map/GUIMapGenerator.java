@@ -2,16 +2,23 @@ package map;
 
 import main.logger.GameLogger;
 import tile.TileManager;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
 
+/**
+ * A GUIMapGenerator osztály biztosítja a pályagenerálás grafikus felhasználói felületét.
+ */
 public class GUIMapGenerator extends JFrame {
     private static final String LOG_CONTEXT = "[GUI MAP GENERATOR]";
     private final int WINDOW_WIDTH = 300;
     private final int WINDOW_HEIGHT = 150;
 
+    /**
+     * Létrehoz egy új pályagenerátor ablakot.
+     */
     public GUIMapGenerator() {
         setTitle("Custom Map Options");
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -21,6 +28,9 @@ public class GUIMapGenerator extends JFrame {
         initializeComponents();
     }
 
+    /**
+     * Inicializálja az ablak komponenseit és eseménykezelőit.
+     */
     private void initializeComponents() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);

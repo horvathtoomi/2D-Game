@@ -1,15 +1,23 @@
 package map;
 
 import main.logger.GameLogger;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A MapGenerator osztály felelős a pályák generálásáért képfájlok alapján.
+ */
 public class MapGenerator {
     private static final int BLOCK_SIZE = 16;
     private static final int MAX_TILES = 1000;
@@ -17,6 +25,12 @@ public class MapGenerator {
     private static final String ANALYSIS_PATH = "res/maps/map_analysis";
     private static final String LOG_CONTEXT = "[MAP GENERATOR]";
 
+    /**
+     * Ellenőrzi a bemeneti kép méreteit.
+     * @param width szélesség
+     * @param height magasság
+     * @throws IllegalArgumentException ha a méretek nem megfelelőek
+     */
     private static void validateImageDimensions(int width, int height) {
         if (width % BLOCK_SIZE != 0 || height % BLOCK_SIZE != 0) {
             GameLogger.error(LOG_CONTEXT,
@@ -35,6 +49,11 @@ public class MapGenerator {
         GameLogger.info(LOG_CONTEXT, "New map dimensions set to: " + tilesWidth + "x" + tilesHeight + " tiles");
     }
 
+    /**
+     * Visszaadja a következő pályaszámot.
+     * @return a következő pályaszám
+     * @throws IOException ha a fájlrendszer nem elérhető
+     */
     public static int getNextMapNumber() throws IOException {
         Path matricesDir = Paths.get(MATRICES_PATH);
         if (!Files.exists(matricesDir)) {
@@ -55,6 +74,11 @@ public class MapGenerator {
         return maxNumber + 1;
     }
 
+    /**
+     * Feldolgoz egy képfájlt és pályát generál belőle.
+     * @param imagePath a képfájl útvonala
+     * @throws IOException ha a fájl nem olvasható
+     */
     public static void processImage(String imagePath) throws IOException {
         BufferedImage image = ImageIO.read(new File(imagePath));
         validateImageDimensions(image.getWidth(), image.getHeight());

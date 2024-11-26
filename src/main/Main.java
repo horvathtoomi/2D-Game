@@ -2,6 +2,10 @@ package main;
 
 import javax.swing.*;
 
+/**
+ * A Main osztály a játék belépési pontja.
+ * Létrehozza az ablakot és elindítja a játékot.
+ */
 public class Main {
     public static void main(String[] args) {
         JFrame window = new JFrame();

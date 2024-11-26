@@ -1,17 +1,22 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import entity.Entity;
+import entity.Inventory;
+import entity.Player;
+import entity.enemy.SmallEnemy;
 import entity.npc.NPC_Wayfarer;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import main.Engine;
 import main.AssetSetter;
 import main.CollisionChecker;
-import entity.*;
-import entity.enemy.*;
+import main.Engine;
 import object.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Engine Core System Tests")
 class EnhancedEngineTest {

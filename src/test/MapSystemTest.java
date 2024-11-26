@@ -1,20 +1,24 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import main.Engine;
+import main.logger.GameLogger;
+import map.ColorAnalyzer;
+import map.MapGenerator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import tile.TileManager;
-import map.*;
-import main.Engine;
-import main.logger.GameLogger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.file.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Map and Tile System Tests")
 class MapSystemTest {

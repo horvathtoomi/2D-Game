@@ -1,16 +1,22 @@
 package main;
 
-import entity.*;
-import java.awt.*;
-import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-import javax.swing.*;
+import entity.Entity;
+import entity.Player;
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
 import map.MapGenerator;
-import object.*;
+import object.SuperObject;
 import tile.TileManager;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * Az Engine osztály a játék fő motorja, amely kezeli a játék állapotát,
+ * frissítését és megjelenítését. Központi szerepet játszik a játék működésében.
+ */
 public class Engine extends JPanel implements Runnable {
 
     private static final int ORIGINAL_TILE_SIZE = 16;
@@ -89,6 +95,9 @@ public class Engine extends JPanel implements Runnable {
     public void addObject(SuperObject obj) {aSetter.list.add(obj);}
     public void removeEnemy(Entity ent) {entities.remove(ent);}
 
+    /**
+     * Létrehoz egy új játékmotort és inicializálja az alapvető komponenseket.
+     */
     public Engine() {
         GameLogger.info(LOG_CONTEXT, "|INITIALIZING ENGINE|");
         inpkez = new InputHandler(this);
@@ -103,6 +112,9 @@ public class Engine extends JPanel implements Runnable {
         setGamePanel();
     }
 
+    /**
+     * Beállítja a játékpanel alapvető tulajdonságait.
+     */
     private void setGamePanel(){
         gameState = GameState.START;
         difficulty = GameDifficulty.EASY;
@@ -115,21 +127,34 @@ public class Engine extends JPanel implements Runnable {
         this.setFocusable(true);
     }
 
+    /**
+     * Inicializálja a történet módot.
+     */
     public void setupStoryMode(){
         tileman.loadStoryMap(true);
         aSetter.loadLevelAssets(true);
         player.setDefaultValues();
     }
 
+    /**
+     * Inicializálja az egyéni módot.
+     */
     public static void setupCustomMode(){
         MapGenerator.GUIMapGenerator();
     }
 
+    /**
+     * Elindítja a játék fő szálát.
+     */
     public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
     }
 
+    /**
+     * A játék fő ciklusa.
+     * Kezeli a játék frissítését és megjelenítését.
+     */
     public void run() {
         GameLogger.info(LOG_CONTEXT, "|STARTING GAME LOOP|");
         double drawInterval = 1_000_000_000.0 / FPS; //Setting the game's FPS
@@ -151,6 +176,10 @@ public class Engine extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Frissíti a játék állapotát.
+     * Frissíti a játékost, entitásokat és objektumokat.
+     */
     public void update() {
         if(gameState == GameState.RUNNING) {
             player.update();
@@ -163,6 +192,11 @@ public class Engine extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Kirajzolja a játék aktuális állapotát.
+     *
+     * @param g a grafikus kontextus
+     */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -181,6 +215,7 @@ public class Engine extends JPanel implements Runnable {
         g2.dispose();
     }
 
+
     public void startGame() {
         entities.clear();
         aSetter.list.clear();
@@ -195,11 +230,19 @@ public class Engine extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Ellenőrzi, hogy a játékos a célterületen belül van-e.
+     *
+     * @return true ha a játékos a célterületen belül van
+     */
     public boolean isPlayerWithinRadius() {
         double distance = Math.sqrt(Math.pow(player.getWorldX() - endPoints[currentStoryLevel][0], 2) + Math.pow(player.getWorldY() - endPoints[currentStoryLevel][1], 2));
         return distance < (3 * TILE_SIZE);
     }
 
+    /**
+     * Ellenőrzi a pályaszint teljesítését és kezeli a következő szintre lépést.
+     */
     public void checkLevelCompletion() {
         if(!isPlayerWithinRadius()) {
             return;

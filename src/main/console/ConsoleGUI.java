@@ -5,12 +5,16 @@ import main.Engine;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * A játék konzol felhasználói felületét megvalósító osztály.
+ * Kezeli a bevitelt és megjeleníti a konzol kimenetét.
+ */
 public class ConsoleGUI extends JFrame {
     private final JTextPane outputPane;
     private final JTextField inputField;
@@ -25,7 +29,7 @@ public class ConsoleGUI extends JFrame {
     private static int numOfMakeEnd = 0;
 
 
-    public ConsoleGUI(Engine gp, ConsoleHandler consoleHandler) {
+    public ConsoleGUI(Engine eng, ConsoleHandler consoleHandler) {
         super("Game Console");
         this.consoleHandler = consoleHandler;
         this.commandHistory = new CommandHistory();
@@ -92,7 +96,7 @@ public class ConsoleGUI extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                gp.setGameState(Engine.GameState.PAUSED);
+                eng.setGameState(Engine.GameState.PAUSED);
                 if (isScriptMode) {
                     inputQueue.offer("end");
                 }
@@ -124,6 +128,10 @@ public class ConsoleGUI extends JFrame {
         numOfMakeEnd = 0;
     }
 
+    /**
+     * Kezeli a parancsbevitelt.
+     * Feldolgozza a beírt parancsot és végrehajtja azt.
+     */
     private void handleInput() {
         String input = inputField.getText().trim();
         if (!input.isEmpty()) {

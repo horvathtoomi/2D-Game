@@ -2,9 +2,13 @@ package map;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
+/**
+ * A ColorAnalyzer osztály felelős a képek színeinek elemzéséért és a megfelelő csempe típusok
+ * meghatározásáért a pályagenerálás során.
+ */
 public class ColorAnalyzer {
 
     private ColorAnalyzer() {}
@@ -24,6 +28,12 @@ public class ColorAnalyzer {
             new TileColor(254,16,2,11)        //Red, lava
     );
 
+    /**
+     * Kiszámítja két szín közötti távolságot.
+     * @param color1 az első szín
+     * @param color2 a második szín
+     * @return a színek közötti távolság
+     */
     public static double calculateColorDistance(Color color1, TileColor color2) {
         double dr = (color1.getRed() - color2.r) / 255.0;
         double dg = (color1.getGreen() - color2.g) / 255.0;
@@ -31,6 +41,11 @@ public class ColorAnalyzer {
         return Math.sqrt(dr * dr + dg * dg + db * db);
     }
 
+    /**
+     * Meghatározza a legközelebbi csempe típust egy adott színhez.
+     * @param color a vizsgált szín
+     * @return a megfelelő csempe típus azonosítója
+     */
     public static int getClosestTile(Color color) {
         return TILE_COLORS.stream()
                 .min(Comparator.comparingDouble(tile ->
@@ -39,6 +54,11 @@ public class ColorAnalyzer {
                 .orElse(0);
     }
 
+    /**
+     * Meghatározza egy képblokk domináns színét.
+     * @param block a vizsgált képblokk
+     * @return a domináns szín
+     */
     public static Color getDominantColor(BufferedImage block) {
         Map<Integer, Integer> colorCount = new HashMap<>();
 

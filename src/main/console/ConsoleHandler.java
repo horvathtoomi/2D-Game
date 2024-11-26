@@ -1,19 +1,24 @@
 package main.console;
 
-import java.util.HashMap;
-import java.util.Map;
 import main.Engine;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * A konzol parancsok kezelését végző osztály.
+ * Összeköti a felhasználói felületet a parancsok végrehajtásával.
+ */
 public class ConsoleHandler {
-    private final Engine gp;
+    private final Engine eng;
     private final Commands commands;
     public boolean abortProcess;
     private final Map<String, Command> commandMap;
     private ConsoleGUI consoleGUI;
 
-    public ConsoleHandler(Engine gp) {
-        this.gp = gp;
-        this.commands = new Commands(gp, this);  // Pass ConsoleHandler to Commands
+    public ConsoleHandler(Engine eng) {
+        this.eng = eng;
+        this.commands = new Commands(eng, this);  // Pass ConsoleHandler to Commands
         this.abortProcess = false;
         this.commandMap = initializeCommands();
     }
@@ -28,6 +33,11 @@ public class ConsoleHandler {
         }
     }
 
+    /**
+     * Inicializálja a parancsokat.
+     * Beállítja a parancsokhoz tartozó végrehajtási logikát.
+     * @return a parancsok térképe
+     */
     private Map<String, Command> initializeCommands() {
         Map<String, Command> map = new HashMap<>();
 
@@ -40,17 +50,17 @@ public class ConsoleHandler {
             }
         });
 
-        map.put("reset", _ -> {
-            gp.startGame();
+        map.put("reset", e -> {
+            eng.startGame();
             printToConsole("Game has been reset");
         });
 
-        map.put("exit", _ -> {
+        map.put("exit", e -> {
             abortProcess = true;
             if (consoleGUI != null) {
                 consoleGUI.dispose();
             }
-            gp.setGameState(Engine.GameState.PAUSED);
+            eng.setGameState(Engine.GameState.PAUSED);
         });
 
         map.put("exit_game", _ -> System.exit(0));
@@ -162,12 +172,12 @@ public class ConsoleHandler {
     }
 
     public void startConsoleInput() {
-        if (gp.getGameState() != Engine.GameState.CONSOLE_INPUT) {
+        if (eng.getGameState() != Engine.GameState.CONSOLE_INPUT) {
             printToConsole("Console is only available in CONSOLE_INPUT state");
             return;
         }
         if (consoleGUI == null) {
-            consoleGUI = new ConsoleGUI(gp, this);
+            consoleGUI = new ConsoleGUI(eng, this);
         }
         consoleGUI.showConsole();
         consoleGUI.appendToConsole(getHelpText());

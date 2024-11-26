@@ -1,16 +1,24 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import entity.attack.*;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import main.Engine;
+import entity.attack.DragonEnemyAttack;
+import entity.attack.GiantEnemyAttack;
+import entity.attack.SmallEnemyAttack;
+import entity.enemy.DragonEnemy;
+import entity.enemy.FriendlyEnemy;
+import entity.enemy.GiantEnemy;
+import entity.enemy.SmallEnemy;
 import main.Button;
-import entity.enemy.*;
-import object.*;
-import java.awt.Point;
-import java.awt.Color;
+import main.Engine;
+import object.OBJ_Boots;
+import object.OBJ_Chest;
+import object.OBJ_Door;
+import object.OBJ_Key;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.awt.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 class EnemyTest {

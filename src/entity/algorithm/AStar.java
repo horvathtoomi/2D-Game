@@ -6,8 +6,17 @@ import main.logger.GameLogger;
 import tile.TileManager;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+
+/**
+ * Az A* útvonalkereső algoritmus implementációja.
+ * Ez az osztály biztosítja az entitások számára az optimális útvonal megtalálását
+ * a játékban figyelembe véve a terep akadályait és más entitásokat.
+ */
 public class AStar {
     private static final int DIAGONAL_COST = 14;
     private static final int V_H_COST = 10;
@@ -18,6 +27,11 @@ public class AStar {
     private static final Map<PathKey, PathCacheEntry> pathCache = new ConcurrentHashMap<>();
     private static final long CACHE_DURATION = 5000; // 5 seconds cache duration
 
+
+    /**
+     * Egy cella reprezentációja az A* algoritmus számára.
+     * Tartalmazza a cella pozícióját és az útvonalkereséshez szükséges költségértékeket.
+     */
     private static class Cell {
         int heuristicCost = 0;
         double finalCost = 0;
@@ -97,17 +111,28 @@ public class AStar {
         cleanupExecutor.scheduleAtFixedRate(() -> pathCache.entrySet().removeIf(entry -> entry.getValue().isExpired()), CACHE_DURATION, CACHE_DURATION, TimeUnit.MILLISECONDS);
     }
 
-    public static ArrayList<int[]> findPath(Engine gp, int startX, int startY, int endX, int endY) {
-        int startI = startY / gp.getTileSize();
-        int startJ = startX / gp.getTileSize();
-        int endI = endY / gp.getTileSize();
-        int endJ = endX / gp.getTileSize();
+
+    /**
+     * Megkeresi az optimális útvonalat két pont között.
+     *
+     * @param eng a játékmotor példánya
+     * @param startX kezdőpont X koordinátája
+     * @param startY kezdőpont Y koordinátája
+     * @param endX célpont X koordinátája
+     * @param endY célpont Y koordinátája
+     * @return ArrayList<int[]> az útvonal koordinátáinak listája, vagy null ha nem található útvonal
+     */
+    public static ArrayList<int[]> findPath(Engine eng, int startX, int startY, int endX, int endY) {
+        int startI = startY / eng.getTileSize();
+        int startJ = startX / eng.getTileSize();
+        int endI = endY / eng.getTileSize();
+        int endJ = endX / eng.getTileSize();
 
         try {
-            startI = Math.max(Math.min(startI, gp.getMaxWorldRow() - 1), 0);
-            startJ = Math.max(Math.min(startJ, gp.getMaxWorldCol() - 1), 0);
-            endI = Math.max(Math.min(endI, gp.getMaxWorldRow() - 1), 0);
-            endJ = Math.max(Math.min(endJ, gp.getMaxWorldCol() - 1), 0);
+            startI = Math.max(Math.min(startI, eng.getMaxWorldRow() - 1), 0);
+            startJ = Math.max(Math.min(startJ, eng.getMaxWorldCol() - 1), 0);
+            endI = Math.max(Math.min(endI, eng.getMaxWorldRow() - 1), 0);
+            endJ = Math.max(Math.min(endJ, eng.getMaxWorldCol() - 1), 0);
         } catch(Exception e) {
             GameLogger.error(LOG_CONTEXT, "Invalid coordinates: " + e.getMessage(), e);
             return null;
@@ -119,7 +144,7 @@ public class AStar {
             return new ArrayList<>(cached.path);
         }
 
-        ArrayList<int[]> path = calculatePath(gp, startI, startJ, endI, endJ);
+        ArrayList<int[]> path = calculatePath(eng, startI, startJ, endI, endJ);
         if (path != null) {
             pathCache.put(key, new PathCacheEntry(path));
         }
@@ -127,9 +152,19 @@ public class AStar {
         return path;
     }
 
-    private static ArrayList<int[]> calculatePath(Engine gp, int startI, int startJ, int endI, int endJ) {
-        int rows = gp.getMaxWorldRow();
-        int cols = gp.getMaxWorldCol();
+    /**
+     * Kiszámítja az útvonalat két pont között az A* algoritmus segítségével.
+     *
+     * @param eng a játékmotor példánya
+     * @param startI kezdőpont sor indexe
+     * @param startJ kezdőpont oszlop indexe
+     * @param endI célpont sor indexe
+     * @param endJ célpont oszlop indexe
+     * @return ArrayList<int[]> az útvonal koordinátáinak listája, vagy null ha nem található útvonal
+     */
+    private static ArrayList<int[]> calculatePath(Engine eng, int startI, int startJ, int endI, int endJ) {
+        int rows = eng.getMaxWorldRow();
+        int cols = eng.getMaxWorldCol();
 
         Cell[][] grid = new Cell[rows][cols];
         for (int i = 0; i < rows; i++) {
@@ -138,7 +173,7 @@ public class AStar {
             }
         }
 
-        Map<Cell, Double> dynamicCosts = calculateDynamicCosts(gp, rows, cols);
+        Map<Cell, Double> dynamicCosts = calculateDynamicCosts(eng, rows, cols);
 
         PriorityQueue<Cell> openList = new PriorityQueue<>(
                 Comparator.comparingDouble(c -> c.finalCost)
@@ -168,7 +203,7 @@ public class AStar {
 
                     if (nextI < 0 || nextI >= rows || nextJ < 0 || nextJ >= cols) continue;
                     if (closedList[nextI][nextJ]) continue;
-                    if (gp.tileman.tile[TileManager.mapTileNum[nextJ][nextI]].collision) continue;
+                    if (eng.tileman.tile[TileManager.mapTileNum[nextJ][nextI]].collision) continue;
 
                     Cell neighbor = grid[nextI][nextJ];
 
@@ -193,16 +228,33 @@ public class AStar {
         return null;
     }
 
+    /**
+     * Kiszámítja a heurisztikus költséget két pont között (Manhattan távolság).
+     *
+     * @param cell a vizsgált cella
+     * @param endI célpont sor indexe
+     * @param endJ célpont oszlop indexe
+     * @return a heurisztikus költség értéke
+     */
     private static int calculateHeuristic(Cell cell, int endI, int endJ) {
         return Math.abs(cell.i - endI) + Math.abs(cell.j - endJ);
     }
 
-    private static Map<Cell, Double> calculateDynamicCosts(Engine gp, int rows, int cols) {
+    /**
+     * Kiszámítja a dinamikus költségeket a pályán lévő entitások alapján.
+     * Ez befolyásolja az útvonalválasztást, hogy az entitások elkerülhetők legyenek.
+     *
+     * @param eng a játékmotor példánya
+     * @param rows a pálya sorainak száma
+     * @param cols a pálya oszlopainak száma
+     * @return Map<Cell, Double> a cellákhoz tartozó dinamikus költségek
+     */
+    private static Map<Cell, Double> calculateDynamicCosts(Engine eng, int rows, int cols) {
         Map<Cell, Double> dynamicCosts = new HashMap<>();
 
-        for (Entity entity : gp.getEntity()) {
-            int entityI = entity.getWorldY() / gp.getTileSize();
-            int entityJ = entity.getWorldX() / gp.getTileSize();
+        for (Entity entity : eng.getEntity()) {
+            int entityI = entity.getWorldY() / eng.getTileSize();
+            int entityJ = entity.getWorldX() / eng.getTileSize();
 
             for (int i = Math.max(0, entityI - ENTITY_INFLUENCE_RADIUS);
                  i < Math.min(rows, entityI + ENTITY_INFLUENCE_RADIUS); i++) {
@@ -223,6 +275,12 @@ public class AStar {
         return dynamicCosts;
     }
 
+    /**
+     * Rekonstruálja a megtalált útvonalat a célponttól visszafelé haladva.
+     *
+     * @param end a célpontot tartalmazó cella
+     * @return ArrayList<int[]> az útvonal koordinátáinak listája
+     */
     private static ArrayList<int[]> reconstructPath(Cell end) {
         ArrayList<int[]> path = new ArrayList<>();
         Cell current = end;
