@@ -1,0 +1,13 @@
+package object;
+
+import main.Engine;
+
+import static java.lang.Integer.MAX_VALUE;
+
+public class Shooter extends Weapon{
+
+    public Shooter(Engine eng, int x, int y, String name, String imageName, int damage, int attackSpeed) {
+        super(eng,x,y,name,imageName,damage,MAX_VALUE,attackSpeed);
+    }
+
+}

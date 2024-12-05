@@ -1,12 +1,10 @@
 package entity;
 
+import entity.attack.Bullet;
 import main.Engine;
 import main.InputHandler;
 import main.UtilityTool;
-import object.OBJ_Boots;
-import object.OBJ_Key;
-import object.SuperObject;
-import object.Weapon;
+import object.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -264,6 +262,34 @@ public class Player extends Entity {
         if(!(getInventory().getCurrent() instanceof Weapon weapon)) {
             return;
         }
+        if(weapon instanceof Shooter){
+            attackByShooterWeapon((Shooter)weapon);
+        }
+        else {
+            attackByMeeleWeapon(weapon);
+        }
+    }
+
+    private int[] determineDirection() {
+        if(direction.equalsIgnoreCase("up")){
+            return new int[]{-10000,0};
+        }
+        else if(direction.equalsIgnoreCase("down")){
+            return new int[]{10000,0};
+        }
+        else if(direction.equalsIgnoreCase("left")){
+            return new int[]{0,-10000};
+        }
+        else {
+            return new int[]{0, 10000};
+        }
+    }
+
+    private void attackByShooterWeapon(Shooter shooter){
+        eng.addEntity(new Bullet(eng,"Bullet",40, getWorldX(),getWorldY(),determineDirection()[0], determineDirection()[1]));
+    }
+
+    private void attackByMeeleWeapon(Weapon weapon){
         long currentTime = System.currentTimeMillis();
         if(currentTime - lastAttackTime < ATTACK_COOLDOWN){
             return;
