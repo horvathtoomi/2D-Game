@@ -2,11 +2,16 @@ package object;
 
 import main.Engine;
 
-import static java.lang.Integer.MAX_VALUE;
+public class Pistol extends Shooter {
 
-public class Pistol extends Shooter{
+    public Pistol(Engine eng, int x, int y) {
+        super(eng, x, y, "pistol", "pistol", 40);
+        setPistolValues();
+    }
 
-    public Pistol(Engine eng, int x, int y, String name, String imageName, int damage) {
-        super(eng,x,y,name,imageName,damage,MAX_VALUE);
+    private void setPistolValues(){
+        maxMagSize = 12;
+        currentMagSize = maxMagSize;
+        remainingAmmo = 24;
     }
 }

@@ -24,7 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AssetSetter {
     Engine eng;
     public List<SuperObject> list;
-    private final String[] possibleChestItems = {"key", "boots", "sword"};
+    private final String[] possibleChestItems = {"key", "boots", "sword", "pistol"};
     private final Random rand;
     private int mapNum = 1;
     private static final String LOG_CONTEXT = "[ASSET SETTER]";
@@ -112,6 +112,7 @@ public class AssetSetter {
             case "door" -> new OBJ_Door(eng, x, y);
             case "boots" -> new OBJ_Boots(eng, x, y);
             case "sword" -> new OBJ_Sword(eng, x, y, 50);
+            case "pistol" -> new Pistol(eng, x, y);
             default -> null;
         };
         if (obj != null) {

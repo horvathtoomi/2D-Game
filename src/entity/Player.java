@@ -23,6 +23,7 @@ public class Player extends Entity {
     private static final int INTERACTION_COOLDOWN = 30; // frames
     private int interactionTimer = 0;
     public int defeatedEnemies = 0;
+    public static boolean shot = false;
     private BufferedImage up_key, up_boots, up_sword,
             down_key, down_boots, down_sword,
             left_key, left_boots, left_sword,
@@ -177,7 +178,7 @@ public class Player extends Entity {
             SuperObject obj = eng.aSetter.list.get(index);
 
             switch (obj.name) {
-                case "key", "sword", "boots" -> {
+                case "key", "sword", "boots", "pistol" -> {
                     if (!inventory.isFull()) {
                         inventory.addItem(obj);
                         eng.aSetter.list.remove(obj);
@@ -263,7 +264,8 @@ public class Player extends Entity {
             return;
         }
         if(weapon instanceof Shooter){
-            attackByShooterWeapon((Shooter)weapon);
+            if(((Shooter) weapon).canShoot())
+                attackByShooterWeapon();
         }
         else {
             attackByMeeleWeapon(weapon);
@@ -272,21 +274,26 @@ public class Player extends Entity {
 
     private int[] determineDirection() {
         if(direction.equalsIgnoreCase("up")){
-            return new int[]{-10000,0};
+            return new int[]{-10000,getWorldY()};
         }
         else if(direction.equalsIgnoreCase("down")){
-            return new int[]{10000,0};
+            return new int[]{10000,getWorldY()};
         }
         else if(direction.equalsIgnoreCase("left")){
-            return new int[]{0,-10000};
+            return new int[]{getWorldX(),-10000};
         }
         else {
-            return new int[]{0, 10000};
+            return new int[]{getWorldX(), 10000};
         }
     }
 
-    private void attackByShooterWeapon(Shooter shooter){
-        eng.addEntity(new Bullet(eng,"Bullet",40, getWorldX(),getWorldY(),determineDirection()[0], determineDirection()[1]));
+    private void attackByShooterWeapon(){
+        if(!shot) {
+            eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0], determineDirection()[1]));
+            inventory.getCurrent().use();
+            isAttacking = true;
+            shot = true;
+        }
     }
 
     private void attackByMeeleWeapon(Weapon weapon){
@@ -298,7 +305,6 @@ public class Player extends Entity {
         hasReducedDurability = false;
         weapon.isActive = true;
         lastAttackTime = currentTime;
-
         weapon.updateHitbox(getWorldX(), getWorldY(), direction);
         weapon.checkHit(eng.getEntity());
     }

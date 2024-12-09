@@ -17,7 +17,7 @@ public abstract class Weapon extends SuperObject {
     protected int range;
     protected int attackSpeed;
     protected int attackDuration = 30;
-    protected int attackCooldown = 30;
+    protected int attackCooldown = 3000;
     protected boolean isAttacking = false;
     protected Rectangle hitbox;
     public boolean isActive = false;
@@ -85,7 +85,7 @@ public abstract class Weapon extends SuperObject {
             attackCooldown--;
         }
         if(attackCooldown==0 && isAttacking) {
-            attackCooldown = 30;
+            attackCooldown = 3000;
             attackDuration--;
         }
     }

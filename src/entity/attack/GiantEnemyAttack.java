@@ -19,6 +19,9 @@ public class GiantEnemyAttack extends Attack {
      */
     public GiantEnemyAttack(Engine eng, int startX, int startY, int targetX, int targetY) {
         super(eng,"GiantEnemyAttack",100,startX,startY,targetX,targetY);
+        image1 = scale("objects",name+"1");
+        image2 = scale("objects",name+"2");
+        image = image1;
     }
 
 }

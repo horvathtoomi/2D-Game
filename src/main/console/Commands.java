@@ -81,6 +81,7 @@ public class Commands {
             case "boots" -> eng.addObject(new OBJ_Boots(eng,x * eng.getTileSize(),y * eng.getTileSize()));
             case "chest" -> eng.addObject(new OBJ_Chest(eng,x * eng.getTileSize(),y * eng.getTileSize()));
             case "sword" -> eng.addObject(new OBJ_Sword(eng,x * eng.getTileSize(),y * eng.getTileSize(), 50));
+            case "pistol" -> eng.addObject(new Pistol(eng,x *eng.getTileSize(), y * eng.getTileSize()));
             default -> {
                 consoleHandler.printToConsole("Unknown entity or object: " + obj);
                 return;
