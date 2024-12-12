@@ -165,7 +165,7 @@ public class UserInterface extends JFrame {
 
         g2.setFont(arial_80);
         g2.setColor(Color.WHITE);
-        String gameOverText = eng.getGameState() == Engine.GameState.FINISHED_LOST ? "GAME OVER" : "YOU WON";
+        String gameOverText = eng.getGameState() == Engine.GameState.FINISHED_LOST ? "YOU DIED" : "YOU WON";
         int x = getXforCenteredText(gameOverText);
         int y = eng.getScreenHeight() / 4;
         g2.drawString(gameOverText, x, y);
@@ -384,7 +384,10 @@ public class UserInterface extends JFrame {
     }
 
     private void initGameOverButtons(){
-        endScreenButtons.getFirst().addActionListener(e -> eng.setGameState(Engine.GameState.DIFFICULTY_SCREEN));
+        endScreenButtons.getFirst().addActionListener(e -> {
+            eng.setGameState(Engine.GameState.GAME_MODE_SCREEN);
+            eng.player.setPlayerHealth(100);
+        });
         endScreenButtons.get(1).addActionListener(e -> {
             FileManager.loadGame(eng);
             eng.setGameState(Engine.GameState.RUNNING);

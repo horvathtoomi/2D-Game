@@ -8,3 +8,5 @@ smallenemy 75 75
 giantenemy 85 85
 npc_wayfarer 7 6
 npc_wayfarer 8 8
+tankenemy 10 5
+tankenemy 20 5

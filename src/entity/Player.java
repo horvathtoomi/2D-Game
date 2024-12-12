@@ -28,7 +28,9 @@ public class Player extends Entity {
             down_key, down_boots, down_sword,
             left_key, left_boots, left_sword,
             right_key, right_boots, right_sword,
-            attack_up, attack_down, attack_left, attack_rigth;
+            attack_up, attack_down, attack_left, attack_rigth,
+            up_pistol, down_pistol, left_pistol, right_pistol,
+            attack_up_pistol, attack_down_pistol, attack_left_pistol, attack_rigth_pistol;
 
     public void setPlayerHealth(int health) {
         if(health > maxHealth)
@@ -115,6 +117,16 @@ public class Player extends Entity {
         attack_down = scale("player", "attack_down");
         attack_left = scale("player", "attack_left");
         attack_rigth = scale("player", "attack_rigth");
+
+        up_pistol = scale("player", "up_pistol");
+        down_pistol = scale("player", "down_pistol");
+        left_pistol = scale("player", "left_pistol");
+        right_pistol = scale("player", "rigth_pistol");
+        attack_up_pistol = scale("player", "attack_up_pistol");
+        attack_down_pistol = scale("player", "attack_down_pistol");
+        attack_left_pistol = scale("player", "attack_left_pistol");
+        attack_rigth_pistol = scale("player", "attack_rigth_pistol");
+
         UtilityTool uTool = new UtilityTool();
         attack_up = uTool.scaleImage(attack_up, eng.getTileSize(), eng.getTileSize() * 2);
         attack_down = uTool.scaleImage(attack_down, eng.getTileSize(), eng.getTileSize() * 2);
@@ -178,7 +190,7 @@ public class Player extends Entity {
             SuperObject obj = eng.aSetter.list.get(index);
 
             switch (obj.name) {
-                case "key", "sword", "boots", "pistol" -> {
+                case "key", "sword", "boots", "pistol", "rifle" -> {
                     if (!inventory.isFull()) {
                         inventory.addItem(obj);
                         eng.aSetter.list.remove(obj);
@@ -228,23 +240,42 @@ public class Player extends Entity {
                 };
             }
             else if(inventory.getCurrent() instanceof Weapon) {
-                if(!isAttacking) {
-                    image = switch (direction) {
-                        case "up" -> up_sword;
-                        case "down" -> down_sword;
-                        case "left" -> left_sword;
-                        case "right" -> right_sword;
-                        default -> null;
-                    };
-                }
-                else{
-                    image = switch (direction) {
-                        case "up" -> attack_up;
-                        case "down" -> attack_down;
-                        case "left" -> attack_left;
-                        case "right" -> attack_rigth;
-                        default -> null;
-                    };
+                if(inventory.getCurrent() instanceof OBJ_Sword) {
+                    if (!isAttacking) {
+                        image = switch (direction) {
+                            case "up" -> up_sword;
+                            case "down" -> down_sword;
+                            case "left" -> left_sword;
+                            case "right" -> right_sword;
+                            default -> null;
+                        };
+                    } else {
+                        image = switch (direction) {
+                            case "up" -> attack_up;
+                            case "down" -> attack_down;
+                            case "left" -> attack_left;
+                            case "right" -> attack_rigth;
+                            default -> null;
+                        };
+                    }
+                } else {
+                    if (!isAttacking) {
+                        image = switch (direction) {
+                            case "up" -> up_pistol;
+                            case "down" -> down_pistol;
+                            case "left" -> left_pistol;
+                            case "right" -> right_pistol;
+                            default -> null;
+                        };
+                    } else {
+                        image = switch (direction) {
+                            case "up" -> attack_up_pistol;
+                            case "down" -> attack_down_pistol;
+                            case "left" -> attack_left_pistol;
+                            case "right" -> attack_rigth_pistol;
+                            default -> null;
+                        };
+                    }
                 }
             }
         } else {

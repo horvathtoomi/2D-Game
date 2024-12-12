@@ -1,10 +1,7 @@
 package main;
 
 import entity.Entity;
-import entity.enemy.DragonEnemy;
-import entity.enemy.FriendlyEnemy;
-import entity.enemy.GiantEnemy;
-import entity.enemy.SmallEnemy;
+import entity.enemy.*;
 import entity.npc.NPC_Wayfarer;
 import main.logger.GameLogger;
 import object.*;
@@ -24,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AssetSetter {
     Engine eng;
     public List<SuperObject> list;
-    private final String[] possibleChestItems = {"key", "boots", "sword", "pistol"};
+    private final String[] possibleChestItems = {"key", "boots", "sword", "pistol", "rifle"};
     private final Random rand;
     private int mapNum = 1;
     private static final String LOG_CONTEXT = "[ASSET SETTER]";
@@ -113,6 +110,7 @@ public class AssetSetter {
             case "boots" -> new OBJ_Boots(eng, x, y);
             case "sword" -> new OBJ_Sword(eng, x, y, 50);
             case "pistol" -> new Pistol(eng, x, y);
+            case "rifle" -> new Rifle(eng, x, y);
             default -> null;
         };
         if (obj != null) {
@@ -135,6 +133,7 @@ public class AssetSetter {
             case "friendlyenemy" -> new FriendlyEnemy(eng, x, y);
             case "giantenemy" -> new GiantEnemy(eng, x, y);
             case "smallenemy" -> new SmallEnemy(eng, x, y);
+            case "tankenemy" -> new TankEnemy(eng, x, y);
             case "npc_wayfarer" -> new NPC_Wayfarer(eng, x, y);
             default -> null;
         };
@@ -156,6 +155,8 @@ public class AssetSetter {
             case "key" -> newItem = new OBJ_Key(eng, x, y);
             case "boots" -> newItem = new OBJ_Boots(eng, x, y);
             case "sword" -> newItem = createRandomSword(x,y);
+            case "pistol" -> newItem = new Pistol(eng, x, y);
+            case "rifle" -> newItem = new Rifle(eng, x, y);
         }
         if (newItem != null) {
             list.add(newItem);

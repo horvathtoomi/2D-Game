@@ -230,6 +230,7 @@ public abstract class Enemy extends Entity {
         Attack attack = switch(name){
             case "SmallEnemy" -> new SmallEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
             case "GiantEnemy" -> new GiantEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
+            case "TankEnemy" -> new TankEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
             case "FriendlyEnemy" -> getClosestEnemy();
             default -> new DragonEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
         };
