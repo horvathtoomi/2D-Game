@@ -84,7 +84,7 @@ public abstract class Weapon extends SuperObject {
         if(isAttacking) {
             attackCooldown--;
         }
-        if(attackCooldown==0 && isAttacking) {
+        if(attackCooldown == 0 && isAttacking) {
             attackCooldown = 3000;
             attackDuration--;
         }

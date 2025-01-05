@@ -146,8 +146,9 @@ public class FileManager {
                         item.name,
                         item.getDurability(),
                         item.getMaxDurability(),
-                        item instanceof Weapon ? ((Weapon) item).getDamage() : 0
-                )).toList();
+                        item instanceof Weapon ? ((Weapon) item).getDamage() : 0,
+                        item instanceof Shooter ? ((Shooter) item).getRemainingAmmo() : 0,
+                        item instanceof Shooter ? ((Shooter) item).getCurrentMagSize() : 0)).toList();
     }
 
     /**
@@ -163,6 +164,8 @@ public class FileManager {
                 case "sword" -> new OBJ_Sword(eng, 0, 0, item.damage);
                 case "boots" -> new OBJ_Boots(eng, 0, 0);
                 case "key" -> new OBJ_Key(eng, 0, 0);
+                case "pistol" -> new Pistol(eng, 0, 0, item.leftoverAmmo, item.inMagAmmo);
+                case "rifle" -> new Rifle(eng, 0, 0, item.leftoverAmmo, item.inMagAmmo);
                 default -> null;
             };
             if (obj != null) {

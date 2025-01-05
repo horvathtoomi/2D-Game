@@ -9,12 +9,16 @@ public class SerializableInventoryItem implements Serializable {
     String name;
     int durability;
     int maxDurability;
+    int leftoverAmmo;
+    int inMagAmmo;
     int damage;
 
-    SerializableInventoryItem(String name, int durability, int maxDurability, int damage) {
+    SerializableInventoryItem(String name, int durability, int maxDurability, int damage, int leftoverAmmo, int inMagAmmo) {
         this.name = name;
         this.durability = durability;
         this.maxDurability = maxDurability;
         this.damage = damage;
+        this.leftoverAmmo = leftoverAmmo;
+        this.inMagAmmo = inMagAmmo;
     }
 }

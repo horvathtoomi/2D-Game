@@ -3,7 +3,6 @@ package entity;
 import main.Engine;
 import main.UtilityTool;
 import main.logger.GameLogger;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -104,9 +103,6 @@ public class Entity{
             case "shoot" -> shoot;
             default -> null;
         };
-        int screenX = getWorldX() - eng.player.getWorldX() + eng.player.getScreenX();
-        int screenY = getWorldY() - eng.player.getWorldY() + eng.player.getScreenY();
-
         screenX = adjustScreenX(screenX);
         screenY = adjustScreenY(screenY);
 

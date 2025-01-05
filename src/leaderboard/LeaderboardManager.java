@@ -54,14 +54,10 @@ public class LeaderboardManager {
             // Könyvtár létrehozása, ha nem létezik
             Path path = Paths.get(LEADERBOARD_FILE);
             Files.createDirectories(path.getParent());
-
-            // Ha a fájl nem létezik, létrehozzuk
             if (!Files.exists(path)) {
                 Files.createFile(path);
                 return;
             }
-
-            // Fájl beolvasása soronként
             List<String> lines = Files.readAllLines(path);
             for (String line : lines) {
                 if (line.trim().isEmpty()) continue;
@@ -73,7 +69,6 @@ public class LeaderboardManager {
                 }
             }
 
-            // Rendezés és limitálás minden nehézségi szintnél
             for (Engine.GameDifficulty difficulty : Engine.GameDifficulty.values()) {
                 List<LeaderboardEntry> entries = leaderboards.get(difficulty);
                 Collections.sort(entries);
