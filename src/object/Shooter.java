@@ -11,6 +11,10 @@ public abstract class Shooter extends Weapon {
     protected int coolDown;
     private static final String LOG_CONTEXT = "[SHOOTER]";
 
+    public void addAmmo(int val){
+        remainingAmmo += val;
+    }
+
     public int getRemainingAmmo() {
         return remainingAmmo;
     }

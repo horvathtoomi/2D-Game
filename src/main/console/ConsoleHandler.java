@@ -1,6 +1,7 @@
 package main.console;
 
 import main.Engine;
+import object.Shooter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,10 +22,6 @@ public class ConsoleHandler {
         this.commands = new Commands(eng, this);
         this.abortProcess = false;
         this.commandMap = initializeCommands();
-    }
-
-    public ConsoleGUI getConsoleGUI() {
-        return consoleGUI;
     }
 
     public void printToConsole(String message) {
@@ -131,10 +128,22 @@ public class ConsoleHandler {
         map.put("add", args -> {
             if (args.length == 4) {
                 commands.add(args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+            } else if(args.length == 3 && args[1].startsWith("ammo")){
+                if(eng.player.getInventory().getCurrent() instanceof Shooter){
+                    if(Integer.parseInt(args[2]) >= 0 && Integer.parseInt(args[2]) <= 999) {
+                        commands.addAmmo(Integer.parseInt(args[2]));
+                        printToConsole(Integer.parseInt(args[2]) + " ammo added to the Weapon.");
+                    } else {
+                        printToConsole("Value must be [0 : 999]");
+                    }
+                } else {
+                    printToConsole("The current object is not a Shooter!");
+                }
             } else {
                 printToConsole("""
                     Invalid format for 'add' command.
                     Usage: add <entity/object> X Y
+                    Usage for ammo: add ammo <val>, where val : [0 : 999]
                     Entities: GiantEnemy, SmallEnemy, DragonEnemy, FriendlyEnemy
                     Objects: chest, door, key, boots""");
             }

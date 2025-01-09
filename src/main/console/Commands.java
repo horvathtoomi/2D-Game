@@ -89,6 +89,10 @@ public class Commands {
         consoleHandler.printToConsole(obj + " added to the game");
     }
 
+    public void addAmmo(int val){
+        ((Shooter)eng.player.getInventory().getCurrent()).addAmmo(val);
+    }
+
     public void teleport(int x, int y){
         int[][] maphelp = eng.tileman.getMapTileNum();
         if(x >= eng.getMaxWorldCol() || x < 1 || y >= eng.getMaxWorldRow() || y < 1){
@@ -231,6 +235,7 @@ public class Commands {
                     Where entity_name: <blank>,<GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>""");
             case "add" -> consoleHandler.printToConsole("""
                     Add use: add <entity/object> <x> <y>
+                    Add ammo use: add ammo <val> where value: [0 : 999]
                     Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>,<sword>""");
             case "remove" -> consoleHandler.printToConsole("""
                     Remove use: remove <entity_name>

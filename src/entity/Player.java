@@ -256,7 +256,7 @@ public class Player extends Entity {
                 };
             }
             else if(inventory.getCurrent() instanceof Rifle){
-                image = isAttacking ? switch (direction){
+                image = !isAttacking ? switch (direction){
                     case "up" -> up_rifle;
                     case "down" -> down_rifle;
                     case "left" -> left_rifle;
@@ -271,7 +271,7 @@ public class Player extends Entity {
                 };
             }
             else if(inventory.getCurrent() instanceof OBJ_Sword) {
-                image = isAttacking ? switch (direction) {
+                image = !isAttacking ? switch (direction) {
                     case "up" -> up_sword;
                     case "down" -> down_sword;
                     case "left" -> left_sword;
@@ -286,7 +286,7 @@ public class Player extends Entity {
                 };
             }
             else if (inventory.getCurrent() instanceof Pistol) {
-                image = isAttacking ? switch (direction) {
+                image = !isAttacking ? switch (direction) {
                     case "up" -> up_pistol;
                     case "down" -> down_pistol;
                     case "left" -> left_pistol;
