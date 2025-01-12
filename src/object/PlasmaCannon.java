@@ -17,7 +17,7 @@ public class PlasmaCannon extends Shooter{
     }
 
     public static PlasmaRay getAdjustedRay(double duration){
-        double frac = duration * dT / minToMaxTime;                                                 //Duration must be in milliseconds
+        double frac = duration * dT / minToMaxTime;                                   //Duration must be in milliseconds
         int damage = (maxDamage * frac) < minDamage ? minDamage : (int)(maxDamage * frac);
         return new PlasmaRay(eng, "plasma_ray", damage, 5,5,5,5 );
     }
