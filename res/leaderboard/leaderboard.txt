@@ -1,0 +1,2 @@
+jatekos2|EASY|0|0|100|101000
+jatekos|EASY|21|0|100|5545

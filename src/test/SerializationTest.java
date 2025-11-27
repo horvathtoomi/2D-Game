@@ -1,5 +1,6 @@
 package test;
 
+import entity.Direction;
 import entity.enemy.DragonEnemy;
 import entity.enemy.GiantEnemy;
 import entity.enemy.SmallEnemy;
@@ -63,7 +64,7 @@ class SerializationTest {
         engine.player.setWorldX(100);
         engine.player.setWorldY(200);
         engine.player.setSpeed(4);
-        engine.player.direction = "right";
+        engine.player.direction = Direction.RIGHT;
 
         engine.player.getInventory().addItem(new OBJ_Sword(engine, 0, 0, 50));
         engine.player.getInventory().addItem(new OBJ_Key(engine, 0, 0));

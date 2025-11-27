@@ -1,10 +1,7 @@
 package entity;
 
 import main.Engine;
-import object.OBJ_Key;
-import object.SuperObject;
-import object.Weapon;
-import object.Wearable;
+import object.*;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -86,15 +83,15 @@ public class Inventory {
         int offSetX;
         int offSetY;
         switch (ent.direction) {
-            case "up" -> {
+            case UP -> {
                 offSetX = 0;
                 offSetY = gp.getTileSize();
             }
-            case "down" -> {
+            case DOWN -> {
                 offSetX = 0;
                 offSetY = -(gp.getTileSize());
             }
-            case "left" -> {
+            case LEFT -> {
                 offSetX = gp.getTileSize();
                 offSetY = 0;
             }
@@ -157,6 +154,13 @@ public class Inventory {
         g2.fillRect(screenX, screenY, blueWidth - 7, 5);
     }
 
+    private void drawAmmoBar(Graphics2D g2, int index) {
+        int screenX = 16;
+        int screenY = 3 * gp.getTileSize() + (gp.getTileSize() + 10) * index - 2;
+        Shooter sht = (Shooter)items.get(index);
+        g2.drawString(sht.getCurrentMagSize() + "/" + sht.getRemainingAmmo(), screenX, screenY);
+    }
+
     /**
      * Kirajzolja a leltár felületét.
      * @param g2 a grafikus kontextus
@@ -171,8 +175,10 @@ public class Inventory {
             g2.drawRect(padding, 96 + (slotSize + padding) * i, slotSize, slotSize);
             if (i < items.size() && items.get(i) != null) {
                 g2.drawImage(items.get(i).image, padding, 96 + (slotSize + padding) * i, slotSize, slotSize, null);
-                if(items.get(i) instanceof Wearable || items.get(i) instanceof Weapon){
+                if(items.get(i) instanceof Wearable || (items.get(i) instanceof Weapon && !(items.get(i) instanceof Shooter))){
                     drawUsageBar(g2, i);
+                } else if(items.get(i) instanceof Shooter){
+                    drawAmmoBar(g2, i);
                 }
             }
         }

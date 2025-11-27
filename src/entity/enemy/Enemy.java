@@ -1,5 +1,6 @@
 package entity.enemy;
 
+import entity.Direction;
 import entity.Entity;
 import entity.Player;
 import entity.algorithm.AStar;
@@ -18,7 +19,7 @@ import java.util.Random;
  * Tartalmazza az összes enemy közös tulajdonságait és viselkedését.
  */
 public abstract class Enemy extends Entity {
-    String previousDirection;
+    Direction previousDirection;
 
     private final int startX;
     private int shootingRate;
@@ -38,7 +39,7 @@ public abstract class Enemy extends Entity {
     private final int[] diffSpeed = {1,2,3,4};
     private final int[] diffShootingRate = {200, 150, 100, 50};
     private static final String LOG_CONTEXT = "[ENEMY]";
-    private static final String[] newDirection = {"up","down","left","right"};
+    private static final Direction[] newDirection = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
 
     /**
      * Létrehoz egy új ellenséget.
@@ -72,7 +73,7 @@ public abstract class Enemy extends Entity {
         setWorldY(startY);
         initializeValues(shootingRate);
         updateCounter = 0;
-        direction = previousDirection = "right";
+        direction = previousDirection = Direction.RIGHT;
         try {
             getEnemyImage();
         } catch (Exception e) {
@@ -93,7 +94,6 @@ public abstract class Enemy extends Entity {
             case HARD -> {
                 setSpeed(diffSpeed[2]);
                 this.shootingRate = diffShootingRate[2] + plusShootingRate;
-
             }
             case IMPOSSIBLE -> {
                 setSpeed(diffSpeed[3]);
@@ -139,11 +139,11 @@ public abstract class Enemy extends Entity {
             eng.cChecker.checkTile(this);
             if (!collisionOn) {
                 switch (direction) {
-                    case "left" -> setWorldX(getWorldX() - getSpeed());
-                    case "right" -> setWorldX(getWorldX() + getSpeed());
-                    case "down" -> setWorldY(getWorldY() + getSpeed());
-                    case "up" -> setWorldY(getWorldY() - getSpeed());
-                    case "shoot" -> {
+                    case LEFT -> setWorldX(getWorldX() - getSpeed());
+                    case RIGHT -> setWorldX(getWorldX() + getSpeed());
+                    case DOWN -> setWorldY(getWorldY() + getSpeed());
+                    case UP -> setWorldY(getWorldY() - getSpeed());
+                    case SHOOT -> {
                         if (shootCooldown > 0) break;
                         if (shootAnimationTimer == SHOOT_ANIMATION_DURATION / 2) {
                             shoot();
@@ -161,7 +161,7 @@ public abstract class Enemy extends Entity {
         }
         if (random.nextInt(shootingRate) < 1 && shootCooldown == 0) {
             previousDirection = direction;
-            direction = "shoot";
+            direction = Direction.SHOOT;
         }
     }
 
@@ -172,17 +172,17 @@ public abstract class Enemy extends Entity {
             int nextY = nextPoint[1] * eng.getTileSize();
             if (getWorldX() < nextX) {
                 setWorldX(getWorldX() + getSpeed());
-                direction = "right";
+                direction = Direction.RIGHT;
             } else if (getWorldX() > nextX) {
                 setWorldX(getWorldX() - getSpeed());
-                direction = "left";
+                direction = Direction.LEFT;
             }
             if (getWorldY() < nextY) {
                 setWorldY(getWorldY() + getSpeed());
-                direction = "down";
+                direction = Direction.DOWN;
             } else if (getWorldY() > nextY) {
                 setWorldY(getWorldY() - getSpeed());
-                direction = "up";
+                direction = Direction.UP;
             }
 
             if (getWorldX() == nextX && getWorldY() == nextY) {
@@ -230,6 +230,7 @@ public abstract class Enemy extends Entity {
         Attack attack = switch(name){
             case "SmallEnemy" -> new SmallEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
             case "GiantEnemy" -> new GiantEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
+            case "TankEnemy" -> new TankEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
             case "FriendlyEnemy" -> getClosestEnemy();
             default -> new DragonEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
         };

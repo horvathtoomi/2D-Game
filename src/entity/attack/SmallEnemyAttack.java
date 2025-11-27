@@ -19,6 +19,9 @@ public class SmallEnemyAttack extends Attack {
      */
     public SmallEnemyAttack(Engine eng, int startX, int startY, int targetX, int targetY) {
         super(eng,"SmallEnemyAttack",0, startX, startY, targetX, targetY);
+        image1 = scale("objects",name+"1");
+        image2 = scale("objects",name+"2");
+        image = image1;
     }
 
 }

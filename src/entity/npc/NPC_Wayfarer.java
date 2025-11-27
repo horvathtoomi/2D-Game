@@ -1,5 +1,6 @@
 package entity.npc;
 
+import entity.Direction;
 import entity.Entity;
 import main.Engine;
 
@@ -19,7 +20,7 @@ public class NPC_Wayfarer extends Entity {
      */
     public NPC_Wayfarer(Engine gp) {
         super(gp);
-        direction = "down";
+        direction = Direction.DOWN;
         setSpeed(1);
         getWayfarerImages();
         name = "NPC_Wayfarer";
@@ -27,7 +28,7 @@ public class NPC_Wayfarer extends Entity {
 
     public NPC_Wayfarer(Engine gp, int x, int y) {
         super(gp);
-        direction = "down";
+        direction = Direction.DOWN;
         setSpeed(1);
         getWayfarerImages();
         name = "NPC_Wayfarer";
@@ -48,16 +49,16 @@ public class NPC_Wayfarer extends Entity {
             Random rand = new Random();
             int i = rand.nextInt(100) + 1;
             if (i <= 25) {
-                direction = "up";
+                direction = Direction.UP;
             }
             if (i > 25 && i <= 50) {
-                direction = "down";
+                direction = Direction.DOWN;
             }
             if (i > 50 && i <= 75) {
-                direction = "left";
+                direction = Direction.LEFT;
             }
             if (i > 75) {
-                direction = "right";
+                direction = Direction.RIGHT;
             }
             actionLockCounter = 0;
         }

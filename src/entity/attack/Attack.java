@@ -29,9 +29,6 @@ public class Attack extends Entity {
         initializeSpeed();
         dx = Math.cos(angle) * getSpeed();
         dy = Math.sin(angle) * getSpeed();
-        image1 = scale("objects",name+"1");
-        image2 = scale("objects",name+"2");
-        image = image1;
         solidArea = new Rectangle(getWorldX() + 3, getWorldY() + 4, 30, 30);
     }
 
@@ -97,7 +94,7 @@ public class Attack extends Entity {
         }
     }
 
-    private boolean checkTileCollision() {
+    protected boolean checkTileCollision() {
         int x = getWorldX()/ eng.getTileSize();
         int y = getWorldY()/ eng.getTileSize();
         if(TileManager.mapTileNum[x][y]==4)
@@ -108,8 +105,6 @@ public class Attack extends Entity {
 
     @Override
     public void draw(Graphics2D g2) {
-        setScreenX(getWorldX() - eng.player.getWorldX() + eng.player.getScreenX());
-        setScreenY(getWorldY() - eng.player.getWorldY() + eng.player.getScreenY());
         setScreenX(adjustScreenX(getScreenX()));
         setScreenY(adjustScreenY(getScreenY()));
         if (isValidScreenXY(getScreenX(), getScreenY())) {

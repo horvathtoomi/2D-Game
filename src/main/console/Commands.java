@@ -1,10 +1,7 @@
 package main.console;
 
 import entity.Entity;
-import entity.enemy.DragonEnemy;
-import entity.enemy.FriendlyEnemy;
-import entity.enemy.GiantEnemy;
-import entity.enemy.SmallEnemy;
+import entity.enemy.*;
 import main.Engine;
 import main.logger.GameLogger;
 import object.*;
@@ -73,6 +70,7 @@ public class Commands {
         obj = obj.toLowerCase();
         switch(obj){
             case "giantenemy" -> eng.addEntity(new GiantEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+            case "tankenemy" -> eng.addEntity(new TankEnemy(eng, x * eng.getTileSize(), y * eng.getTileSize()));
             case "smallenemy" -> eng.addEntity(new SmallEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
             case "friendlyenemy" -> eng.addEntity(new FriendlyEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
             case "dragonenemy" -> eng.addEntity(new DragonEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
@@ -81,6 +79,8 @@ public class Commands {
             case "boots" -> eng.addObject(new OBJ_Boots(eng,x * eng.getTileSize(),y * eng.getTileSize()));
             case "chest" -> eng.addObject(new OBJ_Chest(eng,x * eng.getTileSize(),y * eng.getTileSize()));
             case "sword" -> eng.addObject(new OBJ_Sword(eng,x * eng.getTileSize(),y * eng.getTileSize(), 50));
+            case "pistol" -> eng.addObject(new Pistol(eng,x *eng.getTileSize(), y * eng.getTileSize()));
+            case "rifle" -> eng.addObject(new Rifle(eng, x * eng.getTileSize(), y * eng.getTileSize()));
             default -> {
                 consoleHandler.printToConsole("Unknown entity or object: " + obj);
                 return;
@@ -89,13 +89,16 @@ public class Commands {
         consoleHandler.printToConsole(obj + " added to the game");
     }
 
+    public void addAmmo(int val){
+        ((Shooter)eng.player.getInventory().getCurrent()).addAmmo(val);
+    }
+
     public void teleport(int x, int y){
         int[][] maphelp = eng.tileman.getMapTileNum();
         if(x >= eng.getMaxWorldCol() || x < 1 || y >= eng.getMaxWorldRow() || y < 1){
             GameLogger.warn(LOG_CONTEXT, "Coordinates must be X->[1:" + (eng.getMaxWorldCol() -1) + "] and Y->[1:" + (eng.getMaxWorldRow() -1) + "]");
             return;
-        }
-        else if(eng.tileman.getTile(maphelp[x][y]).collision){
+        } else if(eng.tileman.getTile(maphelp[x][y]).collision){
             GameLogger.warn(LOG_CONTEXT, "Can not teleport on a solid tile!");
             return;
         }
@@ -232,6 +235,7 @@ public class Commands {
                     Where entity_name: <blank>,<GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>""");
             case "add" -> consoleHandler.printToConsole("""
                     Add use: add <entity/object> <x> <y>
+                    Add ammo use: add ammo <val> where value: [0 : 999]
                     Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>,<sword>""");
             case "remove" -> consoleHandler.printToConsole("""
                     Remove use: remove <entity_name>

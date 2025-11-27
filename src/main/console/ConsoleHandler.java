@@ -1,6 +1,7 @@
 package main.console;
 
 import main.Engine;
+import object.Shooter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
 public class ConsoleHandler {
     private final Engine eng;
     private final Commands commands;
-    public boolean abortProcess;
+    protected boolean abortProcess;
     private final Map<String, Command> commandMap;
     private ConsoleGUI consoleGUI;
 
@@ -21,10 +22,6 @@ public class ConsoleHandler {
         this.commands = new Commands(eng, this);
         this.abortProcess = false;
         this.commandMap = initializeCommands();
-    }
-
-    public ConsoleGUI getConsoleGUI() {
-        return consoleGUI;
     }
 
     public void printToConsole(String message) {
@@ -131,10 +128,22 @@ public class ConsoleHandler {
         map.put("add", args -> {
             if (args.length == 4) {
                 commands.add(args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+            } else if(args.length == 3 && args[1].startsWith("ammo")){
+                if(eng.player.getInventory().getCurrent() instanceof Shooter){
+                    if(Integer.parseInt(args[2]) >= 0 && Integer.parseInt(args[2]) <= 999) {
+                        commands.addAmmo(Integer.parseInt(args[2]));
+                        printToConsole(Integer.parseInt(args[2]) + " ammo added to the Weapon.");
+                    } else {
+                        printToConsole("Value must be [0 : 999]");
+                    }
+                } else {
+                    printToConsole("The current object is not a Shooter!");
+                }
             } else {
                 printToConsole("""
                     Invalid format for 'add' command.
                     Usage: add <entity/object> X Y
+                    Usage for ammo: add ammo <val>, where val : [0 : 999]
                     Entities: GiantEnemy, SmallEnemy, DragonEnemy, FriendlyEnemy
                     Objects: chest, door, key, boots""");
             }
@@ -167,7 +176,6 @@ public class ConsoleHandler {
                 printToConsole("Invalid format! Use 'help make' for correct usage");
             }
         });
-
         return map;
     }
 
@@ -200,20 +208,21 @@ public class ConsoleHandler {
 
     private String getHelpText() {
         return """
-                            Available commands:
-            -------------------------------------------------------
-            | help [command] : Show help for a specific command   |
-            | reset          : Reset the game                     |
-            | exit           : Exit console mode                  |
-            | exit_game      : Exit the game                      |
-            | remove         : Remove entities                    |
-            | save/load      : Save/Load game state               |
-            | set/get        : Set/Get game values                |
-            | add            : Add entities or objects            |
-            | teleport       : Teleports player                   |
-            | script         : Run a script file                  |
-            | make           : Create a new script file           |
-            -------------------------------------------------------
+            ------------------------------------------------------
+            |               Available commands:                  |
+            ------------------------------------------------------
+            | help [command] : Show help for a specific command  |
+            | reset          : Reset the game                    |
+            | exit           : Exit console mode                 |
+            | exit_game      : Exit the game                     |
+            | remove         : Remove entities                   |
+            | save/load      : Save/Load game state              |
+            | set/get        : Set/Get game values               |
+            | add            : Add entities or objects           |
+            | teleport       : Teleports player                  |
+            | script         : Run a script file                 |
+            | make           : Create a new script file          |
+            ------------------------------------------------------
             Type 'help <command>' for detailed usage information.""";
     }
 }

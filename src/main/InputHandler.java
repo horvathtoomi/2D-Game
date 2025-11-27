@@ -3,6 +3,7 @@ package main;
 import entity.Player;
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
+import object.Shooter;
 import serializable.FileManager;
 
 import java.awt.event.KeyEvent;
@@ -45,6 +46,11 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_D -> rightPressed = true;
             case KeyEvent.VK_E -> attackPressed = true;
             case KeyEvent.VK_F -> eng.player.getInventory().rotate();
+            case KeyEvent.VK_R -> {
+                if (eng.player.getInventory().getCurrent() instanceof Shooter shooter) {
+                    shooter.reload();
+                }
+            }
             case KeyEvent.VK_Q -> handleQ();
             case KeyEvent.VK_ESCAPE -> togglePauseState();
             case KeyEvent.VK_ENTER -> toggleMenuState();
@@ -68,6 +74,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_E -> {
                 attackPressed = false;
                 Player.isAttacking = false;
+                Player.shot = false;
             }
         }
     }

@@ -3,7 +3,6 @@ package entity;
 import main.Engine;
 import main.UtilityTool;
 import main.logger.GameLogger;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -23,7 +22,7 @@ public class Entity{
     private int speed, health;
     public int actionLockCounter;
     public BufferedImage right,left,up,down,shoot;
-    public String direction;
+    public Direction direction = Direction.DOWN;
     public Rectangle solidArea = new Rectangle(0,0,48,48);
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
@@ -79,16 +78,16 @@ public class Entity{
         eng.cChecker.checkPlayer(this);
         if(!collisionOn){
             switch (direction) {
-                case "up":
+                case UP:
                     worldY -= speed;
                     break;
-                case "down":
+                case DOWN:
                     worldY += speed;
                     break;
-                case "left":
+                case LEFT:
                     worldX -= speed;
                     break;
-                case "right":
+                case RIGHT:
                     worldX += speed;
                     break;
             }
@@ -96,20 +95,9 @@ public class Entity{
     }
 
     public void draw(Graphics2D g2) {
-        BufferedImage image = switch (direction) {
-            case "up" -> up;
-            case "down" -> down;
-            case "left" -> left;
-            case "right" -> right;
-            case "shoot" -> shoot;
-            default -> null;
-        };
-        int screenX = getWorldX() - eng.player.getWorldX() + eng.player.getScreenX();
-        int screenY = getWorldY() - eng.player.getWorldY() + eng.player.getScreenY();
-
+        BufferedImage image = Direction.valueMapper(new BufferedImage[]{up,down,left,right,shoot}, direction);
         screenX = adjustScreenX(screenX);
         screenY = adjustScreenY(screenY);
-
         if (isValidScreenXY(screenX, screenY)) {
             g2.drawImage(image, screenX, screenY, width, height, null);
         }
@@ -144,10 +132,10 @@ public class Entity{
     public BufferedImage scale(String folderName, String imageName){
         UtilityTool uTool = new UtilityTool();
         BufferedImage bufim = null;
-        try{
+        try {
             bufim = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png")));
             bufim = uTool.scaleImage(bufim, eng.getTileSize(), eng.getTileSize());
-        }catch(IOException e){
+        } catch(IOException e) {
             GameLogger.error("[ENTITY]", "Failed to load image: " + e.getMessage(), e);
         }
         return bufim;

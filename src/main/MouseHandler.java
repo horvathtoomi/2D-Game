@@ -31,6 +31,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
             case DIFFICULTY_SCREEN -> eng.userInterface.handleDifficultyScreenClick(e.getPoint());
             case FINISHED_LOST -> eng.userInterface.handleGameOverClick(e.getPoint());
             case PAUSED -> eng.userInterface.handlePauseScreenClick(e.getPoint());
+            case RUNNING -> eng.player.attack();
         }
     }
 

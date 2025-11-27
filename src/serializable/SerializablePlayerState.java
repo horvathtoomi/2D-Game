@@ -1,5 +1,6 @@
 package serializable;
 
+import entity.Direction;
 import entity.Player;
 import main.Engine;
 
@@ -15,11 +16,10 @@ public class SerializablePlayerState implements Serializable {
     public int speed;
     public int health;
     public int maxHealth;
-    public String direction;
+    public Direction direction;
     public List<SerializableInventoryItem> inventoryState;
 
-    SerializablePlayerState(Player player, Engine.GameDifficulty difficulty,
-                            List<SerializableInventoryItem> inventoryState) {
+    SerializablePlayerState(Player player, List<SerializableInventoryItem> inventoryState) {
         this.worldX = player.getWorldX();
         this.worldY = player.getWorldY();
         this.speed = player.getSpeed();

@@ -1,5 +1,6 @@
 package test;
 
+import entity.Direction;
 import entity.Entity;
 import entity.Inventory;
 import entity.Player;
@@ -106,8 +107,8 @@ class EnhancedEngineTest {
         void testTileCollision() {
             Entity entity = new NPC_Wayfarer(engine);
 
-            String[] directions = {"up", "down", "left", "right"};
-            for(String direction : directions) {
+            Direction[] directions = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
+            for(Direction direction : directions) {
                 entity.direction = direction;
                 entity.collisionOn = false;
                 collisionChecker.checkTile(entity);

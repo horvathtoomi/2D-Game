@@ -1,12 +1,10 @@
 package entity;
 
+import entity.attack.Bullet;
 import main.Engine;
 import main.InputHandler;
 import main.UtilityTool;
-import object.OBJ_Boots;
-import object.OBJ_Key;
-import object.SuperObject;
-import object.Weapon;
+import object.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -19,17 +17,22 @@ public class Player extends Entity {
     public static boolean isAttacking = false;
     private boolean hasReducedDurability = false;
     private long lastAttackTime = 0;
-    private final InputHandler kezelo;
+    private final InputHandler inputHandler;
     private final Inventory inventory;
     private static final long ATTACK_COOLDOWN = 500;
-    private static final int INTERACTION_COOLDOWN = 30; // frames
+    private static final int INTERACTION_COOLDOWN = 30;
     private int interactionTimer = 0;
     public int defeatedEnemies = 0;
+    public static boolean shot = false;
     private BufferedImage up_key, up_boots, up_sword,
             down_key, down_boots, down_sword,
             left_key, left_boots, left_sword,
             right_key, right_boots, right_sword,
-            attack_up, attack_down, attack_left, attack_rigth;
+            up_rifle, down_rifle, right_rifle, left_rifle,
+            attack_up, attack_down, attack_left, attack_right,
+            up_pistol, down_pistol, left_pistol, right_pistol,
+            attack_up_pistol, attack_down_pistol, attack_left_pistol, attack_right_pistol,
+            attack_up_rifle, attack_down_rifle, attack_left_rifle, attack_right_rifle;
 
     public void setPlayerHealth(int health) {
         if(health > maxHealth)
@@ -47,7 +50,7 @@ public class Player extends Entity {
      */
     public Player(Engine panel, InputHandler kezelo) {
         super(panel);
-        this.kezelo = kezelo;
+        this.inputHandler = kezelo;
         setMaxHealth(100);
         setHealth(100);
         setScreenX(eng.getScreenWidth() / 2 - (eng.getTileSize() / 2));
@@ -58,7 +61,7 @@ public class Player extends Entity {
         solidAreaDefaultY = solidArea.y;
         getPlayerImage();
         setSpeed(3);
-        direction = "down";
+        direction = Direction.DOWN;
     }
 
     public void setDefaultValues() {
@@ -96,10 +99,10 @@ public class Player extends Entity {
     }
 
     public void getPlayerImage() {
-        right = scale("player", "rigth");
-        right_key = scale("player", "rigth_key");
-        right_boots = scale("player", "rigth_boots");
-        right_sword = scale("player", "rigth_sword");
+        right = scale("player", "right");
+        right_key = scale("player", "right_key");
+        right_boots = scale("player", "right_boots");
+        right_sword = scale("player", "right_sword");
         left = scale("player", "left");
         left_key = scale("player", "left_key");
         left_boots = scale("player", "left_boots");
@@ -115,12 +118,33 @@ public class Player extends Entity {
         attack_up = scale("player", "attack_up");
         attack_down = scale("player", "attack_down");
         attack_left = scale("player", "attack_left");
-        attack_rigth = scale("player", "attack_rigth");
+        attack_right = scale("player", "attack_right");
+
+        up_rifle = scale("player", "up_rifle");
+        down_rifle = scale("player", "down_rifle");
+        left_rifle = scale("player", "left_rifle");
+        right_rifle = scale("player", "right_rifle");
+
+        up_pistol = scale("player", "up_pistol");
+        down_pistol = scale("player", "down_pistol");
+        left_pistol = scale("player", "left_pistol");
+        right_pistol = scale("player", "right_pistol");
+        attack_up_pistol = scale("player", "attack_up_pistol");
+        attack_down_pistol = scale("player", "attack_down_pistol");
+        attack_left_pistol = scale("player", "attack_left_pistol");
+        attack_right_pistol = scale("player", "attack_right_pistol");
+
+        attack_up_rifle = scale("player", "attack_up_rifle");
+        attack_down_rifle = scale("player", "attack_down_rifle");
+        attack_left_rifle = scale("player", "attack_left_rifle");
+        attack_right_rifle = scale("player", "attack_right_rifle");
+
+
         UtilityTool uTool = new UtilityTool();
         attack_up = uTool.scaleImage(attack_up, eng.getTileSize(), eng.getTileSize() * 2);
         attack_down = uTool.scaleImage(attack_down, eng.getTileSize(), eng.getTileSize() * 2);
         attack_left = uTool.scaleImage(attack_left, eng.getTileSize() * 2, eng.getTileSize());
-        attack_rigth = uTool.scaleImage(attack_rigth, eng.getTileSize() * 2, eng.getTileSize());
+        attack_right = uTool.scaleImage(attack_right, eng.getTileSize() * 2, eng.getTileSize());
     }
 
     /**
@@ -133,7 +157,11 @@ public class Player extends Entity {
             interactionTimer--;
         }
         setSpeed(inventory.getCurrent() instanceof OBJ_Boots ? 4 : 3);
-        if (!kezelo.attackPressed && isAttacking) {
+        if(inputHandler.attackPressed){
+            attack();
+        }
+
+        if (!inputHandler.attackPressed && isAttacking) {
             isAttacking = false;
             hasReducedDurability = false;
             if (inventory.getCurrent() instanceof Weapon) {
@@ -141,12 +169,11 @@ public class Player extends Entity {
             }
         }
 
-        if (kezelo.attackPressed || kezelo.upPressed || kezelo.downPressed || kezelo.leftPressed || kezelo.rightPressed) {
-            if (kezelo.upPressed) direction = "up";
-            if (kezelo.downPressed) direction = "down";
-            if (kezelo.leftPressed) direction = "left";
-            if (kezelo.rightPressed) direction = "right";
-            if (kezelo.attackPressed) attack();
+        if (inputHandler.upPressed || inputHandler.downPressed || inputHandler.leftPressed || inputHandler.rightPressed) {
+            if (inputHandler.upPressed) direction = Direction.UP;
+            if (inputHandler.downPressed) direction = Direction.DOWN;
+            if (inputHandler.leftPressed) direction = Direction.LEFT;
+            if (inputHandler.rightPressed) direction = Direction.RIGHT;
 
             //Check Tile Collision
             collisionOn = false;
@@ -160,10 +187,10 @@ public class Player extends Entity {
 
             if (!collisionOn) {
                 switch (direction) {
-                    case "up" -> setWorldY(getWorldY() - getSpeed());
-                    case "down" -> setWorldY(getWorldY() + getSpeed());
-                    case "left" -> setWorldX(getWorldX() - getSpeed());
-                    case "right" -> setWorldX(getWorldX() + getSpeed());
+                    case UP -> setWorldY(getWorldY() - getSpeed());
+                    case DOWN -> setWorldY(getWorldY() + getSpeed());
+                    case LEFT -> setWorldX(getWorldX() - getSpeed());
+                    case RIGHT -> setWorldX(getWorldX() + getSpeed());
                 }
             }
         }
@@ -173,13 +200,11 @@ public class Player extends Entity {
         }
     }
 
-
     private void interactWithObject(int index) {
         if (index < eng.aSetter.list.size()) {
             SuperObject obj = eng.aSetter.list.get(index);
-
             switch (obj.name) {
-                case "key", "sword", "boots" -> {
+                case "key", "sword", "boots", "pistol", "rifle" -> {
                     if (!inventory.isFull()) {
                         inventory.addItem(obj);
                         eng.aSetter.list.remove(obj);
@@ -211,51 +236,28 @@ public class Player extends Entity {
         BufferedImage image = up;
         if (inventory.getCurrent() != null) {
             if (inventory.getCurrent() instanceof OBJ_Key) {
-                image = switch(direction){
-                    case "up" -> up_key;
-                    case "down" -> down_key;
-                    case "left" -> left_key;
-                    case "right" -> right_key;
-                    default -> null;
-                };
+                image = Direction.valueMapper(new BufferedImage[]{up_key, down_key, left_key, right_key}, direction);
             }
             else if(inventory.getCurrent() instanceof OBJ_Boots) {
-                image = switch(direction){
-                    case "up" -> up_boots;
-                    case "down" -> down_boots;
-                    case "left" -> left_boots;
-                    case "right" -> right_boots;
-                    default -> null;
-                };
+                image = Direction.valueMapper(new BufferedImage[]{up_boots, down_boots, left_boots, right_boots}, direction);
             }
-            else if(inventory.getCurrent() instanceof Weapon) {
-                if(!isAttacking) {
-                    image = switch (direction) {
-                        case "up" -> up_sword;
-                        case "down" -> down_sword;
-                        case "left" -> left_sword;
-                        case "right" -> right_sword;
-                        default -> null;
-                    };
-                }
-                else{
-                    image = switch (direction) {
-                        case "up" -> attack_up;
-                        case "down" -> attack_down;
-                        case "left" -> attack_left;
-                        case "right" -> attack_rigth;
-                        default -> null;
-                    };
-                }
+            else if(inventory.getCurrent() instanceof Rifle){
+                image = !isAttacking ?
+                        Direction.valueMapper(new BufferedImage[]{up_rifle, down_rifle, left_rifle, right_rifle}, direction)
+                        : Direction.valueMapper(new BufferedImage[]{attack_up_rifle, attack_down_rifle, attack_left_rifle, attack_right_rifle}, direction);
+            }
+            else if(inventory.getCurrent() instanceof OBJ_Sword) {
+                image = !isAttacking ?
+                        Direction.valueMapper(new BufferedImage[]{up_sword, down_sword, left_sword, right_sword}, direction)
+                        : Direction.valueMapper(new BufferedImage[]{attack_up, attack_down, attack_left, attack_right}, direction);
+            }
+            else if (inventory.getCurrent() instanceof Pistol) {
+                image = !isAttacking ?
+                        Direction.valueMapper(new BufferedImage[]{up_pistol, down_pistol, left_pistol, right_pistol}, direction)
+                        : Direction.valueMapper(new BufferedImage[]{attack_up_pistol, attack_down_pistol, attack_left_pistol, attack_right_pistol}, direction);
             }
         } else {
-            image = switch (direction) {
-                case "up" -> up;
-                case "down" -> down;
-                case "left" -> left;
-                case "right" -> right;
-                default -> null;
-            };
+            image = Direction.valueMapper(new BufferedImage[]{up, down, left, right}, direction);
         }
         return image;
     }
@@ -264,6 +266,52 @@ public class Player extends Entity {
         if(!(getInventory().getCurrent() instanceof Weapon weapon)) {
             return;
         }
+        if(weapon instanceof Shooter){
+            if(((Shooter) weapon).canShoot())
+                attackByShooterWeapon();
+        }
+        else {
+            attackByMeeleWeapon(weapon);
+        }
+    }
+
+    private int[] determineDirection() {
+        if(direction == Direction.UP){
+            return new int[]{-10000,getWorldY()};
+        }
+        else if(direction == Direction.DOWN){
+            return new int[]{10000,getWorldY()};
+        }
+        else if(direction == Direction.LEFT){
+            return new int[]{getWorldX(),-10000};
+        }
+        else {
+            return new int[]{getWorldX(), 10000};
+        }
+    }
+
+    private void attackByShooterWeapon(){
+        if(inventory.getCurrent() instanceof Pistol) {
+            if(!shot) {
+                eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0], determineDirection()[1]));
+                inventory.getCurrent().use();
+                isAttacking = true;
+                shot = true;
+            }
+        } else {
+            Rifle rifle = (Rifle)inventory.getCurrent();
+            if(rifle.getCoolDown() == 0) {
+                eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0], determineDirection()[1]));
+                inventory.getCurrent().use();
+                isAttacking = true;
+                ((Shooter)inventory.getCurrent()).setCoolDown(rifle.getFireRate());
+            } else {
+                ((Shooter)inventory.getCurrent()).setCoolDown(rifle.getCoolDown() - 1);
+            }
+        }
+    }
+
+    private void attackByMeeleWeapon(Weapon weapon){
         long currentTime = System.currentTimeMillis();
         if(currentTime - lastAttackTime < ATTACK_COOLDOWN){
             return;
@@ -272,8 +320,7 @@ public class Player extends Entity {
         hasReducedDurability = false;
         weapon.isActive = true;
         lastAttackTime = currentTime;
-
-        weapon.updateHitbox(getWorldX(), getWorldY(), direction);
+        weapon.updateHitbox(getWorldX(), getWorldY(), direction.toString());
         weapon.checkHit(eng.getEntity());
     }
 
@@ -304,7 +351,7 @@ public class Player extends Entity {
             g2.drawImage(image,x,y,null);
         else if(image == attack_left)
             g2.drawImage(image,x - eng.getTileSize(),y,null);
-        else if(image == attack_rigth)
+        else if(image == attack_right)
             g2.drawImage(image,x,y,null);
         else
             g2.drawImage(image, x, y, null);

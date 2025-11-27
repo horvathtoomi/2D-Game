@@ -1,3 +1,7 @@
+pistol 2 2
+pistol 8 2
+rifle 4 2
+rifle 6 2
 chest 20 20
 key 30 30
 boots 40 40

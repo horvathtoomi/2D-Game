@@ -1,5 +1,6 @@
 package serializable;
 
+import entity.Direction;
 import entity.Entity;
 
 import java.io.Serial;
@@ -13,7 +14,7 @@ class SerializableEntityState implements Serializable {
     int worldY;
     int speed;
     int health;
-    String direction;
+    Direction direction;
 
     SerializableEntityState(Entity entity) {
         this.type = entity.getClass().getSimpleName();

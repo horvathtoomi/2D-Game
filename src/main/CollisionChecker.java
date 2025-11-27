@@ -16,7 +16,6 @@ public class CollisionChecker {
 
     public CollisionChecker(Engine eng) {
         this.eng = eng;
-
     }
 
     /**
@@ -39,36 +38,35 @@ public class CollisionChecker {
         int tileNum1, tileNum2;
 
         switch(entity.direction){
-            case "up":
+            case UP:
                 entityTopRow = (entityTopWorldY-entity.getSpeed())/ eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = TileManager.mapTileNum[entityRightCol][entityTopRow];
                 if(eng.tileman.tile[tileNum1].collision|| eng.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
-            case "down":
+            case DOWN:
                 entityBottomRow = (entityBottomWorldY+entity.getSpeed())/ eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 tileNum2 = TileManager.mapTileNum[entityRightCol][entityBottomRow];
                 if(eng.tileman.tile[tileNum1].collision|| eng.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
-            case "left":
+            case LEFT:
                 entityLeftCol = (entityLeftWorldX-entity.getSpeed())/ eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = TileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 if(eng.tileman.tile[tileNum1].collision|| eng.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
-            case "right":
+            case RIGHT:
                 entityRightCol = (entityRightWorldX+entity.getSpeed())/ eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityRightCol][entityTopRow];
                 tileNum2 = TileManager.mapTileNum[entityRightCol][entityBottomRow];
                 if(eng.tileman.tile[tileNum1].collision|| eng.tileman.tile[tileNum2].collision)
                     entity.collisionOn=true;
                 break;
-            case "shoot":
-
+            case SHOOT:
                 break;
         }
     }
@@ -92,7 +90,7 @@ public class CollisionChecker {
                 obj.solidArea.y = obj.worldY + obj.solidArea.y;
 
                 switch (entity.direction) {
-                    case "up" -> {
+                    case UP -> {
                         entity.solidArea.y -= entity.getSpeed();
                         if (entity.solidArea.intersects(obj.solidArea)) {
                             if (obj.collision) {
@@ -103,7 +101,7 @@ public class CollisionChecker {
                             }
                         }
                     }
-                    case "down" -> {
+                    case DOWN -> {
                         entity.solidArea.y += entity.getSpeed();
                         if (entity.solidArea.intersects(obj.solidArea)) {
                             if (obj.collision) {
@@ -114,7 +112,7 @@ public class CollisionChecker {
                             }
                         }
                     }
-                    case "left" -> {
+                    case LEFT -> {
                         entity.solidArea.x -= entity.getSpeed();
                         if (entity.solidArea.intersects(obj.solidArea)) {
                             if (obj.collision) {
@@ -125,7 +123,7 @@ public class CollisionChecker {
                             }
                         }
                     }
-                    case "right" -> {
+                    case RIGHT -> {
                         entity.solidArea.x += entity.getSpeed();
                         if (entity.solidArea.intersects(obj.solidArea)) {
                             if (obj.collision) {
@@ -167,28 +165,28 @@ public class CollisionChecker {
                 target.solidArea.y = target.getWorldY() + target.solidArea.y;
 
                 switch (entity.direction) {
-                    case "up" -> {
+                    case UP -> {
                         entity.solidArea.y -= entity.getSpeed();
                         if (entity.solidArea.intersects(target.solidArea)) {
                             entity.collisionOn = true;
                             index = it;
                         }
                     }
-                    case "down" -> {
+                    case DOWN -> {
                         entity.solidArea.y += entity.getSpeed();
                         if (entity.solidArea.intersects(target.solidArea)) {
                             entity.collisionOn = true;
                             index = it;
                         }
                     }
-                    case "left" -> {
+                    case LEFT -> {
                         entity.solidArea.x -= entity.getSpeed();
                         if (entity.solidArea.intersects(target.solidArea)) {
                             entity.collisionOn = true;
                             index = it;
                         }
                     }
-                    case "right" -> {
+                    case RIGHT -> {
                         entity.solidArea.x += entity.getSpeed();
                         if (entity.solidArea.intersects(target.solidArea)) {
                             entity.collisionOn = true;
@@ -219,22 +217,22 @@ public class CollisionChecker {
             eng.player.solidArea.y = eng.player.getWorldY() + eng.player.solidArea.y;
 
             switch (entity.direction) {
-                case "up":
+                case UP:
                     entity.solidArea.y -= entity.getSpeed();
                     if (entity.solidArea.intersects(eng.player.solidArea))
                         entity.collisionOn = true;
                     break;
-                case "down":
+                case DOWN:
                     entity.solidArea.y += entity.getSpeed();
                     if (entity.solidArea.intersects(eng.player.solidArea))
                         entity.collisionOn = true;
                     break;
-                case "left":
+                case LEFT:
                     entity.solidArea.x -= entity.getSpeed();
                     if (entity.solidArea.intersects(eng.player.solidArea))
                         entity.collisionOn = true;
                     break;
-                case "right":
+                case RIGHT:
                     entity.solidArea.x += entity.getSpeed();
                     if (entity.solidArea.intersects(eng.player.solidArea))
                         entity.collisionOn = true;

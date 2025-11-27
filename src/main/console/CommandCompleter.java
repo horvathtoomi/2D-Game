@@ -81,28 +81,6 @@ public class CommandCompleter {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     private String completeMainCommand(String partial, boolean isNextCompletion) {
         if (!isNextCompletion || !Objects.equals(lastCompletion, partial)) {
             initializeMainCompletions(partial);
@@ -152,7 +130,6 @@ public class CommandCompleter {
         }
         return scriptFiles;
     }
-
 
     private void initializeMainCompletions(String partial) {
         currentCompletions.clear();
