@@ -84,13 +84,13 @@ public class InputHandler implements KeyListener {
      * @param mode a kiválasztott mód indexe
      */
     private void modeFinder(int mode){
-        if(eng.getGameState() == Engine.GameState.DIFFICULTY_SCREEN) {
+        if(eng.getGameState() == GameState.DIFFICULTY_SCREEN) {
             String[] gameModes = {"EASY", "NORMAL", "HARD", "IMPOSSIBLE"};
             switch (mode) {
-                case 0 -> startByKey(Engine.GameDifficulty.EASY);
-                case 1 -> startByKey(Engine.GameDifficulty.MEDIUM);
-                case 2 -> startByKey(Engine.GameDifficulty.HARD);
-                case 3 -> startByKey(Engine.GameDifficulty.IMPOSSIBLE);
+                case 0 -> startByKey(GameDifficulty.EASY);
+                case 1 -> startByKey(GameDifficulty.MEDIUM);
+                case 2 -> startByKey(GameDifficulty.HARD);
+                case 3 -> startByKey(GameDifficulty.IMPOSSIBLE);
                 default ->
                         GameLogger.error(LOG_CONTEXT, "SOMETHING UNEXPECTED HAPPENED", new IllegalArgumentException("Unexpected parameter"));
             }
@@ -99,53 +99,53 @@ public class InputHandler implements KeyListener {
     }
 
     private void handleQ(){
-        if (eng.getGameState() == Engine.GameState.PAUSED) {
-            eng.setGameState(Engine.GameState.CONSOLE_INPUT);
+        if (eng.getGameState() == GameState.PAUSED) {
+            eng.setGameState(GameState.CONSOLE_INPUT);
             consoleHandler.startConsoleInput();
         }
-        else if(eng.getGameState() == Engine.GameState.RUNNING) {
+        else if(eng.getGameState() == GameState.RUNNING) {
             eng.player.getInventory().drop();
         }
     }
 
     private void handleO() {
-        if (eng.getGameState() == Engine.GameState.RUNNING || eng.getGameState() == Engine.GameState.PAUSED)
+        if (eng.getGameState() == GameState.RUNNING || eng.getGameState() == GameState.PAUSED)
             FileManager.saveGame(eng);
         else
             GameLogger.warn(LOG_CONTEXT, "You are not running the game yet!");
     }
 
     private void handleL(){
-        if(eng.getGameState() != Engine.GameState.RUNNING)
+        if(eng.getGameState() != GameState.RUNNING)
             FileManager.loadGame(eng);
         else
             GameLogger.warn(LOG_CONTEXT, "CAN NOT LOAD GAME WHILE RUNNING");
     }
 
-    private void startByKey(Engine.GameDifficulty diff){
-        eng.setGameMode(Engine.GameMode.STORY);
+    private void startByKey(GameDifficulty diff){
+        eng.setGameMode(GameMode.STORY);
         eng.setGameDifficulty(diff);
         eng.startGame();
-        eng.setGameState(Engine.GameState.RUNNING);
+        eng.setGameState(GameState.RUNNING);
     }
 
     private void togglePauseState() {
         switch(eng.getGameState()){
-            case RUNNING, CONSOLE_INPUT -> eng.setGameState(Engine.GameState.PAUSED);
-            case PAUSED -> eng.setGameState(Engine.GameState.RUNNING);
-            case DIFFICULTY_SCREEN -> eng.setGameState(Engine.GameState.GAME_MODE_SCREEN);
-            default -> eng.setGameState(Engine.GameState.START);
+            case RUNNING, CONSOLE_INPUT -> eng.setGameState(GameState.PAUSED);
+            case PAUSED -> eng.setGameState(GameState.RUNNING);
+            case DIFFICULTY_SCREEN -> eng.setGameState(GameState.GAME_MODE_SCREEN);
+            default -> eng.setGameState(GameState.START);
         }
     }
 
     private void toggleMenuState() {
         switch(eng.getGameState()){
-            case PAUSED -> eng.setGameState(Engine.GameState.RUNNING);
-            case START, FINISHED_LOST, FINISHED_WON -> eng.setGameState(Engine.GameState.GAME_MODE_SCREEN);
-            case GAME_MODE_SCREEN -> eng.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
+            case PAUSED -> eng.setGameState(GameState.RUNNING);
+            case START, FINISHED_LOST, FINISHED_WON -> eng.setGameState(GameState.GAME_MODE_SCREEN);
+            case GAME_MODE_SCREEN -> eng.setGameState(GameState.DIFFICULTY_SCREEN);
             case DIFFICULTY_SCREEN -> {
-                eng.setGameMode(Engine.GameMode.STORY);
-                eng.setGameState(Engine.GameState.RUNNING);
+                eng.setGameMode(GameMode.STORY);
+                eng.setGameState(GameState.RUNNING);
                 eng.setupStoryMode();
             }
         }

@@ -1,6 +1,7 @@
 package tile;
 
 import main.Engine;
+import main.GameState;
 import main.UtilityTool;
 import main.logger.GameLogger;
 import map.MapGenerator;
@@ -154,7 +155,7 @@ public class TileManager {
                 }
             }
             eng.startGame();
-            eng.setGameState(Engine.GameState.RUNNING);
+            eng.setGameState(GameState.RUNNING);
         }catch(Exception e){
             GameLogger.error(LOG_CONTEXT, "Failed to load map", e);
             GameLogger.warn(LOG_CONTEXT, "Initializing a clean map");

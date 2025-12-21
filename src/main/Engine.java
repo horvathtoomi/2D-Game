@@ -59,14 +59,6 @@ public class Engine extends JPanel implements Runnable {
     public final transient UserInterface userInterface;
     private static final String LOG_CONTEXT = "[ENGINE]";
 
-    public enum GameState {
-        START, DIFFICULTY_SCREEN,
-        GAME_MODE_SCREEN, RUNNING, PAUSED,
-        FINISHED_LOST, FINISHED_WON, CONSOLE_INPUT
-    }
-    public enum GameDifficulty {EASY, MEDIUM, HARD, IMPOSSIBLE}
-    public enum GameMode {NONE, STORY, CUSTOM}
-
     private GameState gameState;
     private GameDifficulty difficulty;
     private GameMode gameMode = GameMode.NONE;

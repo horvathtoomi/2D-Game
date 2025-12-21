@@ -1,6 +1,7 @@
 package main.console;
 
 import main.Engine;
+import main.GameState;
 import object.Shooter;
 
 import java.util.HashMap;
@@ -57,7 +58,7 @@ public class ConsoleHandler {
             if (consoleGUI != null) {
                 consoleGUI.dispose();
             }
-            eng.setGameState(Engine.GameState.PAUSED);
+            eng.setGameState(GameState.PAUSED);
         });
 
         map.put("exit_game", _ -> System.exit(0));
@@ -180,7 +181,7 @@ public class ConsoleHandler {
     }
 
     public void startConsoleInput() {
-        if (eng.getGameState() != Engine.GameState.CONSOLE_INPUT) {
+        if (eng.getGameState() != GameState.CONSOLE_INPUT) {
             printToConsole("Console is only available in CONSOLE_INPUT state");
             return;
         }

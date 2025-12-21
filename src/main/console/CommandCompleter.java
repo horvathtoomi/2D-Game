@@ -11,7 +11,6 @@ public class CommandCompleter {
 
     private String lastCompletion = null;
     private final List<String> currentCompletions = new ArrayList<>(getScriptFiles());
-    private List<String> scriptFiles = new ArrayList<>();
     private int currentIndex = -1;
 
     private final List<String> commands = Arrays.asList(
@@ -59,7 +58,7 @@ public class CommandCompleter {
                     currentCompletions.clear();
                     currentIndex = -1;
                     lastCompletion = partial;
-                    scriptFiles = getScriptFiles();
+                    List<String> scriptFiles = getScriptFiles();
                     if (currentCompletions.isEmpty()) {
                         currentCompletions.addAll(scriptFiles);
                     }
@@ -116,7 +115,7 @@ public class CommandCompleter {
         }
     }
 
-    public List<String> getScriptFiles() {
+    public static List<String> getScriptFiles() {
         List<String> scriptFiles = new ArrayList<>();
         File scriptDir = new File("res/scripts");
         if (scriptDir.exists() && scriptDir.isDirectory()) {

@@ -1,6 +1,8 @@
 package leaderboard;
 
 import main.Engine;
+import main.GameDifficulty;
+import main.GameState;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -32,8 +34,8 @@ public class LeaderboardDialog extends JDialog {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (engine.getGameState() == Engine.GameState.PAUSED) {
-                    engine.setGameState(Engine.GameState.RUNNING);
+                if (engine.getGameState() == GameState.PAUSED) {
+                    engine.setGameState(GameState.RUNNING);
                 }
                 dispose();
             }
@@ -41,13 +43,13 @@ public class LeaderboardDialog extends JDialog {
     }
 
     private void initializeTabs() {
-        for (Engine.GameDifficulty difficulty : Engine.GameDifficulty.values()) {
+        for (GameDifficulty difficulty : GameDifficulty.values()) {
             JPanel panel = createDifficultyPanel(difficulty);
             tabbedPane.addTab(difficulty.toString(), panel);
         }
     }
 
-    private JPanel createDifficultyPanel(Engine.GameDifficulty difficulty) {
+    private JPanel createDifficultyPanel(GameDifficulty difficulty) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(30, 30, 30));
 
@@ -84,7 +86,7 @@ public class LeaderboardDialog extends JDialog {
         return panel;
     }
 
-    private void updateTableData(DefaultTableModel model, Engine.GameDifficulty difficulty) {
+    private void updateTableData(DefaultTableModel model, GameDifficulty difficulty) {
         model.setRowCount(0);
         List<LeaderboardEntry> entries = LeaderboardManager.getInstance()
                 .getEntriesForDifficulty(difficulty);
@@ -103,8 +105,8 @@ public class LeaderboardDialog extends JDialog {
     }
 
     public void showDialog() {
-        if (engine.getGameState() == Engine.GameState.RUNNING) {
-            engine.setGameState(Engine.GameState.PAUSED);
+        if (engine.getGameState() == GameState.RUNNING) {
+            engine.setGameState(GameState.PAUSED);
         }
         setVisible(true);
     }

@@ -165,7 +165,7 @@ public class UserInterface extends JFrame {
 
         g2.setFont(arial_80);
         g2.setColor(Color.WHITE);
-        String gameOverText = eng.getGameState() == Engine.GameState.FINISHED_LOST ? "YOU DIED" : "YOU WON";
+        String gameOverText = eng.getGameState() == GameState.FINISHED_LOST ? "YOU DIED" : "YOU WON";
         int x = getXforCenteredText(gameOverText);
         int y = eng.getScreenHeight() / 4;
         g2.drawString(gameOverText, x, y);
@@ -197,7 +197,7 @@ public class UserInterface extends JFrame {
         for (Button button : difficultyScreenButtons) {
             if (button.contains(p)) {
                 button.doClick();
-                eng.setGameState(Engine.GameState.RUNNING);
+                eng.setGameState(GameState.RUNNING);
                 eng.startGame();
                 break;
             }
@@ -315,12 +315,12 @@ public class UserInterface extends JFrame {
     }
 
     private void initStartButtons(){
-        startScreenButtons.getFirst().addActionListener(e -> eng.setGameState(Engine.GameState.GAME_MODE_SCREEN));
+        startScreenButtons.getFirst().addActionListener(e -> eng.setGameState(GameState.GAME_MODE_SCREEN));
         startScreenButtons.get(1).addActionListener(e -> {
             if(FileManager.loadGame(eng))
-                eng.setGameState(Engine.GameState.RUNNING);
+                eng.setGameState(GameState.RUNNING);
             else
-                eng.setGameState(Engine.GameState.START);
+                eng.setGameState(GameState.START);
         });
         startScreenButtons.get(2).addActionListener(e -> System.exit(0));
         startScreenButtons.get(3).addActionListener(e ->{
@@ -334,33 +334,33 @@ public class UserInterface extends JFrame {
 
     private void initModeButtons() {
         modeScreenButtons.getFirst().addActionListener(e -> {
-            eng.setGameMode(Engine.GameMode.STORY);
-            eng.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
+            eng.setGameMode(GameMode.STORY);
+            eng.setGameState(GameState.DIFFICULTY_SCREEN);
         });
         modeScreenButtons.get(1).addActionListener(e -> {
-            eng.setGameMode(Engine.GameMode.CUSTOM);
+            eng.setGameMode(GameMode.CUSTOM);
             Engine.setupCustomMode();
         });
-        modeScreenButtons.get(2).addActionListener(e -> eng.setGameState(Engine.GameState.START));
+        modeScreenButtons.get(2).addActionListener(e -> eng.setGameState(GameState.START));
         for(Button button : modeScreenButtons){
             button.setBackgroundColor(MODE_BUTTON);
         }
     }
 
     private void initDiffButtons(){
-        difficultyScreenButtons.getFirst().addActionListener(e -> eng.setGameDifficulty(Engine.GameDifficulty.EASY));
-        difficultyScreenButtons.get(1).addActionListener(e -> eng.setGameDifficulty(Engine.GameDifficulty.MEDIUM));
-        difficultyScreenButtons.get(2).addActionListener(e -> eng.setGameDifficulty(Engine.GameDifficulty.HARD));
-        difficultyScreenButtons.get(3).addActionListener(e -> eng.setGameDifficulty(Engine.GameDifficulty.IMPOSSIBLE));
+        difficultyScreenButtons.getFirst().addActionListener(e -> eng.setGameDifficulty(GameDifficulty.EASY));
+        difficultyScreenButtons.get(1).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.MEDIUM));
+        difficultyScreenButtons.get(2).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.HARD));
+        difficultyScreenButtons.get(3).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.IMPOSSIBLE));
         for(Button button : difficultyScreenButtons){
             button.setBackgroundColor(DIFFICULTY_BUTTON);
         }
     }
 
     private void initPauseButtons(){
-        pauseScreenButtons.getFirst().addActionListener(e -> eng.setGameState(Engine.GameState.RUNNING));
+        pauseScreenButtons.getFirst().addActionListener(e -> eng.setGameState(GameState.RUNNING));
         pauseScreenButtons.get(1).addActionListener(e -> {
-            eng.setGameState(Engine.GameState.CONSOLE_INPUT);
+            eng.setGameState(GameState.CONSOLE_INPUT);
             try {
                 eng.console.startConsoleInput();
             } catch (Exception err) {
@@ -370,7 +370,7 @@ public class UserInterface extends JFrame {
         pauseScreenButtons.get(2).addActionListener(e -> System.exit(0));
         pauseScreenButtons.get(3).addActionListener(e -> {
             eng.startGame();
-            eng.setGameState(Engine.GameState.DIFFICULTY_SCREEN);
+            eng.setGameState(GameState.DIFFICULTY_SCREEN);
         });
         pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(eng));
         pauseScreenButtons.get(5).addActionListener(e -> FileManager.loadGame(eng));
@@ -385,12 +385,12 @@ public class UserInterface extends JFrame {
 
     private void initGameOverButtons(){
         endScreenButtons.getFirst().addActionListener(e -> {
-            eng.setGameState(Engine.GameState.GAME_MODE_SCREEN);
+            eng.setGameState(GameState.GAME_MODE_SCREEN);
             eng.player.setPlayerHealth(100);
         });
         endScreenButtons.get(1).addActionListener(e -> {
             FileManager.loadGame(eng);
-            eng.setGameState(Engine.GameState.RUNNING);
+            eng.setGameState(GameState.RUNNING);
         });
         endScreenButtons.get(2).addActionListener(e -> System.exit(0));
         endScreenButtons.get(3).addActionListener(e -> {

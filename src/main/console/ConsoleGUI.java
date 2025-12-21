@@ -1,6 +1,7 @@
 package main.console;
 
 import main.Engine;
+import main.GameState;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,7 +97,7 @@ public class ConsoleGUI extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                eng.setGameState(Engine.GameState.PAUSED);
+                eng.setGameState(GameState.PAUSED);
                 if (isScriptMode) {
                     inputQueue.offer("end");
                 }

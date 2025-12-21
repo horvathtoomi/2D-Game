@@ -2,6 +2,7 @@ package entity;
 
 import entity.attack.Bullet;
 import main.Engine;
+import main.GameMode;
 import main.InputHandler;
 import main.UtilityTool;
 import object.*;
@@ -65,7 +66,7 @@ public class Player extends Entity {
     }
 
     public void setDefaultValues() {
-        if(eng.getGameMode().equals(Engine.GameMode.STORY)) {
+        if(eng.getGameMode().equals(GameMode.STORY)) {
             setWorldX(eng.getTileSize() * 5);
             setWorldY(eng.getTileSize() * 5);
         }

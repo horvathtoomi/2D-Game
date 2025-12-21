@@ -4,6 +4,8 @@ import entity.enemy.DragonEnemy;
 import entity.enemy.GiantEnemy;
 import entity.enemy.SmallEnemy;
 import main.Engine;
+import main.GameDifficulty;
+import main.GameState;
 import main.console.Commands;
 import main.console.ConsoleGUI;
 import main.console.ConsoleHandler;
@@ -128,15 +130,15 @@ class ConsoleSystemTest {
 
     @Test
     void testGameStateCommands() {
-        assertEquals(Engine.GameState.START, engine.getGameState());
+        assertEquals(GameState.START, engine.getGameState());
 
-        engine.setGameState(Engine.GameState.RUNNING);
-        assertEquals(Engine.GameState.RUNNING, engine.getGameState());
+        engine.setGameState(GameState.RUNNING);
+        assertEquals(GameState.RUNNING, engine.getGameState());
 
-        engine.setGameDifficulty(Engine.GameDifficulty.EASY);
-        assertEquals(Engine.GameDifficulty.EASY, engine.getGameDifficulty());
+        engine.setGameDifficulty(GameDifficulty.EASY);
+        assertEquals(GameDifficulty.EASY, engine.getGameDifficulty());
 
-        engine.setGameDifficulty(Engine.GameDifficulty.HARD);
-        assertEquals(Engine.GameDifficulty.HARD, engine.getGameDifficulty());
+        engine.setGameDifficulty(GameDifficulty.HARD);
+        assertEquals(GameDifficulty.HARD, engine.getGameDifficulty());
     }
 }

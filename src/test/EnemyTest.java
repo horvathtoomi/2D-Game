@@ -7,8 +7,8 @@ import entity.enemy.DragonEnemy;
 import entity.enemy.FriendlyEnemy;
 import entity.enemy.GiantEnemy;
 import entity.enemy.SmallEnemy;
+import main.*;
 import main.Button;
-import main.Engine;
 import object.OBJ_Boots;
 import object.OBJ_Chest;
 import object.OBJ_Door;
@@ -191,36 +191,36 @@ class GameStateTest {
 
     @Test
     void testInitialGameState() {
-        assertEquals(Engine.GameState.START, engine.getGameState());
+        assertEquals(GameState.START, engine.getGameState());
     }
 
     @Test
     void testGameStateTransitions() {
-        engine.setGameState(Engine.GameState.RUNNING);
-        assertEquals(Engine.GameState.RUNNING, engine.getGameState());
+        engine.setGameState(GameState.RUNNING);
+        assertEquals(GameState.RUNNING, engine.getGameState());
 
-        engine.setGameState(Engine.GameState.PAUSED);
-        assertEquals(Engine.GameState.PAUSED, engine.getGameState());
+        engine.setGameState(GameState.PAUSED);
+        assertEquals(GameState.PAUSED, engine.getGameState());
 
-        engine.setGameState(Engine.GameState.FINISHED_LOST);
-        assertEquals(Engine.GameState.FINISHED_LOST, engine.getGameState());
+        engine.setGameState(GameState.FINISHED_LOST);
+        assertEquals(GameState.FINISHED_LOST, engine.getGameState());
     }
 
     @Test
     void testGameDifficulty() {
-        engine.setGameDifficulty(Engine.GameDifficulty.EASY);
-        assertEquals(Engine.GameDifficulty.EASY, engine.getGameDifficulty());
+        engine.setGameDifficulty(GameDifficulty.EASY);
+        assertEquals(GameDifficulty.EASY, engine.getGameDifficulty());
 
-        engine.setGameDifficulty(Engine.GameDifficulty.HARD);
-        assertEquals(Engine.GameDifficulty.HARD, engine.getGameDifficulty());
+        engine.setGameDifficulty(GameDifficulty.HARD);
+        assertEquals(GameDifficulty.HARD, engine.getGameDifficulty());
     }
 
     @Test
     void testGameMode() {
-        engine.setGameMode(Engine.GameMode.STORY);
-        assertEquals(Engine.GameMode.STORY, engine.getGameMode());
+        engine.setGameMode(GameMode.STORY);
+        assertEquals(GameMode.STORY, engine.getGameMode());
 
-        engine.setGameMode(Engine.GameMode.CUSTOM);
-        assertEquals(Engine.GameMode.CUSTOM, engine.getGameMode());
+        engine.setGameMode(GameMode.CUSTOM);
+        assertEquals(GameMode.CUSTOM, engine.getGameMode());
     }
 }

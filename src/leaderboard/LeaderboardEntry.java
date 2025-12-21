@@ -1,17 +1,19 @@
 package leaderboard;
 
 import main.Engine;
+import main.GameDifficulty;
+
 import java.time.Duration;
 
 public class LeaderboardEntry implements Comparable<LeaderboardEntry> {
     private final String playerName;
     private final long timeInSeconds;
-    private final Engine.GameDifficulty difficulty;
+    private final GameDifficulty difficulty;
     private final int enemiesDefeated;
     private final int finalHealth;
     private final int score;
 
-    public LeaderboardEntry(String playerName, long timeInSeconds, Engine.GameDifficulty difficulty, int enemiesDefeated, int finalHealth) {
+    public LeaderboardEntry(String playerName, long timeInSeconds, GameDifficulty difficulty, int enemiesDefeated, int finalHealth) {
         this.playerName = playerName;
         this.timeInSeconds = timeInSeconds;
         this.difficulty = difficulty;
@@ -26,7 +28,7 @@ public class LeaderboardEntry implements Comparable<LeaderboardEntry> {
         return new LeaderboardEntry(
                 parts[0],
                 Long.parseLong(parts[2]),
-                Engine.GameDifficulty.valueOf(parts[1]),
+                GameDifficulty.valueOf(parts[1]),
                 Integer.parseInt(parts[3]),
                 Integer.parseInt(parts[4])
         );
@@ -57,7 +59,7 @@ public class LeaderboardEntry implements Comparable<LeaderboardEntry> {
     // Getterek
     public String getPlayerName() { return playerName; }
     public long getTimeInSeconds() { return timeInSeconds; }
-    public Engine.GameDifficulty getDifficulty() { return difficulty; }
+    public GameDifficulty getDifficulty() { return difficulty; }
     public int getEnemiesDefeated() { return enemiesDefeated; }
     public int getFinalHealth() { return finalHealth; }
     public int getScore() { return score; }

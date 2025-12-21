@@ -1,6 +1,7 @@
 package leaderboard;
 
 import main.Engine;
+import main.GameDifficulty;
 import main.logger.GameLogger;
 
 import java.io.*;
@@ -12,12 +13,12 @@ public class LeaderboardManager {
     private static final int MAX_ENTRIES_PER_DIFFICULTY = 25;
     private static final String LOG_CONTEXT = "[LEADERBOARD]";
 
-    private Map<Engine.GameDifficulty, List<LeaderboardEntry>> leaderboards;
+    private Map<GameDifficulty, List<LeaderboardEntry>> leaderboards;
     private static LeaderboardManager instance;
 
     private LeaderboardManager() {
-        leaderboards = new EnumMap<>(Engine.GameDifficulty.class);
-        for (Engine.GameDifficulty difficulty : Engine.GameDifficulty.values()) {
+        leaderboards = new EnumMap<>(GameDifficulty.class);
+        for (GameDifficulty difficulty : GameDifficulty.values()) {
             leaderboards.put(difficulty, new ArrayList<>());
         }
         loadLeaderboard();
@@ -45,7 +46,7 @@ public class LeaderboardManager {
         saveLeaderboard();
     }
 
-    public List<LeaderboardEntry> getEntriesForDifficulty(Engine.GameDifficulty difficulty) {
+    public List<LeaderboardEntry> getEntriesForDifficulty(GameDifficulty difficulty) {
         return new ArrayList<>(leaderboards.get(difficulty));
     }
 
@@ -69,7 +70,7 @@ public class LeaderboardManager {
                 }
             }
 
-            for (Engine.GameDifficulty difficulty : Engine.GameDifficulty.values()) {
+            for (GameDifficulty difficulty : GameDifficulty.values()) {
                 List<LeaderboardEntry> entries = leaderboards.get(difficulty);
                 Collections.sort(entries);
                 if (entries.size() > MAX_ENTRIES_PER_DIFFICULTY) {

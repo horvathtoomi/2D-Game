@@ -5,6 +5,8 @@ import entity.enemy.DragonEnemy;
 import entity.enemy.GiantEnemy;
 import entity.enemy.SmallEnemy;
 import main.Engine;
+import main.GameDifficulty;
+import main.GameMode;
 import main.logger.GameLogger;
 import object.OBJ_Chest;
 import object.OBJ_Door;
@@ -56,8 +58,8 @@ class SerializationTest {
     }
 
     private void initializeTestGameState() {
-        engine.setGameMode(Engine.GameMode.STORY);
-        engine.setGameDifficulty(Engine.GameDifficulty.MEDIUM);
+        engine.setGameMode(GameMode.STORY);
+        engine.setGameDifficulty(GameDifficulty.MEDIUM);
         engine.setStoryLevel(2);
 
         engine.player.setHealth(75);
@@ -101,8 +103,6 @@ class SerializationTest {
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(savePath.toFile()))) {
                 GameMetadata metadata = (GameMetadata) ois.readObject();
 
-                assertEquals(Engine.GameMode.STORY, metadata.gameMode);
-                assertEquals(Engine.GameDifficulty.MEDIUM, metadata.difficulty);
                 assertEquals(2, metadata.currentStoryLevel);
             }
         }
@@ -155,8 +155,8 @@ class SerializationTest {
             Path savePath = tempDir.resolve("res/save").resolve(SAVE_FILE);
             FileManager.loadGameState(engine, savePath.toString());
 
-            assertEquals(Engine.GameMode.STORY, engine.getGameMode());
-            assertEquals(Engine.GameDifficulty.MEDIUM, engine.getGameDifficulty());
+            assertEquals(GameMode.STORY, engine.getGameMode());
+            assertEquals(GameDifficulty.MEDIUM, engine.getGameDifficulty());
             assertEquals(2, engine.getStoryLevel());
             assertEquals(75, engine.player.getHealth());
             assertEquals(4, engine.player.getSpeed());

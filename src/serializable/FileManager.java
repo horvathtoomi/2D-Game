@@ -9,9 +9,9 @@ import entity.enemy.SmallEnemy;
 import entity.npc.NPC_Wayfarer;
 import main.Engine;
 import main.logger.GameLogger;
+import main.GameMode;
 import object.*;
 import tile.TileManager;
-
 import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class FileManager {
             );
             oos.writeObject(tileState);
 
-            if (eng.getGameMode() == Engine.GameMode.STORY) {
+            if (eng.getGameMode() == GameMode.STORY) {
                 oos.writeObject(new ArrayList<>(eng.getEntity().stream()
                         .filter(Objects::nonNull)
                         .map(SerializableEntityState::new)
@@ -120,7 +120,7 @@ public class FileManager {
             SerializableTileState tileState = (SerializableTileState) ois.readObject();
             TileManager.mapTileNum = tileState.mapTileNum;
 
-            if (metadata.gameMode == Engine.GameMode.STORY) {
+            if (metadata.gameMode == GameMode.STORY) {
                 List<SerializableEntityState> entityStates = (List<SerializableEntityState>) ois.readObject();
                 eng.setEntities(entityStates.stream()
                         .map(state -> createEntityFromState(eng, state)).filter(Objects::nonNull)
