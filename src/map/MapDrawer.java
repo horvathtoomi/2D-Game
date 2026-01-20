@@ -2,6 +2,7 @@ package map;
 
 import main.UtilityTool;
 import main.logger.GameLogger;
+import tile.TileManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -19,10 +20,9 @@ import java.util.Queue;
 
 public class MapDrawer extends JFrame {
 
-    private final PaintPanel paintPanel;
-    private final ResourcePanel resourcePanel;
+    private PaintPanel paintPanel;
+    private ResourcePanel resourcePanel;
 
-    // Állapotváltozók
     private Color currentColor = Color.BLACK;
     private int brushSize = 16;
     private Tool currentTool = Tool.BRUSH;
@@ -41,7 +41,7 @@ public class MapDrawer extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Top Menu Panel (Save/Load + Tools)
+        // Top Menu Panel (Save/Load/Open + Tools)
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(createMenuPanel(), BorderLayout.NORTH);
         topPanel.add(createToolPanel(), BorderLayout.SOUTH);
@@ -76,16 +76,24 @@ public class MapDrawer extends JFrame {
         panel.setBackground(Color.LIGHT_GRAY);
         panel.setBorder(BorderFactory.createEtchedBorder());
 
+        JButton openButton = new JButton("Open (Play)");
         JButton saveButton = new JButton("Save Map");
         JButton loadButton = new JButton("Load Map");
         JButton exitButton = new JButton("Exit");
 
+        // Gombok eseménykezelői
+        openButton.addActionListener(e -> openMapAction());
         saveButton.addActionListener(e -> saveMapAction());
         loadButton.addActionListener(e -> loadMapAction());
         exitButton.addActionListener(e -> dispose());
 
-        panel.add(saveButton);
+        // Stílus kiemelés az Open gombnak
+        openButton.setFont(new Font("Arial", Font.BOLD, 12));
+        openButton.setBackground(new Color(200, 255, 200));
+
+        panel.add(openButton);
         panel.add(new JSeparator(SwingConstants.VERTICAL));
+        panel.add(saveButton);
         panel.add(loadButton);
         panel.add(new JSeparator(SwingConstants.VERTICAL));
         panel.add(exitButton);
@@ -130,6 +138,49 @@ public class MapDrawer extends JFrame {
         panel.add(sizeSlider);
 
         return panel;
+    }
+
+    /**
+     * Ez a metódus végzi az automatikus mentést, konvertálást és betöltést.
+     */
+    private void openMapAction() {
+        try {
+            // 1. Lépés: Az aktuális rajz mentése egy ideiglenes fájlba
+            File tempDir = new File("res/maps/temp");
+            if (!tempDir.exists()) {
+                tempDir.mkdirs();
+            }
+            File tempImageFile = new File(tempDir, "temp_drawn_map.png");
+            ImageIO.write(paintPanel.getCanvas(), "png", tempImageFile);
+
+            GameLogger.info(LOG_CONTEXT, "Temporary map image saved: " + tempImageFile.getAbsolutePath());
+
+            // 2. Lépés: Kiszámítjuk mi lesz a következő ID, amit a MapGenerator generálni fog
+            // Erre azért van szükség, hogy tudjuk melyik TXT fájlt kell betölteni
+            int nextMapId = MapGenerator.getNextMapNumber();
+
+            // 3. Lépés: A MapGenerator feldolgozza a képet és létrehozza a .txt mátrixot
+            MapGenerator.processImage(tempImageFile.getAbsolutePath());
+
+            // 4. Lépés: Összeállítjuk a generált TXT fájl útvonalát
+            // A MapGenerator logikája alapján: res/maps/map_matrices/map{SZAM}.txt
+            String generatedMapPath = "res/maps/map_matrices/map" + nextMapId + ".txt";
+
+            GameLogger.info(LOG_CONTEXT, "Loading generated map matrix: " + generatedMapPath);
+
+            // 5. Lépés: Betöltjük a pályát a játékba
+            TileManager.loadCustomMap(generatedMapPath);
+
+            // 6. Lépés: Bezárjuk a szerkesztőt
+            dispose();
+
+        } catch (Exception ex) {
+            GameLogger.error(LOG_CONTEXT, "Failed to generate and open map", ex);
+            JOptionPane.showMessageDialog(this,
+                    "Critical error while processing map: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void saveMapAction() {
@@ -236,7 +287,6 @@ class PaintPanel extends JPanel implements MouseMotionListener, MouseListener {
         g.drawImage(canvas, 0, 0, null);
     }
 
-
     private void useTool(MouseEvent e, boolean isDrag) {
         MapDrawer frame = (MapDrawer) SwingUtilities.getWindowAncestor(this);
         if (frame == null) return;
@@ -251,7 +301,7 @@ class PaintPanel extends JPanel implements MouseMotionListener, MouseListener {
         }
 
         Graphics2D g2 = canvas.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF); // Pixel art stílus
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
         if (tool == MapDrawer.Tool.ERASER) {
             g2.setColor(Color.WHITE);
@@ -303,7 +353,6 @@ class PaintPanel extends JPanel implements MouseMotionListener, MouseListener {
         useTool(e, true);
     }
 
-    // Nem használt egér események
     public void mouseMoved(MouseEvent e) {}
     public void mouseClicked(MouseEvent e) {}
     public void mouseReleased(MouseEvent e) {}
@@ -430,10 +479,8 @@ class ResourcePanel extends JPanel {
 
     private void selectColor(Color c, JPanel rowPanel) {
         mapDrawer.setCurrentColor(c);
-        // Ha nem radír mód van, akkor visszaállunk ecsetre, hogy a felhasználó rögtön rajzolhasson
         if (mapDrawer.getCurrentTool() == MapDrawer.Tool.ERASER) {
-            // Opcionális: automatikusan ecsetre váltás színválasztáskor
-            // mapDrawer.setTool(MapDrawer.Tool.BRUSH);
+            // Opcionális logika
         }
         for (Component comp : getComponents()) {
             if (comp instanceof JPanel) {
