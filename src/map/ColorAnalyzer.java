@@ -24,9 +24,17 @@ public class ColorAnalyzer {
             new TileColor(119, 132, 87, 7),   // Brown with sand bg, dead bush
             new TileColor(13, 160, 132, 8),   // Green with sand bg, cactus
             new TileColor(62, 113, 2, 9),     // Green-brown with grass bg, tree
-            new TileColor(255, 216, 93, 10),  //Light-gray, gravel
-            new TileColor(254,16,2,11)        //Red, lava
+            new TileColor(255, 216, 93, 10),  // Light-gray, gravel
+            new TileColor(254,16,2,11)        // Red, lava
     );
+
+    /**
+     * Visszaadja a definiált csempeszínek listáját.
+     * @return A TileColor objektumok listája.
+     */
+    public static List<TileColor> getTileColors() {
+        return TILE_COLORS;
+    }
 
     /**
      * Kiszámítja két szín közötti távolságot.

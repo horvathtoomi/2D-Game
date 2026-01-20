@@ -19,7 +19,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Engine extends JPanel implements Runnable {
 
-    private String playerName;
+    private final String LOG_CONTEXT = "[ENGINE]";
+
     private static final int ORIGINAL_TILE_SIZE = 16;
     private static final int SCALE = 3;
     private static final int TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE;
@@ -51,13 +52,12 @@ public class Engine extends JPanel implements Runnable {
     public transient Thread gameThread;
     public transient TileManager tileman;
     private CopyOnWriteArrayList<Entity> entities;
-    private final GameTimer gameTimer = new GameTimer();
+    private final transient GameTimer gameTimer = new GameTimer();
     public final transient InputHandler inpkez;
     public final transient ConsoleHandler console;
     public final transient CollisionChecker cChecker;
     public final transient MouseHandler mouseHandler;
     public final transient UserInterface userInterface;
-    private static final String LOG_CONTEXT = "[ENGINE]";
 
     private GameState gameState;
     private GameDifficulty difficulty;
@@ -83,9 +83,7 @@ public class Engine extends JPanel implements Runnable {
     public void setGameDifficulty(GameDifficulty diff){difficulty = diff;}
     public void setEntities(CopyOnWriteArrayList<Entity> entities){this.entities = entities;}
 
-    public void addEntity(Entity ent){
-        entities.add(ent);
-    }
+    public void addEntity(Entity ent){entities.add(ent);}
     public void addObject(SuperObject obj) {aSetter.list.add(obj);}
     public void removeEnemy(Entity ent) {entities.remove(ent);}
 
@@ -128,7 +126,7 @@ public class Engine extends JPanel implements Runnable {
         tileman.loadStoryMap(true);
         aSetter.loadLevelAssets(true);
         player.setDefaultValues();
-        playerName = JOptionPane.showInputDialog(null, "Enter your player name:", "Set Username", JOptionPane.PLAIN_MESSAGE);
+        player.name = JOptionPane.showInputDialog(null, "Enter your player name:", "Set Username", JOptionPane.PLAIN_MESSAGE);
     }
 
     /**
@@ -211,7 +209,9 @@ public class Engine extends JPanel implements Runnable {
         g2.dispose();
     }
 
-
+    /**
+     * Indítja/Újraindírja a játékot
+     */
     public void startGame() {
         entities.clear();
         aSetter.list.clear();
@@ -240,7 +240,9 @@ public class Engine extends JPanel implements Runnable {
      * Ellenőrzi a pályaszint teljesítését és kezeli a következő szintre lépést.
      */
     public void checkLevelCompletion() {
-        if(!isPlayerWithinRadius()) {return;}
+        if(!isPlayerWithinRadius()) {
+            return;
+        }
         if(currentStoryLevel < MAX_STORY_LEVEL) {
             currentStoryLevel++;
             tileman.loadStoryMap(false);
@@ -249,9 +251,9 @@ public class Engine extends JPanel implements Runnable {
             player.setWorldY(spawnPoints[currentStoryLevel][1]);
         } else {
             gameState = GameState.FINISHED_WON;
-            if (playerName != null && !playerName.trim().isEmpty()) {
+            if (player.name != null && !player.name.trim().isEmpty()) {
                 LeaderboardEntry entry = new LeaderboardEntry(
-                        playerName, gameTimer.getElapsedTimeInSeconds(),
+                        player.name, gameTimer.getElapsedTimeInSeconds(),
                         getGameDifficulty(), player.defeatedEnemies, player.getHealth()
                 );
                 LeaderboardManager.getInstance().addEntry(entry);

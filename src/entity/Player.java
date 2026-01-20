@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
  * Kezeli a játékos mozgását, támadását és interakcióit.
  */
 public class Player extends Entity {
+    public String name;
     public static boolean isAttacking = false;
     private boolean hasReducedDurability = false;
     private long lastAttackTime = 0;

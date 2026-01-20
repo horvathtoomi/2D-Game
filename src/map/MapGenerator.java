@@ -131,16 +131,19 @@ public class MapGenerator {
         Scanner scanner = new Scanner(System.in);
         GameLogger.info(LOG_CONTEXT, "Type 'GUI' to open graphical UI");
         GameLogger.info(LOG_CONTEXT, "Type 'exit' to close application");
-        GameLogger.info(LOG_CONTEXT, "Enter the path to your PNG image: ");
-        String imagePath;
-        while((imagePath = scanner.nextLine()) != null) {
-            if (imagePath.equalsIgnoreCase("GUI")) {
+        GameLogger.info(LOG_CONTEXT, "Type 'info' to get print 'how-to'");
+        GameLogger.info(LOG_CONTEXT, "Or enter the path to your PNG image: ");
+        String cmdLine;
+        while((cmdLine = scanner.nextLine()) != null) {
+            if (cmdLine.equalsIgnoreCase("GUI")) {
                 GUIMapGenerator();
-            } else if (imagePath.equalsIgnoreCase("exit")) {
+            } else if (cmdLine.equalsIgnoreCase("exit")) {
                 System.exit(0);
+            } else if (cmdLine.equalsIgnoreCase("info")) {
+                GameLogger.warn(LOG_CONTEXT, "The resolution of your .png picture's pixels (height*length) must be dividable by 16");
             } else {
                 try {
-                    processImage(imagePath);
+                    processImage(cmdLine);
                 } catch (Exception e) {
                     GameLogger.warn(LOG_CONTEXT, "File not found!");
                 }

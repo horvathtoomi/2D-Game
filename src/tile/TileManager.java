@@ -19,7 +19,7 @@ import java.util.Random;
 public class TileManager {
     static Engine eng;
     static Random rand = new Random();
-    public Tile[] tile;
+    public static Tile[] tile;
     private int mapNumber = 3;
     public static int[][] mapTileNum;
     private static final String LOG_CONTEXT = "[TILE MANAGER]";

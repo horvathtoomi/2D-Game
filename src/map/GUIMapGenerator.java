@@ -12,15 +12,16 @@ import java.io.File;
  * A GUIMapGenerator osztály biztosítja a pályagenerálás grafikus felhasználói felületét.
  */
 public class GUIMapGenerator extends JFrame {
+
     private static final String LOG_CONTEXT = "[GUI MAP GENERATOR]";
-    private final int WINDOW_WIDTH = 300;
-    private final int WINDOW_HEIGHT = 150;
 
     /**
      * Létrehoz egy új pályagenerátor ablakot.
      */
     public GUIMapGenerator() {
         setTitle("Custom Map Options");
+        int WINDOW_WIDTH = 300;
+        int WINDOW_HEIGHT = 150;
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setResizable(false);
         setLocationRelativeTo(null);
@@ -50,19 +51,7 @@ public class GUIMapGenerator extends JFrame {
         add(generateMapButton, gbc);
 
         chooseMapButton.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Select Map File");
-            fileChooser.setFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File f) {
-                    return f.isDirectory() || f.getName().toLowerCase().endsWith(".txt");
-                }
-
-                @Override
-                public String getDescription() {
-                    return "Text Files (*.txt)";
-                }
-            });
+            JFileChooser fileChooser = getFileChooser();
 
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -82,36 +71,34 @@ public class GUIMapGenerator extends JFrame {
         });
 
         generateMapButton.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Select Image File");
-            fileChooser.setFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File f) {
-                    return f.isDirectory() || f.getName().toLowerCase().endsWith(".png");
-                }
+            MapDrawer drawer = new MapDrawer();
+        });
+    }
 
-                @Override
-                public String getDescription() {
-                    return "PNG Images (*.png)";
-                }
-            });
+    private static JFrame createMapDrawer() {
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        return frame;
+    }
 
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                try {
-                    MapGenerator.processImage(selectedFile.getAbsolutePath());
-                    GameLogger.info(LOG_CONTEXT, "Map generated successfully from: " + selectedFile.getName());
-                    TileManager.loadCustomMap(null);
-                    dispose();
-                } catch (Exception ex) {
-                    GameLogger.error(LOG_CONTEXT, "Failed to generate map", ex);
-                    JOptionPane.showMessageDialog(this,
-                            "Error generating map: " + ex.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+    private static JFileChooser getFileChooser() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Select Map File");
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getName().toLowerCase().endsWith(".txt");
+            }
+
+            @Override
+            public String getDescription() {
+                return "Text Files (*.txt)";
             }
         });
+        return fileChooser;
     }
 }
