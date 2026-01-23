@@ -100,7 +100,7 @@ public class Attack extends Entity {
         if(TileManager.mapTileNum[x][y]==4)
             return false;
         else
-            return eng.tileman.tile[TileManager.mapTileNum[x][y]].collision;
+            return TileManager.tile[TileManager.mapTileNum[x][y]].collision;
     }
 
     @Override

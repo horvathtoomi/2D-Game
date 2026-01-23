@@ -70,7 +70,7 @@ public class GUIMapGenerator extends JFrame {
             }
         });
 
-        generateMapButton.addActionListener(e -> {
+        generateMapButton.addActionListener(_ -> {
             MapDrawer drawer = new MapDrawer();
         });
     }

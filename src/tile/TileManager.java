@@ -138,6 +138,9 @@ public class TileManager {
      * @param mapPath a pályafájl elérési útja
      */
     public static void loadCustomMap(String mapPath) {
+        if(eng == null ) {
+            return;
+        }
         try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getRightPath(mapPath))))){
             int col=0;
             int row=0;
