@@ -3,7 +3,8 @@ package main;
 import entity.Player;
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
-import object.Shooter;
+
+import object.GunItem;
 import serializable.FileManager;
 
 import java.awt.event.KeyEvent;
@@ -15,12 +16,13 @@ import java.awt.event.KeyListener;
  */
 public class InputHandler implements KeyListener {
     Engine eng;
-    public boolean upPressed, downPressed, leftPressed,rightPressed, attackPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, attackPressed;
     private final ConsoleHandler consoleHandler;
     private static final String LOG_CONTEXT = "[INPUT HANDLER]";
 
     /**
      * Létrehoz egy új bevitel kezelőt.
+     * 
      * @param eng a játékmotor példánya
      */
     public InputHandler(Engine eng) {
@@ -29,11 +31,12 @@ public class InputHandler implements KeyListener {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {}
-
+    public void keyTyped(KeyEvent e) {
+    }
 
     /**
      * Kezeli a billentyű lenyomás eseményeket.
+     * 
      * @param e a billentyű esemény
      */
     @Override
@@ -47,7 +50,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_E -> attackPressed = true;
             case KeyEvent.VK_F -> eng.player.getInventory().rotate();
             case KeyEvent.VK_R -> {
-                if (eng.player.getInventory().getCurrent() instanceof Shooter shooter) {
+                if (eng.player.getInventory().getCurrent() instanceof GunItem shooter) {
                     shooter.reload();
                 }
             }
@@ -81,29 +84,30 @@ public class InputHandler implements KeyListener {
 
     /**
      * Kezeli a játékmód kiválasztását.
+     * 
      * @param mode a kiválasztott mód indexe
      */
-    private void modeFinder(int mode){
-        if(eng.getGameState() == GameState.DIFFICULTY_SCREEN) {
-            String[] gameModes = {"EASY", "NORMAL", "HARD", "IMPOSSIBLE"};
+    private void modeFinder(int mode) {
+        if (eng.getGameState() == GameState.DIFFICULTY_SCREEN) {
+            String[] gameModes = { "EASY", "NORMAL", "HARD", "IMPOSSIBLE" };
             switch (mode) {
                 case 0 -> startByKey(GameDifficulty.EASY);
                 case 1 -> startByKey(GameDifficulty.MEDIUM);
                 case 2 -> startByKey(GameDifficulty.HARD);
                 case 3 -> startByKey(GameDifficulty.IMPOSSIBLE);
                 default ->
-                        GameLogger.error(LOG_CONTEXT, "SOMETHING UNEXPECTED HAPPENED", new IllegalArgumentException("Unexpected parameter"));
+                    GameLogger.error(LOG_CONTEXT, "SOMETHING UNEXPECTED HAPPENED",
+                            new IllegalArgumentException("Unexpected parameter"));
             }
             GameLogger.info(LOG_CONTEXT, "|GAME STARTED AS " + gameModes[mode] + "|");
         }
     }
 
-    private void handleQ(){
+    private void handleQ() {
         if (eng.getGameState() == GameState.PAUSED) {
             eng.setGameState(GameState.CONSOLE_INPUT);
             consoleHandler.startConsoleInput();
-        }
-        else if(eng.getGameState() == GameState.RUNNING) {
+        } else if (eng.getGameState() == GameState.RUNNING) {
             eng.player.getInventory().drop();
         }
     }
@@ -115,14 +119,14 @@ public class InputHandler implements KeyListener {
             GameLogger.warn(LOG_CONTEXT, "You are not running the game yet!");
     }
 
-    private void handleL(){
-        if(eng.getGameState() != GameState.RUNNING)
+    private void handleL() {
+        if (eng.getGameState() != GameState.RUNNING)
             FileManager.loadGame(eng);
         else
             GameLogger.warn(LOG_CONTEXT, "CAN NOT LOAD GAME WHILE RUNNING");
     }
 
-    private void startByKey(GameDifficulty diff){
+    private void startByKey(GameDifficulty diff) {
         eng.setGameMode(GameMode.STORY);
         eng.setGameDifficulty(diff);
         eng.startGame();
@@ -130,7 +134,7 @@ public class InputHandler implements KeyListener {
     }
 
     private void togglePauseState() {
-        switch(eng.getGameState()){
+        switch (eng.getGameState()) {
             case RUNNING, CONSOLE_INPUT -> eng.setGameState(GameState.PAUSED);
             case PAUSED -> eng.setGameState(GameState.RUNNING);
             case DIFFICULTY_SCREEN -> eng.setGameState(GameState.GAME_MODE_SCREEN);
@@ -139,7 +143,7 @@ public class InputHandler implements KeyListener {
     }
 
     private void toggleMenuState() {
-        switch(eng.getGameState()){
+        switch (eng.getGameState()) {
             case PAUSED -> eng.setGameState(GameState.RUNNING);
             case START, FINISHED_LOST, FINISHED_WON -> eng.setGameState(GameState.GAME_MODE_SCREEN);
             case GAME_MODE_SCREEN -> eng.setGameState(GameState.DIFFICULTY_SCREEN);

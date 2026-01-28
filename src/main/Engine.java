@@ -5,7 +5,7 @@ import entity.Player;
 import main.console.ConsoleHandler;
 import main.logger.GameLogger;
 import map.MapGenerator;
-import object.SuperObject;
+import object.GameObject;
 import tile.TileManager;
 import leaderboard.*;
 import javax.swing.*;
@@ -36,17 +36,17 @@ public class Engine extends JPanel implements Runnable {
     private static final int MAX_STORY_LEVEL = 3;
 
     private final transient int[][] endPoints = {
-            {100 * TILE_SIZE, 94 * TILE_SIZE},
-            {TILE_SIZE, 85 * TILE_SIZE},
-            {3 * TILE_SIZE, 3 * TILE_SIZE},
-            {3 * TILE_SIZE, 3 * TILE_SIZE}
+            { 100 * TILE_SIZE, 94 * TILE_SIZE },
+            { TILE_SIZE, 85 * TILE_SIZE },
+            { 3 * TILE_SIZE, 3 * TILE_SIZE },
+            { 3 * TILE_SIZE, 3 * TILE_SIZE }
     };
 
     private final transient int[][] spawnPoints = {
-            {6 * TILE_SIZE,4 * TILE_SIZE},
-            {5 * TILE_SIZE, 10 * TILE_SIZE},
-            {14 * TILE_SIZE, 54 * TILE_SIZE},
-            {95 * TILE_SIZE, 95 * TILE_SIZE}
+            { 6 * TILE_SIZE, 4 * TILE_SIZE },
+            { 5 * TILE_SIZE, 10 * TILE_SIZE },
+            { 14 * TILE_SIZE, 54 * TILE_SIZE },
+            { 95 * TILE_SIZE, 95 * TILE_SIZE }
     };
 
     public Player player;
@@ -65,29 +65,89 @@ public class Engine extends JPanel implements Runnable {
     private GameDifficulty difficulty;
     private GameMode gameMode = GameMode.NONE;
 
-    public GameState getGameState(){return gameState;}
-    public GameMode getGameMode(){return gameMode;}
-    public GameDifficulty getGameDifficulty(){return difficulty;}
-    public int getFPS() {return FPS;}
-    public int getTileSize() {return TILE_SIZE;}
-    public int getScreenWidth() {return MAX_SCREEN_COL * TILE_SIZE;} //768 pixel
-    public int getScreenHeight() {return MAX_SCREEN_ROW * TILE_SIZE;} //576 pixel
-    public int getMaxWorldCol() {return MAX_WORLD_COL;}
-    public int getMaxWorldRow() {return MAX_WORLD_ROW;}
-    public int getWorldWidth() {return MAX_WORLD_COL * TILE_SIZE;}
-    public int getWorldHeight() {return MAX_WORLD_ROW * TILE_SIZE;}
-    public int getStoryLevel() {return currentStoryLevel;}
-    public CopyOnWriteArrayList<Entity> getEntity() {return entities;}
+    public GameState getGameState() {
+        return gameState;
+    }
 
-    public void setStoryLevel(int a){currentStoryLevel = a;}
-    public void setGameState(GameState state){gameState = state;}
-    public void setGameMode(GameMode mode){gameMode = mode;}
-    public void setGameDifficulty(GameDifficulty diff){difficulty = diff;}
-    public void setEntities(CopyOnWriteArrayList<Entity> entities){this.entities = entities;}
+    public GameMode getGameMode() {
+        return gameMode;
+    }
 
-    public void addEntity(Entity ent){entities.add(ent);}
-    public void addObject(SuperObject obj) {aSetter.list.add(obj);}
-    public void removeEnemy(Entity ent) {entities.remove(ent);}
+    public GameDifficulty getGameDifficulty() {
+        return difficulty;
+    }
+
+    public int getFPS() {
+        return FPS;
+    }
+
+    public int getTileSize() {
+        return TILE_SIZE;
+    }
+
+    public int getScreenWidth() {
+        return MAX_SCREEN_COL * TILE_SIZE;
+    } // 768 pixel
+
+    public int getScreenHeight() {
+        return MAX_SCREEN_ROW * TILE_SIZE;
+    } // 576 pixel
+
+    public int getMaxWorldCol() {
+        return MAX_WORLD_COL;
+    }
+
+    public int getMaxWorldRow() {
+        return MAX_WORLD_ROW;
+    }
+
+    public int getWorldWidth() {
+        return MAX_WORLD_COL * TILE_SIZE;
+    }
+
+    public int getWorldHeight() {
+        return MAX_WORLD_ROW * TILE_SIZE;
+    }
+
+    public int getStoryLevel() {
+        return currentStoryLevel;
+    }
+
+    public CopyOnWriteArrayList<Entity> getEntity() {
+        return entities;
+    }
+
+    public void setStoryLevel(int a) {
+        currentStoryLevel = a;
+    }
+
+    public void setGameState(GameState state) {
+        gameState = state;
+    }
+
+    public void setGameMode(GameMode mode) {
+        gameMode = mode;
+    }
+
+    public void setGameDifficulty(GameDifficulty diff) {
+        difficulty = diff;
+    }
+
+    public void setEntities(CopyOnWriteArrayList<Entity> entities) {
+        this.entities = entities;
+    }
+
+    public void addEntity(Entity ent) {
+        entities.add(ent);
+    }
+
+    public void addObject(GameObject obj) {
+        aSetter.list.add(obj);
+    }
+
+    public void removeEnemy(Entity ent) {
+        entities.remove(ent);
+    }
 
     /**
      * Létrehoz egy új játékmotort és inicializálja az alapvető komponenseket.
@@ -95,14 +155,14 @@ public class Engine extends JPanel implements Runnable {
     public Engine() {
         GameLogger.info(LOG_CONTEXT, "|INITIALIZING ENGINE|");
         inpkez = new InputHandler(this);
-        player = new Player(this,inpkez);
+        player = new Player(this, inpkez);
         entities = new CopyOnWriteArrayList<>();
         aSetter = new AssetSetter(this);
-        cChecker=new CollisionChecker(this);
+        cChecker = new CollisionChecker(this);
         userInterface = new UserInterface(this);
-        mouseHandler=new MouseHandler(this);
+        mouseHandler = new MouseHandler(this);
         tileman = new TileManager(this);
-        console=new ConsoleHandler(this);
+        console = new ConsoleHandler(this);
         camera = new Camera(getWorldWidth(), getWorldHeight(), getScreenWidth(), getScreenHeight());
         setGamePanel();
     }
@@ -110,10 +170,10 @@ public class Engine extends JPanel implements Runnable {
     /**
      * Beállítja a játékpanel alapvető tulajdonságait.
      */
-    private void setGamePanel(){
+    private void setGamePanel() {
         gameState = GameState.START;
         difficulty = GameDifficulty.EASY;
-        this.setPreferredSize(new Dimension(getScreenWidth(),getScreenHeight()));
+        this.setPreferredSize(new Dimension(getScreenWidth(), getScreenHeight()));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
         this.addKeyListener(inpkez);
@@ -125,17 +185,18 @@ public class Engine extends JPanel implements Runnable {
     /**
      * Inicializálja a történet módot.
      */
-    public void setupStoryMode(){
+    public void setupStoryMode() {
         tileman.loadStoryMap(true);
         aSetter.loadLevelAssets(true);
         player.setDefaultValues();
-        player.name = JOptionPane.showInputDialog(null, "Enter your player name:", "Set Username", JOptionPane.PLAIN_MESSAGE);
+        player.name = JOptionPane.showInputDialog(null, "Enter your player name:", "Set Username",
+                JOptionPane.PLAIN_MESSAGE);
     }
 
     /**
      * Inicializálja az egyéni módot.
      */
-    public static void setupCustomMode(){
+    public static void setupCustomMode() {
         MapGenerator.GUIMapGenerator();
     }
 
@@ -156,9 +217,9 @@ public class Engine extends JPanel implements Runnable {
         double drawInterval = 1_000_000_000.0 / FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
         while (gameThread != null) {
-            if(player.getHealth()<=0 && gameState == GameState.RUNNING)
-                gameState=GameState.FINISHED_LOST;
-            else if(gameState == GameState.RUNNING)
+            if (player.getHealth() <= 0 && gameState == GameState.RUNNING)
+                gameState = GameState.FINISHED_LOST;
+            else if (gameState == GameState.RUNNING)
                 update();
             else
                 gameTimer.stop();
@@ -169,7 +230,7 @@ public class Engine extends JPanel implements Runnable {
                 Thread.sleep((long) remainingTime);
                 nextDrawTime += drawInterval;
             } catch (InterruptedException e) {
-                GameLogger.error(LOG_CONTEXT, "Unexpected error occurred.",e);
+                GameLogger.error(LOG_CONTEXT, "Unexpected error occurred.", e);
             }
         }
     }
@@ -185,7 +246,7 @@ public class Engine extends JPanel implements Runnable {
         entities.removeIf(Objects::isNull);
         aSetter.list.removeIf(Objects::isNull);
         entities.forEach(Entity::update);
-        aSetter.list.forEach(SuperObject::update);
+        aSetter.list.forEach(GameObject::update);
         player.getInventory().update();
         checkLevelCompletion();
     }
@@ -201,10 +262,10 @@ public class Engine extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D) g;
         entities.removeIf(Objects::isNull);
         aSetter.list.removeIf(Objects::isNull);
-        if(gameState == GameState.RUNNING ) {
+        if (gameState == GameState.RUNNING) {
             tileman.draw(g2);
-            for (SuperObject object : aSetter.list)
-                object.draw(g2, this);
+            for (GameObject object : aSetter.list)
+                object.draw(g2);
             for (Entity entity : entities)
                 entity.draw(g2);
             player.draw(g2);
@@ -221,11 +282,10 @@ public class Engine extends JPanel implements Runnable {
         aSetter.list.clear();
         player = new Player(this, inpkez);
         gameTimer.reset();
-        if(gameMode.equals(GameMode.STORY)) {
+        if (gameMode.equals(GameMode.STORY)) {
             setupStoryMode();
             gameMode = GameMode.STORY;
-        }
-        else if(gameMode.equals(GameMode.CUSTOM)) {
+        } else if (gameMode.equals(GameMode.CUSTOM)) {
             setupCustomMode();
             gameMode = GameMode.CUSTOM;
         }
@@ -233,10 +293,12 @@ public class Engine extends JPanel implements Runnable {
 
     /**
      * Ellenőrzi, hogy a játékos a célterületen belül van-e.
+     * 
      * @return true ha a játékos a célterületen belül van
      */
     public boolean isPlayerWithinRadius() {
-        double distance = Math.sqrt(Math.pow(player.getWorldX() - endPoints[currentStoryLevel][0], 2) + Math.pow(player.getWorldY() - endPoints[currentStoryLevel][1], 2));
+        double distance = Math.sqrt(Math.pow(player.getWorldX() - endPoints[currentStoryLevel][0], 2)
+                + Math.pow(player.getWorldY() - endPoints[currentStoryLevel][1], 2));
         return distance < (2 * TILE_SIZE);
     }
 
@@ -244,10 +306,10 @@ public class Engine extends JPanel implements Runnable {
      * Ellenőrzi a pályaszint teljesítését és kezeli a következő szintre lépést.
      */
     public void checkLevelCompletion() {
-        if(!isPlayerWithinRadius()) {
+        if (!isPlayerWithinRadius()) {
             return;
         }
-        if(currentStoryLevel < MAX_STORY_LEVEL) {
+        if (currentStoryLevel < MAX_STORY_LEVEL) {
             currentStoryLevel++;
             tileman.loadStoryMap(false);
             aSetter.loadLevelAssets(false);
@@ -258,8 +320,7 @@ public class Engine extends JPanel implements Runnable {
             if (player.name != null && !player.name.trim().isEmpty()) {
                 LeaderboardEntry entry = new LeaderboardEntry(
                         player.name, gameTimer.getElapsedTimeInSeconds(),
-                        getGameDifficulty(), player.defeatedEnemies, player.getHealth()
-                );
+                        getGameDifficulty(), player.defeatedEnemies, player.getHealth());
                 LeaderboardManager.getInstance().addEntry(entry);
             }
         }

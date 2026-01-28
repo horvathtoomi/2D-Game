@@ -2,14 +2,16 @@ package main;
 
 import entity.Entity;
 import object.OBJ_Door;
-import object.SuperObject;
+import object.GameObject;
 import tile.TileManager;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * A CollisionChecker osztály felelős a játékban történő ütközések detektálásáért
- * és kezeléséért. Vizsgálja az entitások, objektumok és a pálya elemeinek ütközéseit.
+ * A CollisionChecker osztály felelős a játékban történő ütközések
+ * detektálásáért
+ * és kezeléséért. Vizsgálja az entitások, objektumok és a pálya elemeinek
+ * ütközéseit.
  */
 public class CollisionChecker {
 
@@ -25,47 +27,47 @@ public class CollisionChecker {
      *
      * @param entity a vizsgálandó entitás
      */
-    public void checkTile(Entity entity){
+    public void checkTile(Entity entity) {
         int entityLeftWorldX = entity.getWorldX() + entity.solidArea.x;
         int entityRightWorldX = entity.getWorldX() + entity.solidArea.x + entity.solidArea.width;
         int entityTopWorldY = entity.getWorldY() + entity.solidArea.y;
         int entityBottomWorldY = entity.getWorldY() + entity.solidArea.y + entity.solidArea.height;
 
-        int entityLeftCol = entityLeftWorldX/ eng.getTileSize();
-        int entityRightCol = entityRightWorldX/ eng.getTileSize();
-        int entityTopRow = entityTopWorldY/ eng.getTileSize();
-        int entityBottomRow = entityBottomWorldY/ eng.getTileSize();
+        int entityLeftCol = entityLeftWorldX / eng.getTileSize();
+        int entityRightCol = entityRightWorldX / eng.getTileSize();
+        int entityTopRow = entityTopWorldY / eng.getTileSize();
+        int entityBottomRow = entityBottomWorldY / eng.getTileSize();
 
         int tileNum1, tileNum2;
 
-        switch(entity.direction){
+        switch (entity.direction) {
             case UP:
-                entityTopRow = (entityTopWorldY-entity.getSpeed())/ eng.getTileSize();
+                entityTopRow = (entityTopWorldY - entity.getSpeed()) / eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = TileManager.mapTileNum[entityRightCol][entityTopRow];
-                if(TileManager.tile[tileNum1].collision|| TileManager.tile[tileNum2].collision)
-                    entity.collisionOn=true;
+                if (TileManager.tile[tileNum1].collision || TileManager.tile[tileNum2].collision)
+                    entity.collisionOn = true;
                 break;
             case DOWN:
-                entityBottomRow = (entityBottomWorldY+entity.getSpeed())/ eng.getTileSize();
+                entityBottomRow = (entityBottomWorldY + entity.getSpeed()) / eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityLeftCol][entityBottomRow];
                 tileNum2 = TileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if(TileManager.tile[tileNum1].collision|| TileManager.tile[tileNum2].collision)
-                    entity.collisionOn=true;
+                if (TileManager.tile[tileNum1].collision || TileManager.tile[tileNum2].collision)
+                    entity.collisionOn = true;
                 break;
             case LEFT:
-                entityLeftCol = (entityLeftWorldX-entity.getSpeed())/ eng.getTileSize();
+                entityLeftCol = (entityLeftWorldX - entity.getSpeed()) / eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityLeftCol][entityTopRow];
                 tileNum2 = TileManager.mapTileNum[entityLeftCol][entityBottomRow];
-                if(TileManager.tile[tileNum1].collision|| TileManager.tile[tileNum2].collision)
-                    entity.collisionOn=true;
+                if (TileManager.tile[tileNum1].collision || TileManager.tile[tileNum2].collision)
+                    entity.collisionOn = true;
                 break;
             case RIGHT:
-                entityRightCol = (entityRightWorldX+entity.getSpeed())/ eng.getTileSize();
+                entityRightCol = (entityRightWorldX + entity.getSpeed()) / eng.getTileSize();
                 tileNum1 = TileManager.mapTileNum[entityRightCol][entityTopRow];
                 tileNum2 = TileManager.mapTileNum[entityRightCol][entityBottomRow];
-                if(TileManager.tile[tileNum1].collision|| TileManager.tile[tileNum2].collision)
-                    entity.collisionOn=true;
+                if (TileManager.tile[tileNum1].collision || TileManager.tile[tileNum2].collision)
+                    entity.collisionOn = true;
                 break;
             case SHOOT:
                 break;
@@ -82,7 +84,7 @@ public class CollisionChecker {
         int index = 999;
         int it = 0;
 
-        for(SuperObject obj : eng.aSetter.list) {
+        for (GameObject obj : eng.aSetter.list) {
             if (obj != null) {
                 OBJ_Door door = null;
                 if (obj instanceof OBJ_Door) {
@@ -155,7 +157,7 @@ public class CollisionChecker {
      *
      * @param entity a vizsgálandó entitás
      */
-    public void checkPlayer(Entity entity){
+    public void checkPlayer(Entity entity) {
         if (entity != null) {
             entity.solidArea.x = entity.getWorldX() + entity.solidArea.x;
             entity.solidArea.y = entity.getWorldY() + entity.solidArea.y;

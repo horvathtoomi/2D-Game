@@ -34,7 +34,8 @@ public class FileManager {
      * Privát konstruktor a példányosítás megakadályozásához.
      * A FileManager csak statikus metódusokat tartalmaz.
      */
-    private FileManager() {}
+    private FileManager() {
+    }
 
     /**
      * EntityCreator térkép az entitások létrehozásához.
@@ -44,24 +45,23 @@ public class FileManager {
             "NPC_Wayfarer", (eng, state) -> createEntity(new NPC_Wayfarer(eng), state),
             "DragonEnemy", (eng, state) -> createEntity(new DragonEnemy(eng, state.worldX, state.worldY), state),
             "SmallEnemy", (eng, state) -> createEntity(new SmallEnemy(eng, state.worldX, state.worldY), state),
-            "GiantEnemy", (eng, state) -> createEntity(new GiantEnemy(eng, state.worldX, state.worldY), state)
-    );
+            "GiantEnemy", (eng, state) -> createEntity(new GiantEnemy(eng, state.worldX, state.worldY), state));
 
     /**
      * ObjectCreator térkép az objektumok létrehozásához.
      * Kulcs: objektum típus neve, Érték: objektum létrehozó függvény
      */
-    private static final Map<String, BiFunction<Engine, SerializableObjectState, SuperObject>> objectCreators = Map.of(
+    private static final Map<String, BiFunction<Engine, SerializableObjectState, GameObject>> objectCreators = Map.of(
             "key", (eng, state) -> createObject(new OBJ_Key(eng, state.worldX, state.worldY), state),
             "door", (eng, state) -> createObject(new OBJ_Door(eng, state.worldX, state.worldY), state),
             "chest", (eng, state) -> createObject(new OBJ_Chest(eng, state.worldX, state.worldY), state),
             "boots", (eng, state) -> createObject(new OBJ_Boots(eng, state.worldX, state.worldY), state),
-            "sword", (eng, state) -> createObject(new OBJ_Sword(eng, state.worldX, state.worldY, state.damage), state)
-    );
+            "sword", (eng, state) -> createObject(new OBJ_Sword(eng, state.worldX, state.worldY, state.damage), state));
 
     /**
      * Elmenti a játék aktuális állapotát egy fájlba.
-     * @param eng a játékmotor példánya
+     * 
+     * @param eng      a játékmotor példánya
      * @param filename a mentési fájl neve
      * @throws IOException ha a fájl írása sikertelen
      */
@@ -70,19 +70,16 @@ public class FileManager {
             GameMetadata metadata = new GameMetadata(
                     eng.getGameMode(),
                     eng.getGameDifficulty(),
-                    eng.getStoryLevel()
-            );
+                    eng.getStoryLevel());
             oos.writeObject(metadata);
 
             SerializablePlayerState playerState = new SerializablePlayerState(
                     eng.player,
-                    serializeInventory(eng.player.getInventory())
-            );
+                    serializeInventory(eng.player.getInventory()));
             oos.writeObject(playerState);
 
             SerializableTileState tileState = new SerializableTileState(
-                    TileManager.mapTileNum
-            );
+                    TileManager.mapTileNum);
             oos.writeObject(tileState);
 
             if (eng.getGameMode() == GameMode.STORY) {
@@ -101,9 +98,10 @@ public class FileManager {
 
     /**
      * Betölti a játék állapotát egy mentési fájlból.
-     * @param eng a játékmotor példánya
+     * 
+     * @param eng      a játékmotor példánya
      * @param filename a mentési fájl neve
-     * @throws IOException ha a fájl olvasása sikertelen
+     * @throws IOException            ha a fájl olvasása sikertelen
      * @throws ClassNotFoundException ha az objektumok deszerializációja sikertelen
      */
     public static void loadGameState(Engine eng, String filename) throws IOException, ClassNotFoundException {
@@ -136,44 +134,48 @@ public class FileManager {
 
     /**
      * Szerializálja a leltár tartalmát.
+     * 
      * @param inventory a szerializálandó leltár
      * @return a szerializált leltárelemek listája
      */
     private static List<SerializableInventoryItem> serializeInventory(Inventory inventory) {
         return inventory.getItems().stream()
                 .map(item -> new SerializableInventoryItem(
-                        item.name,
-                        //item.getDurability(),
-                        //item.getMaxDurability(),
-                        0,
-                        0,
-                        item instanceof Weapon ? ((Weapon) item).getDamage() : 0,
-                        item instanceof Shooter ? ((Shooter) item).getRemainingAmmo() : 0,
-                        item instanceof Shooter ? ((Shooter) item).getCurrentMagSize() : 0)).toList();
+                        item.getName(),
+                        // Durability for BootsItem and SwordItem
+                        (item instanceof BootsItem || item instanceof SwordItem)
+                                ? ((item instanceof BootsItem) ? ((BootsItem) item).getDurability().getCurrent()
+                                        : ((SwordItem) item).getDurability().getCurrent())
+                                : 0,
+                        (item instanceof BootsItem || item instanceof SwordItem)
+                                ? ((item instanceof BootsItem) ? ((BootsItem) item).getDurability().getMax()
+                                        : ((SwordItem) item).getDurability().getMax())
+                                : 0,
+                        item instanceof SwordItem ? ((SwordItem) item).getDamage() : 0,
+                        item instanceof GunItem ? ((GunItem) item).getMagazine().getReserve() : 0,
+                        item instanceof GunItem ? ((GunItem) item).getMagazine().getCurrentMag() : 0))
+                .toList();
     }
 
     /**
      * Deszerializálja és helyreállítja a leltár tartalmát.
+     * 
      * @param inventory a célként szolgáló leltár
-     * @param items a szerializált leltárelemek listája
-     * @param eng a játékmotor példánya
+     * @param items     a szerializált leltárelemek listája
+     * @param eng       a játékmotor példánya
      */
     private static void deserializeInventory(Inventory inventory, List<SerializableInventoryItem> items, Engine eng) {
         inventory.getItems().clear();
         for (SerializableInventoryItem item : items) {
-            SuperObject obj = switch (item.name) {
-                case "sword" -> new OBJ_Sword(eng, 0, 0, item.damage);
-                case "boots" -> new OBJ_Boots(eng, 0, 0);
-                case "key" -> new OBJ_Key(eng, 0, 0);
-                case "pistol" -> new Pistol(eng, 0, 0, item.leftoverAmmo, item.inMagAmmo);
-                case "rifle" -> new Rifle(eng, 0, 0, item.leftoverAmmo, item.inMagAmmo);
+            Item obj = switch (item.name) {
+                case "Sword" -> new SwordItem(eng, item.damage, WeaponRarity.COMMON);
+                case "Boots" -> new BootsItem(eng);
+                case "Key" -> new KeyItem();
+                case "Pistol" -> new PistolItem(eng, item.inMagAmmo, item.leftoverAmmo);
+                case "Rifle" -> new RifleItem(eng, item.inMagAmmo, item.leftoverAmmo);
                 default -> null;
             };
             if (obj != null) {
-                if (obj instanceof Wearable || obj instanceof Weapon) {
-                    //obj.setDurability(item.durability);
-                    //obj.setMaxDurability(item.maxDurability);
-                }
                 inventory.addItem(obj);
             }
         }
@@ -181,8 +183,9 @@ public class FileManager {
 
     /**
      * Létrehoz egy entitást a szerializált állapotából.
+     * 
      * @param entity az alapértelmezett entitás
-     * @param state a szerializált állapot
+     * @param state  a szerializált állapot
      * @return a helyreállított entitás
      */
     private static Entity createEntity(Entity entity, SerializableEntityState state) {
@@ -198,22 +201,16 @@ public class FileManager {
 
     /**
      * Létrehoz egy objektumot a szerializált állapotából.
-     * @param obj az alapértelmezett objektum
+     * 
+     * @param obj   az alapértelmezett objektum
      * @param state a szerializált állapot
      * @return a helyreállított objektum
      */
-    private static SuperObject createObject(SuperObject obj, SerializableObjectState state) {
+    private static GameObject createObject(GameObject obj, SerializableObjectState state) {
         if (obj != null) {
             obj.worldX = state.worldX;
             obj.worldY = state.worldY;
-
-            if (obj instanceof Wearable || obj instanceof Weapon) {
-                //obj.setDurability(state.durability);
-                //obj.setMaxDurability(state.maxDurability);
-            }
-            if (obj instanceof Weapon) {
-                ((Weapon) obj).setDamage(state.damage);
-            }
+            // Durability/damage restoration removed - handled by constructor
         }
         return obj;
     }
@@ -223,15 +220,16 @@ public class FileManager {
         return creator != null ? creator.apply(eng, state) : null;
     }
 
-    private static SuperObject createObjectFromState(Engine eng, SerializableObjectState state) {
-        BiFunction<Engine, SerializableObjectState, SuperObject> creator = objectCreators.get(state.name);
+    private static GameObject createObjectFromState(Engine eng, SerializableObjectState state) {
+        BiFunction<Engine, SerializableObjectState, GameObject> creator = objectCreators.get(state.name);
         return creator != null ? creator.apply(eng, state) : null;
     }
 
     /**
      * Frissíti a játékos állapotát a szerializált adatok alapján.
+     * 
      * @param player a frissítendő játékos
-     * @param state a szerializált játékos állapot
+     * @param state  a szerializált játékos állapot
      */
     private static void updatePlayerState(Player player, SerializablePlayerState state) {
         player.setWorldX(state.worldX);
@@ -245,6 +243,7 @@ public class FileManager {
     /**
      * Felhasználói felülettel ellátott mentési funkció.
      * Megjeleníti a mentési párbeszédablakot és kezeli a felhasználói interakciót.
+     * 
      * @param eng a játékmotor példánya
      */
     public static void saveGame(Engine eng) {
@@ -286,7 +285,9 @@ public class FileManager {
 
     /**
      * Felhasználói felülettel ellátott betöltési funkció.
-     * Megjeleníti a betöltési párbeszédablakot és kezeli a felhasználói interakciót.
+     * Megjeleníti a betöltési párbeszédablakot és kezeli a felhasználói
+     * interakciót.
+     * 
      * @param eng a játékmotor példánya
      * @return true ha a betöltés sikeres volt, false egyébként
      */

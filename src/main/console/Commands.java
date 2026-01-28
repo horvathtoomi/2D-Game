@@ -33,24 +33,24 @@ public class Commands {
 
     /**
      * Eltávolítja a megadott típusú entitásokat a játékból.
+     * 
      * @param entityType az entitás típusa
-     * @param removeAll ha igaz, minden entitást eltávolít
+     * @param removeAll  ha igaz, minden entitást eltávolít
      */
     public void removeEntities(String entityType, boolean removeAll) {
         int count = 0;
         for (Entity entity : eng.getEntity()) {
-            if(removeAll) {
+            if (removeAll) {
                 eng.removeEnemy(entity);
                 count++;
-            }
-            else {
+            } else {
                 if (entity.getClass().getSimpleName().equalsIgnoreCase(entityType)) {
                     eng.removeEnemy(entity);
                     count++;
                 }
             }
         }
-        if(count != 0)
+        if (count != 0)
             consoleHandler.printToConsole("Removed " + count + " entities of type " + entityType);
         else
             consoleHandler.printToConsole("No such entity as: " + entityType);
@@ -58,29 +58,30 @@ public class Commands {
 
     /**
      * Új objektumot vagy entitást ad a játékhoz.
+     * 
      * @param obj az objektum vagy entitás típusa
-     * @param x X koordináta
-     * @param y Y koordináta
+     * @param x   X koordináta
+     * @param y   Y koordináta
      */
     public void add(String obj, int x, int y) {
-        if(!((x< eng.getMaxWorldCol() && x>=1) && (y< eng.getMaxWorldRow() && y>=1))){
-            consoleHandler.printToConsole("Coordinates must be [1:" + (eng.getMaxWorldCol() -1) + "]");
+        if (!((x < eng.getMaxWorldCol() && x >= 1) && (y < eng.getMaxWorldRow() && y >= 1))) {
+            consoleHandler.printToConsole("Coordinates must be [1:" + (eng.getMaxWorldCol() - 1) + "]");
             return;
         }
         obj = obj.toLowerCase();
-        switch(obj){
-            case "giantenemy" -> eng.addEntity(new GiantEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
+        switch (obj) {
+            case "giantenemy" -> eng.addEntity(new GiantEnemy(eng, x * eng.getTileSize(), y * eng.getTileSize()));
             case "tankenemy" -> eng.addEntity(new TankEnemy(eng, x * eng.getTileSize(), y * eng.getTileSize()));
-            case "smallenemy" -> eng.addEntity(new SmallEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
-            case "friendlyenemy" -> eng.addEntity(new FriendlyEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
-            case "dragonenemy" -> eng.addEntity(new DragonEnemy(eng,x * eng.getTileSize(),y * eng.getTileSize()));
-            case "key" -> eng.addObject(new OBJ_Key(eng,x * eng.getTileSize(),y * eng.getTileSize()));
-            case "door" -> eng.addObject(new OBJ_Door(eng,x * eng.getTileSize(),y * eng.getTileSize()));
-            case "boots" -> eng.addObject(new OBJ_Boots(eng,x * eng.getTileSize(),y * eng.getTileSize()));
-            case "chest" -> eng.addObject(new OBJ_Chest(eng,x * eng.getTileSize(),y * eng.getTileSize()));
-            case "sword" -> eng.addObject(new OBJ_Sword(eng,x * eng.getTileSize(),y * eng.getTileSize(), 50));
-            case "pistol" -> eng.addObject(new Pistol(eng,x *eng.getTileSize(), y * eng.getTileSize()));
-            case "rifle" -> eng.addObject(new Rifle(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "smallenemy" -> eng.addEntity(new SmallEnemy(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "friendlyenemy" -> eng.addEntity(new FriendlyEnemy(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "dragonenemy" -> eng.addEntity(new DragonEnemy(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "key" -> eng.addObject(new OBJ_Key(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "door" -> eng.addObject(new OBJ_Door(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "boots" -> eng.addObject(new OBJ_Boots(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "chest" -> eng.addObject(new OBJ_Chest(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "sword" -> eng.addObject(new OBJ_Sword(eng, x * eng.getTileSize(), y * eng.getTileSize(), 50));
+            case "pistol" -> eng.addObject(new OBJ_Pistol(eng, x * eng.getTileSize(), y * eng.getTileSize()));
+            case "rifle" -> eng.addObject(new OBJ_Rifle(eng, x * eng.getTileSize(), y * eng.getTileSize()));
             default -> {
                 consoleHandler.printToConsole("Unknown entity or object: " + obj);
                 return;
@@ -89,16 +90,20 @@ public class Commands {
         consoleHandler.printToConsole(obj + " added to the game");
     }
 
-    public void addAmmo(int val){
-        ((Shooter)eng.player.getInventory().getCurrent()).addAmmo(val);
+    public void addAmmo(int val) {
+        Item currentItem = eng.player.getInventory().getCurrent();
+        if (currentItem instanceof GunItem gun) {
+            gun.getMagazine().reload(); // Note: This design may need adjustment as Magazine doesn't have addAmmo()
+        }
     }
 
-    public void teleport(int x, int y){
+    public void teleport(int x, int y) {
         int[][] maphelp = eng.tileman.getMapTileNum();
-        if(x >= eng.getMaxWorldCol() || x < 1 || y >= eng.getMaxWorldRow() || y < 1){
-            GameLogger.warn(LOG_CONTEXT, "Coordinates must be X->[1:" + (eng.getMaxWorldCol() -1) + "] and Y->[1:" + (eng.getMaxWorldRow() -1) + "]");
+        if (x >= eng.getMaxWorldCol() || x < 1 || y >= eng.getMaxWorldRow() || y < 1) {
+            GameLogger.warn(LOG_CONTEXT, "Coordinates must be X->[1:" + (eng.getMaxWorldCol() - 1) + "] and Y->[1:"
+                    + (eng.getMaxWorldRow() - 1) + "]");
             return;
-        } else if(eng.tileman.getTile(maphelp[x][y]).collision){
+        } else if (eng.tileman.getTile(maphelp[x][y]).collision) {
             GameLogger.warn(LOG_CONTEXT, "Can not teleport on a solid tile!");
             return;
         }
@@ -138,14 +143,14 @@ public class Commands {
                 consoleHandler.printToConsole("Enter commands for the script (type 'end' to finish):");
                 while (true) {
                     String input = gui.getInput();
-                    if(input.startsWith("make")){
+                    if (input.startsWith("make")) {
                         numMakeEnd++;
                     }
                     if ("end".equalsIgnoreCase(input.trim())) {
-                        if(numMakeEnd <= 0) {
+                        if (numMakeEnd <= 0) {
                             consoleHandler.printToConsole(filename + " created and saved successfully.");
                             break;
-                        } else{
+                        } else {
                             numMakeEnd--;
                         }
                     }
@@ -164,15 +169,16 @@ public class Commands {
 
     /**
      * Végrehajtja a script fájlban található parancsokat.
+     * 
      * @param filename a script fájl neve
      */
     private void runScript(String filename, Set<String> visitedScripts) {
         String normalizedFilename = RES_SCRIPTS_PATH + filename + ".txt";
         if (visitedScripts.contains(normalizedFilename)) {
             consoleHandler.printToConsole(
-            "\n----------------------------------------------------------\n" +
-            "ERROR: Circular script reference detected: " + filename +
-            "\n----------------------------------------------------------");
+                    "\n----------------------------------------------------------\n" +
+                            "ERROR: Circular script reference detected: " + filename +
+                            "\n----------------------------------------------------------");
             return;
         }
         visitedScripts.add(normalizedFilename);
@@ -192,7 +198,7 @@ public class Commands {
                     } else {
                         consoleHandler.printToConsole("Invalid script command: " + line);
                     }
-                } else if(line.startsWith("make")){
+                } else if (line.startsWith("make")) {
                     String[] parts = line.split("\\s+");
                     String newFileName = parts[1];
                     File saveFile = new File(RES_SCRIPTS_PATH + newFileName + ".txt");
@@ -224,7 +230,7 @@ public class Commands {
     }
 
     public void printHelp(String command) {
-        switch(command){
+        switch (command) {
             case "script" -> consoleHandler.printToConsole("Script use: script <filename> without extension");
             case "make" -> consoleHandler.printToConsole("Make use: make <filename> without extension");
             case "set" -> consoleHandler.printToConsole("""
@@ -233,10 +239,11 @@ public class Commands {
             case "get" -> consoleHandler.printToConsole("""
                     Get use: get <entity_name>
                     Where entity_name: <blank>,<GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>""");
-            case "add" -> consoleHandler.printToConsole("""
-                    Add use: add <entity/object> <x> <y>
-                    Add ammo use: add ammo <val> where value: [0 : 999]
-                    Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>,<sword>""");
+            case "add" -> consoleHandler.printToConsole(
+                    """
+                            Add use: add <entity/object> <x> <y>
+                            Add ammo use: add ammo <val> where value: [0 : 999]
+                            Where entity/object: <GiantEnemy>,<SmallEnemy>,<DragonEnemy>,<FriendlyEnemy>,<key>,<boots>,<door>,<chest>,<sword>""");
             case "remove" -> consoleHandler.printToConsole("""
                     Remove use: remove <entity_name>
                     Where entity_name: <all> <GiantEnemy> <SmallEnemy> <DragonEnemy> <FriendlyEnemy>""");
@@ -255,25 +262,22 @@ public class Commands {
     }
 
     public void setAll(String attribute, int value) {
-        if(attribute.equals(SPEED)) {
+        if (attribute.equals(SPEED)) {
             if (value > 8 || value < 0) {
                 consoleHandler.printToConsole("Value not valid! (0:8)");
                 return;
             }
-            for(Entity entity : eng.getEntity())
+            for (Entity entity : eng.getEntity())
                 entity.setSpeed(value);
-        }
-        else if(attribute.equals(HEALTH)) {
+        } else if (attribute.equals(HEALTH)) {
             if (value > 5000 || value < 0) {
                 consoleHandler.printToConsole("Value not valid! (0:5000)");
                 return;
-            }
-            else {
-                for(Entity entity : eng.getEntity())
+            } else {
+                for (Entity entity : eng.getEntity())
                     entity.setHealth(value);
             }
-        }
-        else {
+        } else {
             consoleHandler.printToConsole(UNKNOWN_ATTRIBUTE + attribute);
         }
         consoleHandler.printToConsole("Every entity's " + attribute + " set to: " + value);
@@ -281,7 +285,7 @@ public class Commands {
 
     public void setEntity(String name, String attribute, int value) {
         int entityIndex = -1;
-        if(attribute.equals(SPEED)) {
+        if (attribute.equals(SPEED)) {
             if (value > 8 || value < 0) {
                 consoleHandler.printToConsole("Value not valid! (0:8)");
                 return;
@@ -293,8 +297,7 @@ public class Commands {
                     break;
                 }
             }
-        }
-        else if(attribute.equals(HEALTH)) {
+        } else if (attribute.equals(HEALTH)) {
             if (value > 5000 || value < 0) {
                 consoleHandler.printToConsole("Value not valid! (0:5000)");
                 return;
@@ -306,13 +309,13 @@ public class Commands {
                     break;
                 }
             }
-        }
-        else {
+        } else {
             consoleHandler.printToConsole(UNKNOWN_ATTRIBUTE + attribute);
         }
 
-        if(entityIndex != -1)
-            consoleHandler.printToConsole(eng.getEntity().get(entityIndex).getName() + " " + attribute + " set to: " + value);
+        if (entityIndex != -1)
+            consoleHandler
+                    .printToConsole(eng.getEntity().get(entityIndex).getName() + " " + attribute + " set to: " + value);
         else
             consoleHandler.printToConsole("Entity not found");
     }
@@ -338,7 +341,7 @@ public class Commands {
         int speedLimit = 15;
         int healthLimit = 1000;
         int val = Integer.parseInt(value);
-        if(val > 0 && val <= 5001) {
+        if (val > 0 && val <= 5001) {
             switch (variable) {
                 case HEALTH -> {
                     if (eng.player.getMaxHealth() < val) {

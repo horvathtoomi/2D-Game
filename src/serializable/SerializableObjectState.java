@@ -1,7 +1,6 @@
 package serializable;
 
-import object.SuperObject;
-import object.Weapon;
+import object.GameObject;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -18,14 +17,13 @@ public class SerializableObjectState implements Serializable {
     public int maxDurability;
     public int damage;
 
-    public SerializableObjectState(SuperObject obj) {
+    public SerializableObjectState(GameObject obj) {
         this.name = obj.name;
-        this.worldX = obj.worldX;
-        this.worldY = obj.worldY;
-        //this.collision = obj.collision;
-        //this.opened = obj.opened;
-        //this.durability = obj.getDurability();
-        //this.maxDurability = obj.getMaxDurability();
-        this.damage = (obj instanceof Weapon) ? ((Weapon) obj).getDamage() : 0;
+        this.worldX = obj.getWorldX();
+        this.worldY = obj.getWorldY();
+        this.collision = obj.collision;
+        // Other fields are not tracked by GameObject
+        // These would need to be handled by specific object types if needed
+        this.damage = 0;
     }
 }

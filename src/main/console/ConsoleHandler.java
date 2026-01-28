@@ -2,7 +2,7 @@ package main.console;
 
 import main.Engine;
 import main.GameState;
-import object.Shooter;
+import object.GunItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +34,7 @@ public class ConsoleHandler {
     /**
      * Inicializálja a parancsokat.
      * Beállítja a parancsokhoz tartozó végrehajtási logikát.
+     * 
      * @return a parancsok térképe
      */
     private Map<String, Command> initializeCommands() {
@@ -61,7 +62,7 @@ public class ConsoleHandler {
             eng.setGameState(GameState.PAUSED);
         });
 
-        map.put("exit_game", _ -> System.exit(0));
+        map.put("exit_game", e -> System.exit(0));
 
         map.put("remove", args -> {
             if (args.length == 2) {
@@ -100,10 +101,10 @@ public class ConsoleHandler {
                 }
                 case 3 -> commands.setGameValue(args[1], args[2]);
                 default -> printToConsole("""
-                    Invalid format for 'set' command.
-                    Usage: set entity arg1 value
-                    Entity types: *Enemy, Player
-                    Arguments: speed, health, maxhealth""");
+                        Invalid format for 'set' command.
+                        Usage: set entity arg1 value
+                        Entity types: *Enemy, Player
+                        Arguments: speed, health, maxhealth""");
             }
         });
 
@@ -113,25 +114,25 @@ public class ConsoleHandler {
                     switch (args[1]) {
                         case "player" -> commands.getGameValue(args[2]);
                         case "smallenemy", "giantenemy", "dragonenemy", "friendlyenemy" ->
-                                commands.getEntity(args[1], args[2]);
+                            commands.getEntity(args[1], args[2]);
                         default -> printToConsole("Unknown entity type! Use 'help' for available commands");
                     }
                 }
                 case 2 -> commands.getGameValue(args[1]);
                 default -> printToConsole("""
-                    Invalid format for 'get' command.
-                    Usage: get entity arg1
-                    Entity types: *Enemy, Player
-                    Arguments: speed, health""");
+                        Invalid format for 'get' command.
+                        Usage: get entity arg1
+                        Entity types: *Enemy, Player
+                        Arguments: speed, health""");
             }
         });
 
         map.put("add", args -> {
             if (args.length == 4) {
                 commands.add(args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]));
-            } else if(args.length == 3 && args[1].startsWith("ammo")){
-                if(eng.player.getInventory().getCurrent() instanceof Shooter){
-                    if(Integer.parseInt(args[2]) >= 0 && Integer.parseInt(args[2]) <= 999) {
+            } else if (args.length == 3 && args[1].startsWith("ammo")) {
+                if (eng.player.getInventory().getCurrent() instanceof GunItem) {
+                    if (Integer.parseInt(args[2]) >= 0 && Integer.parseInt(args[2]) <= 999) {
                         commands.addAmmo(Integer.parseInt(args[2]));
                         printToConsole(Integer.parseInt(args[2]) + " ammo added to the Weapon.");
                     } else {
@@ -142,19 +143,18 @@ public class ConsoleHandler {
                 }
             } else {
                 printToConsole("""
-                    Invalid format for 'add' command.
-                    Usage: add <entity/object> X Y
-                    Usage for ammo: add ammo <val>, where val : [0 : 999]
-                    Entities: GiantEnemy, SmallEnemy, DragonEnemy, FriendlyEnemy
-                    Objects: chest, door, key, boots""");
+                        Invalid format for 'add' command.
+                        Usage: add <entity/object> X Y
+                        Usage for ammo: add ammo <val>, where val : [0 : 999]
+                        Entities: GiantEnemy, SmallEnemy, DragonEnemy, FriendlyEnemy
+                        Objects: chest, door, key, boots""");
             }
         });
 
         map.put("teleport", args -> {
-            if(args.length == 3){
+            if (args.length == 3) {
                 commands.teleport(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-            }
-            else{
+            } else {
                 printToConsole("""
                         Invalid format for 'teleport' command.
                         Usage: teleport X Y
@@ -193,7 +193,8 @@ public class ConsoleHandler {
     }
 
     public void executeCommand(String input) {
-        if (input.isEmpty()) return;
+        if (input.isEmpty())
+            return;
         String[] parts = input.trim().toLowerCase().split("\\s+");
         Command command = commandMap.get(parts[0]);
         if (command != null) {
@@ -209,21 +210,21 @@ public class ConsoleHandler {
 
     private String getHelpText() {
         return """
-            ------------------------------------------------------
-            |               Available commands:                  |
-            ------------------------------------------------------
-            | help [command] : Show help for a specific command  |
-            | reset          : Reset the game                    |
-            | exit           : Exit console mode                 |
-            | exit_game      : Exit the game                     |
-            | remove         : Remove entities                   |
-            | save/load      : Save/Load game state              |
-            | set/get        : Set/Get game values               |
-            | add            : Add entities or objects           |
-            | teleport       : Teleports player                  |
-            | script         : Run a script file                 |
-            | make           : Create a new script file          |
-            ------------------------------------------------------
-            Type 'help <command>' for detailed usage information.""";
+                ------------------------------------------------------
+                |               Available commands:                  |
+                ------------------------------------------------------
+                | help [command] : Show help for a specific command  |
+                | reset          : Reset the game                    |
+                | exit           : Exit console mode                 |
+                | exit_game      : Exit the game                     |
+                | remove         : Remove entities                   |
+                | save/load      : Save/Load game state              |
+                | set/get        : Set/Get game values               |
+                | add            : Add entities or objects           |
+                | teleport       : Teleports player                  |
+                | script         : Run a script file                 |
+                | make           : Create a new script file          |
+                ------------------------------------------------------
+                Type 'help <command>' for detailed usage information.""";
     }
 }

@@ -38,17 +38,20 @@ public class Player extends Entity {
             attack_up_rifle, attack_down_rifle, attack_left_rifle, attack_right_rifle;
 
     public void setPlayerHealth(int health) {
-        if(health > maxHealth)
+        if (health > maxHealth)
             setHealth(maxHealth);
         else
             setHealth(Math.max(health, 0));
     }
 
-    public Inventory getInventory() {return inventory;}
+    public Inventory getInventory() {
+        return inventory;
+    }
 
     /**
      * Létrehoz egy új játékos karaktert.
-     * @param panel a játékmotor példánya
+     * 
+     * @param panel  a játékmotor példánya
      * @param kezelo a bevitel kezelő példánya
      */
     public Player(Engine panel, InputHandler kezelo) {
@@ -68,21 +71,19 @@ public class Player extends Entity {
     }
 
     public void setDefaultValues() {
-        if(eng.getGameMode().equals(GameMode.STORY)) {
+        if (eng.getGameMode().equals(GameMode.STORY)) {
             setWorldX(eng.getTileSize() * 5);
             setWorldY(eng.getTileSize() * 5);
-        }
-        else{
+        } else {
             int[][] custom_map = eng.tileman.getMapTileNum();
-            if(eng.tileman.getTile(custom_map[eng.getMaxWorldCol()/2][eng.getMaxWorldRow()/2]).collision) {
+            if (eng.tileman.getTile(custom_map[eng.getMaxWorldCol() / 2][eng.getMaxWorldRow() / 2]).collision) {
                 int[] coordinates = TileManager.getNotSolidTile(custom_map);
                 assert coordinates != null;
                 setWorldX(coordinates[0]);
                 setWorldY(coordinates[1]);
-            }
-            else{
-                setWorldX(eng.getMaxWorldCol()/2);
-                setWorldY(eng.getMaxWorldRow()/2);
+            } else {
+                setWorldX(eng.getMaxWorldCol() / 2);
+                setWorldY(eng.getMaxWorldRow() / 2);
             }
         }
     }
@@ -128,7 +129,6 @@ public class Player extends Entity {
         attack_left_rifle = scale("player", "attack_left_rifle");
         attack_right_rifle = scale("player", "attack_right_rifle");
 
-
         UtilityTool uTool = new UtilityTool();
         attack_up = uTool.scaleImage(attack_up, eng.getTileSize(), eng.getTileSize() * 2);
         attack_down = uTool.scaleImage(attack_down, eng.getTileSize(), eng.getTileSize() * 2);
@@ -145,26 +145,29 @@ public class Player extends Entity {
         if (interactionTimer > 0) {
             interactionTimer--;
         }
-        setSpeed(inventory.getCurrent() instanceof OBJ_Boots ? 4 : 3);
-        if(inputHandler.attackPressed){
+        setSpeed(inventory.getCurrent() instanceof BootsItem ? 4 : 3);
+        if (inputHandler.attackPressed) {
             attack();
         }
 
         if (!inputHandler.attackPressed && isAttacking) {
             isAttacking = false;
             hasReducedDurability = false;
-            if (inventory.getCurrent() instanceof Weapon) {
-                ((Weapon) inventory.getCurrent()).isActive = false;
-            }
+            // No weapon.isActive field in new Item architecture
         }
 
-        if (inputHandler.upPressed || inputHandler.downPressed || inputHandler.leftPressed || inputHandler.rightPressed) {
-            if (inputHandler.upPressed) direction = Direction.UP;
-            if (inputHandler.downPressed) direction = Direction.DOWN;
-            if (inputHandler.leftPressed) direction = Direction.LEFT;
-            if (inputHandler.rightPressed) direction = Direction.RIGHT;
+        if (inputHandler.upPressed || inputHandler.downPressed || inputHandler.leftPressed
+                || inputHandler.rightPressed) {
+            if (inputHandler.upPressed)
+                direction = Direction.UP;
+            if (inputHandler.downPressed)
+                direction = Direction.DOWN;
+            if (inputHandler.leftPressed)
+                direction = Direction.LEFT;
+            if (inputHandler.rightPressed)
+                direction = Direction.RIGHT;
 
-            //Check Tile Collision
+            // Check Tile Collision
             collisionOn = false;
             eng.cChecker.checkTile(this);
 
@@ -183,115 +186,116 @@ public class Player extends Entity {
                 }
             }
         }
-        if (isAttacking && !hasReducedDurability && inventory.getCurrent() instanceof Weapon) {
-            inventory.getCurrent().use();
+        if (isAttacking && !hasReducedDurability && inventory.getCurrent() instanceof SwordItem) {
+            inventory.getCurrent().use(this);
             hasReducedDurability = true;
         }
     }
 
     private void interactWithObject(int index) {
         if (index < eng.aSetter.list.size() && index >= 0) {
-            SuperObject obj = eng.aSetter.list.get(index);
-            obj.interact();
+            GameObject obj = eng.aSetter.list.get(index);
+            if (obj instanceof Interactable) {
+                ((Interactable) obj).interact(this);
+            }
         }
     }
 
     private BufferedImage getStateImage() {
         BufferedImage image = up;
         if (inventory.getCurrent() != null) {
-            if (inventory.getCurrent() instanceof OBJ_Key) {
-                image = Direction.valueMapper(new BufferedImage[]{up_key, down_key, left_key, right_key}, direction);
-            }
-            else if(inventory.getCurrent() instanceof OBJ_Boots) {
-                image = Direction.valueMapper(new BufferedImage[]{up_boots, down_boots, left_boots, right_boots}, direction);
-            }
-            else if(inventory.getCurrent() instanceof Rifle){
-                image = !isAttacking ?
-                        Direction.valueMapper(new BufferedImage[]{up_rifle, down_rifle, left_rifle, right_rifle}, direction)
-                        : Direction.valueMapper(new BufferedImage[]{attack_up_rifle, attack_down_rifle, attack_left_rifle, attack_right_rifle}, direction);
-            }
-            else if(inventory.getCurrent() instanceof OBJ_Sword) {
-                image = !isAttacking ?
-                        Direction.valueMapper(new BufferedImage[]{up_sword, down_sword, left_sword, right_sword}, direction)
-                        : Direction.valueMapper(new BufferedImage[]{attack_up, attack_down, attack_left, attack_right}, direction);
-            }
-            else if (inventory.getCurrent() instanceof Pistol) {
-                image = !isAttacking ?
-                        Direction.valueMapper(new BufferedImage[]{up_pistol, down_pistol, left_pistol, right_pistol}, direction)
-                        : Direction.valueMapper(new BufferedImage[]{attack_up_pistol, attack_down_pistol, attack_left_pistol, attack_right_pistol}, direction);
+            if (inventory.getCurrent() instanceof KeyItem) {
+                image = Direction.valueMapper(new BufferedImage[] { up_key, down_key, left_key, right_key }, direction);
+            } else if (inventory.getCurrent() instanceof BootsItem) {
+                image = Direction.valueMapper(new BufferedImage[] { up_boots, down_boots, left_boots, right_boots },
+                        direction);
+            } else if (inventory.getCurrent() instanceof RifleItem) {
+                image = !isAttacking
+                        ? Direction.valueMapper(new BufferedImage[] { up_rifle, down_rifle, left_rifle, right_rifle },
+                                direction)
+                        : Direction.valueMapper(new BufferedImage[] { attack_up_rifle, attack_down_rifle,
+                                attack_left_rifle, attack_right_rifle }, direction);
+            } else if (inventory.getCurrent() instanceof SwordItem) {
+                image = !isAttacking
+                        ? Direction.valueMapper(new BufferedImage[] { up_sword, down_sword, left_sword, right_sword },
+                                direction)
+                        : Direction.valueMapper(
+                                new BufferedImage[] { attack_up, attack_down, attack_left, attack_right }, direction);
+            } else if (inventory.getCurrent() instanceof PistolItem) {
+                image = !isAttacking
+                        ? Direction.valueMapper(
+                                new BufferedImage[] { up_pistol, down_pistol, left_pistol, right_pistol }, direction)
+                        : Direction.valueMapper(new BufferedImage[] { attack_up_pistol, attack_down_pistol,
+                                attack_left_pistol, attack_right_pistol }, direction);
             }
         } else {
-            image = Direction.valueMapper(new BufferedImage[]{up, down, left, right}, direction);
+            image = Direction.valueMapper(new BufferedImage[] { up, down, left, right }, direction);
         }
         return image;
     }
 
-    public void attack(){
-        if(!(getInventory().getCurrent() instanceof Weapon weapon)) {
+    public void attack() {
+        Item current = getInventory().getCurrent();
+        if (current == null) {
             return;
         }
-        if(weapon instanceof Shooter){
-            if(((Shooter) weapon).canShoot())
-                attackByShooterWeapon();
-        }
-        else {
-            attackByMeeleWeapon(weapon);
+        if (current instanceof GunItem) {
+            attackByShooterWeapon();
+        } else if (current instanceof SwordItem) {
+            attackByMeeleWeapon((SwordItem) current);
         }
     }
 
     private int[] determineDirection() {
         return switch (direction) {
-            case UP -> new int[]{-10000, getWorldY()};
-            case DOWN -> new int[]{10000, getWorldY()};
-            case LEFT -> new int[]{getWorldX(), -10000};
-            case RIGHT, SHOOT -> new int[]{getWorldX(), 10000};
+            case UP -> new int[] { -10000, getWorldY() };
+            case DOWN -> new int[] { 10000, getWorldY() };
+            case LEFT -> new int[] { getWorldX(), -10000 };
+            case RIGHT, SHOOT -> new int[] { getWorldX(), 10000 };
         };
     }
 
-
-    private void attackByShooterWeapon(){
-        if(inventory.getCurrent() instanceof Pistol) {
-            if(!shot) {
-                eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0], determineDirection()[1]));
-                inventory.getCurrent().use();
+    private void attackByShooterWeapon() {
+        if (inventory.getCurrent() instanceof PistolItem) {
+            if (!shot) {
+                eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0],
+                        determineDirection()[1]));
+                inventory.getCurrent().use(this);
                 isAttacking = true;
                 shot = true;
             }
-        } else {
-            Rifle rifle = (Rifle)inventory.getCurrent();
-            if(rifle.getCoolDown() == 0) {
-                eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0], determineDirection()[1]));
-                inventory.getCurrent().use();
-                isAttacking = true;
-                ((Shooter)inventory.getCurrent()).setCoolDown(rifle.getFireRate());
-            } else {
-                ((Shooter)inventory.getCurrent()).setCoolDown(rifle.getCoolDown() - 1);
-            }
+        } else if (inventory.getCurrent() instanceof RifleItem) {
+            RifleItem rifle = (RifleItem) inventory.getCurrent();
+            // Use gun's cooldown mechanism
+            eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0],
+                    determineDirection()[1]));
+            rifle.use(this);
+            isAttacking = true;
         }
     }
 
-    private void attackByMeeleWeapon(Weapon weapon){
+    private void attackByMeeleWeapon(SwordItem sword) {
         long currentTime = System.currentTimeMillis();
-        if(currentTime - lastAttackTime < ATTACK_COOLDOWN){
+        if (currentTime - lastAttackTime < ATTACK_COOLDOWN) {
             return;
         }
         isAttacking = true;
         hasReducedDurability = false;
-        weapon.isActive = true;
         lastAttackTime = currentTime;
-        weapon.updateHitbox(getWorldX(), getWorldY(), direction.toString());
-        weapon.checkHit(eng.getEntity());
+        // Use sword item
+        sword.use(this);
+        // TODO: Implement melee hitbox checking using sword's damage component
     }
 
-    private void imageDraw(Graphics2D g2, BufferedImage image, int x, int y){
-        if(image == attack_up)
-            g2.drawImage(image,x,y - eng.getTileSize(),null);
-        else if(image == attack_down)
-            g2.drawImage(image,x,y,null);
-        else if(image == attack_left)
-            g2.drawImage(image,x - eng.getTileSize(),y,null);
-        else if(image == attack_right)
-            g2.drawImage(image,x,y,null);
+    private void imageDraw(Graphics2D g2, BufferedImage image, int x, int y) {
+        if (image == attack_up)
+            g2.drawImage(image, x, y - eng.getTileSize(), null);
+        else if (image == attack_down)
+            g2.drawImage(image, x, y, null);
+        else if (image == attack_left)
+            g2.drawImage(image, x - eng.getTileSize(), y, null);
+        else if (image == attack_right)
+            g2.drawImage(image, x, y, null);
         else
             g2.drawImage(image, x, y, null);
     }
