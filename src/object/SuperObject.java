@@ -30,7 +30,6 @@ public abstract class SuperObject{
     public boolean opened = false;
     public Rectangle solidArea = new Rectangle(0,0,48,48);
 
-
     public int getWorldX(){return worldX;}
     public int getWorldY(){return worldY;}
     public int getMaxDurability(){return MAX_DURABILITY;}
@@ -70,27 +69,11 @@ public abstract class SuperObject{
      */
     public void use(){}
 
-    public void draw(Graphics2D g2, Engine gp) {
-        int screenX = worldX - gp.player.getWorldX() + gp.player.getScreenX();
-        int screenY = worldY - gp.player.getWorldY() + gp.player.getScreenY();
-
-        if (gp.player.getScreenX() > gp.player.getWorldX()) {
-            screenX = worldX;
-        }
-        if (gp.player.getScreenY() > gp.player.getWorldY()) {
-            screenY = worldY;
-        }
-        int rightOffset = gp.getScreenWidth() - gp.player.getScreenX();
-        if (rightOffset > gp.getWorldWidth() - gp.player.getWorldX()) {
-            screenX = gp.getScreenWidth() - (gp.getWorldWidth() - worldX);
-        }
-        int bottomOffset = gp.getScreenHeight() - gp.player.getScreenY();
-        if (bottomOffset > gp.getWorldHeight() - gp.player.getWorldY()) {
-            screenY = gp.getScreenHeight() - (gp.getWorldHeight() - worldY);
-        }
-
-        if (screenX > -gp.getTileSize() && screenX < gp.getScreenWidth() + gp.getTileSize() && screenY > -gp.getTileSize() && screenY < gp.getScreenHeight() + gp.getTileSize()) {
-            g2.drawImage(image, screenX, screenY, gp.getTileSize(), gp.getTileSize(), null);
+    public void draw(Graphics2D g2, Engine eng) {
+        int screenX = worldX - eng.camera.getX();
+        int screenY = worldY - eng.camera.getY();
+        if (screenX + eng.getTileSize() > 0 && screenX < eng.getScreenWidth() && screenY + eng.getTileSize() > 0 && screenY < eng.getScreenHeight()) {
+            g2.drawImage(image, screenX, screenY, eng.getTileSize(), eng.getTileSize(), null);
         }
     }
 

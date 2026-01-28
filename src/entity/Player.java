@@ -328,26 +328,6 @@ public class Player extends Entity {
         weapon.checkHit(eng.getEntity());
     }
 
-    private int setAdjustedX(){
-        int x = getScreenX();
-        if(getScreenX() > getWorldX())
-            x = getWorldX();
-        int rightOffset = eng.getScreenWidth() - getScreenX();
-        if (rightOffset > eng.getWorldWidth() - getWorldX())
-            x = eng.getScreenWidth() - (eng.getWorldWidth() - getWorldX());
-        return x;
-    }
-
-    private int setAdjustedY(){
-        int y = getScreenY();
-        if(getScreenY() > getWorldY())
-            y = getWorldY();
-        int bottomOffset = eng.getScreenHeight() - getScreenY();
-        if (bottomOffset > eng.getWorldHeight() - getWorldY())
-            y = eng.getScreenHeight() - (eng.getWorldHeight() - getWorldY());
-        return y;
-    }
-
     private void imageDraw(Graphics2D g2, BufferedImage image, int x, int y){
         if(image == attack_up)
             g2.drawImage(image,x,y - eng.getTileSize(),null);
@@ -362,12 +342,13 @@ public class Player extends Entity {
     }
 
     @Override
-    public void draw(Graphics2D g2){
+    public void draw(Graphics2D g2) {
         BufferedImage image = getStateImage();
-        int x = setAdjustedX();
-        int y = setAdjustedY();
-        imageDraw(g2, image, x, y);
+        int screenX = getWorldX() - eng.camera.getX();
+        int screenY = getWorldY() - eng.camera.getY();
+        imageDraw(g2, image, screenX, screenY);
         inventory.draw(g2);
     }
+
 
 }

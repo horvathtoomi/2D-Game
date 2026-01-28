@@ -106,17 +106,18 @@ public class Entity{
         };
         screenX = worldX - eng.camera.getX();
         screenY = worldY - eng.camera.getY();
-        if (isValidScreenXY(screenX, screenY)) {
+        if (isOnScreen(screenX, screenY)) {
             g2.drawImage(image, screenX, screenY, width, height, null);
         }
     }
 
-    protected boolean isValidScreenXY(int x, int y) {
-        return x > -width &&
-                x < eng.getScreenWidth() + width &&
-                y > -height &&
-                y < eng.getScreenHeight() + height;
+    protected boolean isOnScreen(int x, int y) {
+        return x + width > 0 &&
+                x < eng.getScreenWidth() &&
+                y + height > 0 &&
+                y < eng.getScreenHeight();
     }
+
 
 
     public BufferedImage scale(String folderName, String imageName){

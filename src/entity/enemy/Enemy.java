@@ -250,18 +250,19 @@ public abstract class Enemy extends Entity {
         int screenX = getWorldX() - eng.camera.getX();
         int screenY = getWorldY() - eng.camera.getY();
 
-        if (isValidScreenXY(screenX, screenY)) {
-            g2.setColor(Color.BLACK);
-            g2.fillRect(screenX - 1, screenY - 11, getWidth() + 2, 7);
+        if (!isOnScreen(screenX, screenY)) return;
 
-            g2.setColor(Color.RED);
-            g2.fillRect(screenX, screenY - 10, getWidth(), 5);
+        int barWidth = eng.getTileSize();
+        int barHeight = 5;
 
-            g2.setColor(Color.GREEN);
-            int greenWidth = (int) ((double) getHealth() / getMaxHealth() * getWidth());
-            g2.fillRect(screenX, screenY - 10, greenWidth, 5);
-        }
+        g2.setColor(Color.BLACK);
+        g2.fillRect(screenX, screenY - 10, barWidth, barHeight);
+
+        g2.setColor(Color.GREEN);
+        int greenWidth = (int)((double)getHealth() / getMaxHealth() * barWidth);
+        g2.fillRect(screenX, screenY - 10, greenWidth, barHeight);
     }
+
 
 
 }
