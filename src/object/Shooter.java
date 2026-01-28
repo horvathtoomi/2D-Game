@@ -36,7 +36,6 @@ public abstract class Shooter extends Weapon {
 
     public Shooter(Engine eng, int x, int y, String name, String imageName, int damage) {
         super(eng, x, y, name, imageName, damage, Integer.MAX_VALUE, 30);
-        setDurability(100);
     }
 
     @Override

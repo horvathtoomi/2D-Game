@@ -5,6 +5,7 @@ import main.Engine;
 import main.GameMode;
 import main.InputHandler;
 import main.UtilityTool;
+import tile.TileManager;
 import object.*;
 
 import java.awt.*;
@@ -74,7 +75,7 @@ public class Player extends Entity {
         else{
             int[][] custom_map = eng.tileman.getMapTileNum();
             if(eng.tileman.getTile(custom_map[eng.getMaxWorldCol()/2][eng.getMaxWorldRow()/2]).collision) {
-                int[] coordinates = getNotSolidTile(custom_map);
+                int[] coordinates = TileManager.getNotSolidTile(custom_map);
                 assert coordinates != null;
                 setWorldX(coordinates[0]);
                 setWorldY(coordinates[1]);
@@ -84,22 +85,6 @@ public class Player extends Entity {
                 setWorldY(eng.getMaxWorldRow()/2);
             }
         }
-    }
-
-    private int[] getNotSolidTile(int[][] custom_map) {
-        int[] coordinates = new int[2];
-        int maxWorldCol = eng.getMaxWorldCol();
-        int maxWorldRow = eng.getMaxWorldRow();
-        for(int x = 1; x < maxWorldRow; x++){
-            for(int y = 1; y < maxWorldCol; y++){
-                if(!(eng.tileman.getTile(custom_map[x][y]).collision)){
-                    coordinates[0] = x;
-                    coordinates[1] = y;
-                    return coordinates;
-                }
-            }
-        }
-        return null;
     }
 
     public void getPlayerImage() {
@@ -205,34 +190,9 @@ public class Player extends Entity {
     }
 
     private void interactWithObject(int index) {
-        if (index < eng.aSetter.list.size()) {
+        if (index < eng.aSetter.list.size() && index >= 0) {
             SuperObject obj = eng.aSetter.list.get(index);
-            switch (obj.name) {
-                case "key", "sword", "boots", "pistol", "rifle" -> {
-                    if (!inventory.isFull()) {
-                        inventory.addItem(obj);
-                        eng.aSetter.list.remove(obj);
-                    }
-                }
-                case "door" -> {
-                    if (eng.aSetter.list.get(index).collision) {
-                        if (inventory.equalsKey()) {
-                            inventory.removeItem("key");
-                            eng.aSetter.list.get(index).collision = false;
-                            eng.aSetter.list.get(index).image = eng.aSetter.list.get(index).image2;
-                        }
-                    }
-                }
-                case "chest" -> {
-                    if (!obj.opened) {
-                        eng.aSetter.list.get(index).image = eng.aSetter.list.get(index).image2;
-                        eng.aSetter.list.get(index).opened = true;
-                        int offsetX = obj.worldX + eng.getTileSize() / 2;
-                        int offsetY = obj.worldY + eng.getTileSize() / 2;
-                        eng.aSetter.spawnItemFromChest(offsetX, offsetY);
-                    }
-                }
-            }
+            obj.interact();
         }
     }
 
@@ -280,19 +240,14 @@ public class Player extends Entity {
     }
 
     private int[] determineDirection() {
-        if(direction == Direction.UP){
-            return new int[]{-10000,getWorldY()};
-        }
-        else if(direction == Direction.DOWN){
-            return new int[]{10000,getWorldY()};
-        }
-        else if(direction == Direction.LEFT){
-            return new int[]{getWorldX(),-10000};
-        }
-        else {
-            return new int[]{getWorldX(), 10000};
-        }
+        return switch (direction) {
+            case UP -> new int[]{-10000, getWorldY()};
+            case DOWN -> new int[]{10000, getWorldY()};
+            case LEFT -> new int[]{getWorldX(), -10000};
+            case RIGHT, SHOOT -> new int[]{getWorldX(), 10000};
+        };
     }
+
 
     private void attackByShooterWeapon(){
         if(inventory.getCurrent() instanceof Pistol) {
@@ -349,6 +304,5 @@ public class Player extends Entity {
         imageDraw(g2, image, screenX, screenY);
         inventory.draw(g2);
     }
-
 
 }

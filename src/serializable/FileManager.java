@@ -143,8 +143,10 @@ public class FileManager {
         return inventory.getItems().stream()
                 .map(item -> new SerializableInventoryItem(
                         item.name,
-                        item.getDurability(),
-                        item.getMaxDurability(),
+                        //item.getDurability(),
+                        //item.getMaxDurability(),
+                        0,
+                        0,
                         item instanceof Weapon ? ((Weapon) item).getDamage() : 0,
                         item instanceof Shooter ? ((Shooter) item).getRemainingAmmo() : 0,
                         item instanceof Shooter ? ((Shooter) item).getCurrentMagSize() : 0)).toList();
@@ -169,8 +171,8 @@ public class FileManager {
             };
             if (obj != null) {
                 if (obj instanceof Wearable || obj instanceof Weapon) {
-                    obj.setDurability(item.durability);
-                    obj.setMaxDurability(item.maxDurability);
+                    //obj.setDurability(item.durability);
+                    //obj.setMaxDurability(item.maxDurability);
                 }
                 inventory.addItem(obj);
             }
@@ -204,14 +206,10 @@ public class FileManager {
         if (obj != null) {
             obj.worldX = state.worldX;
             obj.worldY = state.worldY;
-            obj.collision = state.collision;
-            obj.opened = state.opened;
-            if (obj.opened && obj instanceof OBJ_Chest) {
-                obj.image = obj.image2;
-            }
+
             if (obj instanceof Wearable || obj instanceof Weapon) {
-                obj.setDurability(state.durability);
-                obj.setMaxDurability(state.maxDurability);
+                //obj.setDurability(state.durability);
+                //obj.setMaxDurability(state.maxDurability);
             }
             if (obj instanceof Weapon) {
                 ((Weapon) obj).setDamage(state.damage);

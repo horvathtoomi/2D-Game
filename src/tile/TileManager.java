@@ -205,6 +205,22 @@ public class TileManager {
         loadCustomMap("res/maps/map_matrices/default.txt");
     }
 
+    public static int[] getNotSolidTile(int[][] custom_map) {
+        int[] coordinates = new int[2];
+        int maxWorldCol = eng.getMaxWorldCol();
+        int maxWorldRow = eng.getMaxWorldRow();
+        for(int x = 1; x < maxWorldRow; x++){
+            for(int y = 1; y < maxWorldCol; y++){
+                if(!(eng.tileman.getTile(custom_map[x][y]).collision)){
+                    coordinates[0] = x;
+                    coordinates[1] = y;
+                    return coordinates;
+                }
+            }
+        }
+        return null;
+    }
+
 
     public void draw(Graphics2D g2) {
         int tileSize = eng.getTileSize();

@@ -1,5 +1,6 @@
 package object;
 
+import entity.Inventory;
 import main.Engine;
 
 /**
@@ -17,4 +18,12 @@ public class OBJ_Key extends SuperObject{
         super(eng,x,y,"key","key");
     }
 
+    @Override
+    public void interact(){
+        Inventory inv = eng.player.getInventory();
+        if(!inv.isFull()) {
+            inv.addItem(this);
+            eng.aSetter.list.remove(this);
+        }
+    }
 }

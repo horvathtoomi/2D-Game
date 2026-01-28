@@ -55,11 +55,7 @@ public class ColorAnalyzer {
      * @return a megfelelő csempe típus azonosítója
      */
     public static int getClosestTile(Color color) {
-        return TILE_COLORS.stream()
-                .min(Comparator.comparingDouble(tile ->
-                        calculateColorDistance(color, tile)))
-                .map(tile -> tile.tileNumber)
-                .orElse(0);
+        return TILE_COLORS.stream().min(Comparator.comparingDouble(tile -> calculateColorDistance(color, tile))).map(tile -> tile.tileNumber).orElse(0);
     }
 
     /**
@@ -69,19 +65,13 @@ public class ColorAnalyzer {
      */
     public static Color getDominantColor(BufferedImage block) {
         Map<Integer, Integer> colorCount = new HashMap<>();
-
         for (int y = 0; y < block.getHeight(); y++) {
             for (int x = 0; x < block.getWidth(); x++) {
                 int rgb = block.getRGB(x, y);
                 colorCount.merge(rgb, 1, Integer::sum);
             }
         }
-
-        int dominantRGB = colorCount.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(0);
-
+        int dominantRGB = colorCount.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(0);
         return new Color(dominantRGB);
     }
 }

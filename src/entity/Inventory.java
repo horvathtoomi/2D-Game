@@ -5,14 +5,13 @@ import object.*;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * A játékos leltárát kezelő osztály.
  * Kezeli a tárgyak felvételét, eldobását és használatát.
  */
 public class Inventory {
-    private final Engine gp;
+    private final Engine eng;
     private final ArrayList<SuperObject> items;
     private static final int maxSize = 3;
 
@@ -22,10 +21,10 @@ public class Inventory {
 
     /**
      * Létrehoz egy új leltárat.
-     * @param gp a játékmotor példánya
+     * @param eng a játékmotor példánya
      */
-    public Inventory(Engine gp) {
-        this.gp = gp;
+    public Inventory(Engine eng) {
+        this.eng = eng;
         items = new ArrayList<>(maxSize);
     }
 
@@ -85,18 +84,18 @@ public class Inventory {
         switch (ent.direction) {
             case UP -> {
                 offSetX = 0;
-                offSetY = gp.getTileSize();
+                offSetY = eng.getTileSize();
             }
             case DOWN -> {
                 offSetX = 0;
-                offSetY = -(gp.getTileSize());
+                offSetY = -(eng.getTileSize());
             }
             case LEFT -> {
-                offSetX = gp.getTileSize();
+                offSetX = eng.getTileSize();
                 offSetY = 0;
             }
             default -> {
-                offSetX = -(gp.getTileSize());
+                offSetX = -(eng.getTileSize());
                 offSetY = 0;
             }
         }
@@ -113,12 +112,16 @@ public class Inventory {
      */
     public void drop(){
         if(!items.isEmpty()){
-            SuperObject obj = createDroppable(gp.player);
+            SuperObject obj = createDroppable(eng.player);
             if(obj != null) {
-                gp.aSetter.list.add(createDroppable(gp.player));
+                eng.aSetter.list.add(createDroppable(eng.player));
                 items.removeFirst();
             }
         }
+    }
+
+    public void objectExpired(SuperObject obj){
+        destroy(obj);
     }
 
     /**
@@ -129,34 +132,41 @@ public class Inventory {
         if(getCurrent() instanceof Wearable) {
             getCurrent().use();
         }
-        Iterator<SuperObject> iterator = items.iterator();
-        while (iterator.hasNext()) {
-            SuperObject obj = iterator.next();
-            if (obj.getDurability() < 1) {
-                iterator.remove();
-                destroy(obj);
-            }
-        }
     }
 
     private void drawUsageBar(Graphics2D g2, int index) {
-        int screenX = 10 + 4;
-        int screenY = 3 * gp.getTileSize() + (gp.getTileSize() + 10) * index;
+        boolean isBoots = false;
+        OBJ_Boots obj1 = null;
+        OBJ_Sword obj2 = null;
+        if(items.get(index) instanceof OBJ_Boots) {
+            obj1 = (OBJ_Boots) items.get(index);
+            isBoots = true;
+        } else if (items.get(index) instanceof OBJ_Sword) {
+            obj2 = (OBJ_Sword) items.get(index);
+        } else {
+            return;
+        }
 
-        SuperObject obj = items.get(index);
+        int screenX = 10 + 4;
+        int screenY = 3 * eng.getTileSize() + (eng.getTileSize() + 10) * index;
+
 
         g2.setColor(Color.BLACK);
-        g2.fillRect(screenX, screenY, gp.getTileSize() - 7, 7);
+        g2.fillRect(screenX, screenY, eng.getTileSize() - 7, 7);
         g2.setColor(Color.RED);
-        g2.fillRect(screenX, screenY, gp.getTileSize() - 7, 5);
+        g2.fillRect(screenX, screenY, eng.getTileSize() - 7, 5);
         g2.setColor(Color.BLUE);
-        int blueWidth = (int) ((double) obj.getDurability() / obj.getMaxDurability() * gp.getTileSize());
+        int blueWidth;
+        if(isBoots)
+            blueWidth = (int) ((double) obj1.getDurability() / obj1.getMaxDurability() * eng.getTileSize());
+        else
+            blueWidth = (int) ((double) obj2.getDurability() / obj2.getMaxDurability() * eng.getTileSize());
         g2.fillRect(screenX, screenY, blueWidth - 7, 5);
     }
 
     private void drawAmmoBar(Graphics2D g2, int index) {
         int screenX = 16;
-        int screenY = 3 * gp.getTileSize() + (gp.getTileSize() + 10) * index - 2;
+        int screenY = 3 * eng.getTileSize() + (eng.getTileSize() + 10) * index - 2;
         Shooter sht = (Shooter)items.get(index);
         g2.drawString(sht.getCurrentMagSize() + "/" + sht.getRemainingAmmo(), screenX, screenY);
     }

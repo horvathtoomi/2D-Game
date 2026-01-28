@@ -1,6 +1,7 @@
 package object;
 
 import entity.Entity;
+import entity.Inventory;
 import entity.Player;
 import entity.npc.NPC_Wayfarer;
 import main.Engine;
@@ -91,44 +92,16 @@ public abstract class Weapon extends SuperObject {
     }
 
     @Override
-    public void use(){
-        if(Player.isAttacking) {
-            setDurability(Math.max(getDurability()-getUsageDamage(), 0));
-        }
-    }
-
-    @Override
     public void draw(Graphics2D g2, Engine eng) {
-        int screenX = worldX - eng.player.getWorldX() + eng.player.getScreenX();
-        int screenY = worldY - eng.player.getWorldY() + eng.player.getScreenY();
-
-        if (eng.player.getScreenX() > eng.player.getWorldX()) {
-            screenX = worldX;
-        }
-        if (eng.player.getScreenY() > eng.player.getWorldY()) {
-            screenY = worldY;
-        }
-        int rightOffset = eng.getScreenWidth() - eng.player.getScreenX();
-        if (rightOffset > eng.getWorldWidth() - eng.player.getWorldX()) {
-            screenX = eng.getScreenWidth() - (eng.getWorldWidth() - worldX);
-        }
-        int bottomOffset = eng.getScreenHeight() - eng.player.getScreenY();
-        if (bottomOffset > eng.getWorldHeight() - eng.player.getWorldY()) {
-            screenY = eng.getScreenHeight() - (eng.getWorldHeight() - worldY);
-        }
-
-        if (worldX + eng.getTileSize() > eng.player.getWorldX() - eng.player.getScreenX() &&
-                worldX - eng.getTileSize() < eng.player.getWorldX() + eng.player.getScreenX() &&
-                worldY + eng.getTileSize() > eng.player.getWorldY() - eng.player.getScreenY() &&
-                worldY - eng.getTileSize() < eng.player.getWorldY() + eng.player.getScreenY()) {
-
-            drawGlow(g2, screenX, screenY, OUTER_GLOW_SCALE, glowOpacity / 2);
-            drawGlow(g2, screenX, screenY, INNER_GLOW_SCALE, glowOpacity);
-            g2.drawImage(image, screenX, screenY, eng.getTileSize(), eng.getTileSize(), null);
-
-            updateGlowAnimation();
-        }
+        super.draw(g2, eng);
+        int screenX = worldX - eng.camera.getX();
+        int screenY = worldY - eng.camera.getY();
+        drawGlow(g2, screenX, screenY, OUTER_GLOW_SCALE, glowOpacity / 2);
+        drawGlow(g2, screenX, screenY, INNER_GLOW_SCALE, glowOpacity);
+        g2.drawImage(image, screenX, screenY, eng.getTileSize(), eng.getTileSize(), null);
+        updateGlowAnimation();
     }
+
 
     private void drawGlow(Graphics2D g2, int screenX, int screenY, float scale, float opacity) {
         int size = (int)(eng.getTileSize() * scale);
@@ -136,15 +109,7 @@ public abstract class Weapon extends SuperObject {
 
         Composite originalComposite = g2.getComposite();
 
-        RadialGradientPaint gradient = new RadialGradientPaint(
-                new Point2D.Float(screenX + eng.getTileSize()/2f, screenY + eng.getTileSize()/2f),
-                size/2f,
-                new float[]{0.0f, 1.0f},
-                new Color[]{
-                        new Color(rarity.color.getRed()/255f, rarity.color.getGreen()/255f, rarity.color.getBlue()/255f, opacity),
-                        new Color(rarity.color.getRed()/255f, rarity.color.getGreen()/255f, rarity.color.getBlue()/255f, 0.0f)
-                }
-        );
+        RadialGradientPaint gradient = new RadialGradientPaint(new Point2D.Float(screenX + eng.getTileSize()/2f, screenY + eng.getTileSize()/2f), size/2f, new float[]{0.0f, 1.0f}, new Color[]{new Color(rarity.color.getRed()/255f, rarity.color.getGreen()/255f, rarity.color.getBlue()/255f, opacity), new Color(rarity.color.getRed()/255f, rarity.color.getGreen()/255f, rarity.color.getBlue()/255f, 0.0f)});
 
         g2.setPaint(gradient);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
@@ -168,4 +133,14 @@ public abstract class Weapon extends SuperObject {
             }
         }
     }
+
+    @Override
+    public void interact(){
+        Inventory inv = eng.player.getInventory();
+        if(!inv.isFull()) {
+            inv.addItem(this);
+            eng.aSetter.list.remove(this);
+        }
+    }
+
 }

@@ -22,10 +22,10 @@ public class SerializableObjectState implements Serializable {
         this.name = obj.name;
         this.worldX = obj.worldX;
         this.worldY = obj.worldY;
-        this.collision = obj.collision;
-        this.opened = obj.opened;
-        this.durability = obj.getDurability();
-        this.maxDurability = obj.getMaxDurability();
+        //this.collision = obj.collision;
+        //this.opened = obj.opened;
+        //this.durability = obj.getDurability();
+        //this.maxDurability = obj.getMaxDurability();
         this.damage = (obj instanceof Weapon) ? ((Weapon) obj).getDamage() : 0;
     }
 }

@@ -12,15 +12,15 @@ import serializable.FileManager;
  * Kezeli a menüket, gombokat és játékállapot kijelzőket.
  */
 public class UserInterface extends JFrame {
-    Engine eng;
+    transient  final Engine eng;
     transient Graphics2D g2;
-    Font arial_40;
-    Font arial_80;
-    transient ArrayList<Button> startScreenButtons;
-    transient ArrayList<Button> endScreenButtons;
-    transient ArrayList<Button> pauseScreenButtons;
-    transient ArrayList<Button> modeScreenButtons;
-    transient ArrayList<Button> difficultyScreenButtons;
+    transient Font arial_40;
+    transient Font arial_80;
+    static ArrayList<Button> startScreenButtons;
+    static ArrayList<Button> endScreenButtons;
+    static ArrayList<Button> pauseScreenButtons;
+    static ArrayList<Button> modeScreenButtons;
+    static ArrayList<Button> difficultyScreenButtons;
     private static final String LOG_CONTEXT = "[USER INTERFACE]";
 
     // Start screen
@@ -75,7 +75,6 @@ public class UserInterface extends JFrame {
     public void draw(Graphics2D g2) {
         this.g2 = g2;
         g2.setFont(arial_40);
-
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         switch (eng.getGameState()) {
@@ -89,10 +88,7 @@ public class UserInterface extends JFrame {
     }
 
     private void drawGradientBackground(Color topColor, Color bottomColor) {
-        GradientPaint gradient = new GradientPaint(
-                0, 0, topColor,
-                0, eng.getScreenHeight(), bottomColor
-        );
+        GradientPaint gradient = new GradientPaint(0, 0, topColor, 0, eng.getScreenHeight(), bottomColor);
         g2.setPaint(gradient);
         g2.fillRect(0, 0, eng.getScreenWidth(), eng.getScreenHeight());
     }
@@ -175,17 +171,8 @@ public class UserInterface extends JFrame {
         }
     }
 
-    public void handleStartScreenClick(Point p) {
-        for (Button button : startScreenButtons) {
-            if (button.contains(p)) {
-                button.doClick();
-                break;
-            }
-        }
-    }
-
-    public void handleGameModeScreenClick(Point p) {
-        for (Button button : modeScreenButtons) {
+    protected final void handleClick(Point p, ArrayList<Button> buttons) {
+        for (Button button : buttons) {
             if (button.contains(p)) {
                 button.doClick();
                 break;
@@ -204,23 +191,6 @@ public class UserInterface extends JFrame {
         }
     }
 
-    public void handleGameOverClick(Point p) {
-        for (Button button : endScreenButtons) {
-            if (button.contains(p)) {
-                button.doClick();
-                break;
-            }
-        }
-    }
-
-    public void handlePauseScreenClick(Point p) {
-        for (Button button : pauseScreenButtons) {
-            if (button.contains(p)) {
-                button.doClick();
-                break;
-            }
-        }
-    }
 
     public void handleHover(Point p) {
         ArrayList<Button> currentButtons = switch (eng.getGameState()) {
@@ -234,7 +204,6 @@ public class UserInterface extends JFrame {
         for (Button button : currentButtons) {
             if (button.contains(p)) {
                 Color hoverColor = switch (eng.getGameState()) {
-                    case START -> START_BUTTON_HOVER;
                     case GAME_MODE_SCREEN -> MODE_BUTTON_HOVER;
                     case DIFFICULTY_SCREEN -> DIFFICULTY_BUTTON_HOVER;
                     case PAUSED -> PAUSE_BUTTON_HOVER;
@@ -245,7 +214,6 @@ public class UserInterface extends JFrame {
             }
             else {
                 Color normalColor = switch (eng.getGameState()) {
-                    case START -> START_BUTTON;
                     case GAME_MODE_SCREEN -> MODE_BUTTON;
                     case DIFFICULTY_SCREEN -> DIFFICULTY_BUTTON;
                     case PAUSED -> PAUSE_BUTTON;
@@ -315,15 +283,15 @@ public class UserInterface extends JFrame {
     }
 
     private void initStartButtons(){
-        startScreenButtons.getFirst().addActionListener(e -> eng.setGameState(GameState.GAME_MODE_SCREEN));
-        startScreenButtons.get(1).addActionListener(e -> {
+        startScreenButtons.getFirst().addActionListener(_ -> eng.setGameState(GameState.GAME_MODE_SCREEN));
+        startScreenButtons.get(1).addActionListener(_ -> {
             if(FileManager.loadGame(eng))
                 eng.setGameState(GameState.RUNNING);
             else
                 eng.setGameState(GameState.START);
         });
-        startScreenButtons.get(2).addActionListener(e -> System.exit(0));
-        startScreenButtons.get(3).addActionListener(e ->{
+        startScreenButtons.get(2).addActionListener(_ -> System.exit(0));
+        startScreenButtons.get(3).addActionListener(_ ->{
             LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
             dialog.showDialog();
         });
@@ -333,33 +301,33 @@ public class UserInterface extends JFrame {
     }
 
     private void initModeButtons() {
-        modeScreenButtons.getFirst().addActionListener(e -> {
+        modeScreenButtons.getFirst().addActionListener(_ -> {
             eng.setGameMode(GameMode.STORY);
             eng.setGameState(GameState.DIFFICULTY_SCREEN);
         });
-        modeScreenButtons.get(1).addActionListener(e -> {
+        modeScreenButtons.get(1).addActionListener(_ -> {
             eng.setGameMode(GameMode.CUSTOM);
             Engine.setupCustomMode();
         });
-        modeScreenButtons.get(2).addActionListener(e -> eng.setGameState(GameState.START));
+        modeScreenButtons.get(2).addActionListener(_ -> eng.setGameState(GameState.START));
         for(Button button : modeScreenButtons){
             button.setBackgroundColor(MODE_BUTTON);
         }
     }
 
     private void initDiffButtons(){
-        difficultyScreenButtons.getFirst().addActionListener(e -> eng.setGameDifficulty(GameDifficulty.EASY));
-        difficultyScreenButtons.get(1).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.MEDIUM));
-        difficultyScreenButtons.get(2).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.HARD));
-        difficultyScreenButtons.get(3).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.IMPOSSIBLE));
+        difficultyScreenButtons.getFirst().addActionListener(_ -> eng.setGameDifficulty(GameDifficulty.EASY));
+        difficultyScreenButtons.get(1).addActionListener(_ -> eng.setGameDifficulty(GameDifficulty.MEDIUM));
+        difficultyScreenButtons.get(2).addActionListener(_ -> eng.setGameDifficulty(GameDifficulty.HARD));
+        difficultyScreenButtons.get(3).addActionListener(_ -> eng.setGameDifficulty(GameDifficulty.IMPOSSIBLE));
         for(Button button : difficultyScreenButtons){
             button.setBackgroundColor(DIFFICULTY_BUTTON);
         }
     }
 
     private void initPauseButtons(){
-        pauseScreenButtons.getFirst().addActionListener(e -> eng.setGameState(GameState.RUNNING));
-        pauseScreenButtons.get(1).addActionListener(e -> {
+        pauseScreenButtons.getFirst().addActionListener(_ -> eng.setGameState(GameState.RUNNING));
+        pauseScreenButtons.get(1).addActionListener(_ -> {
             eng.setGameState(GameState.CONSOLE_INPUT);
             try {
                 eng.console.startConsoleInput();
@@ -367,14 +335,14 @@ public class UserInterface extends JFrame {
                 GameLogger.error(LOG_CONTEXT, "Console input error: {0}", err.getCause());
             }
         });
-        pauseScreenButtons.get(2).addActionListener(e -> System.exit(0));
-        pauseScreenButtons.get(3).addActionListener(e -> {
+        pauseScreenButtons.get(2).addActionListener(_ -> System.exit(0));
+        pauseScreenButtons.get(3).addActionListener(_ -> {
             eng.startGame();
             eng.setGameState(GameState.DIFFICULTY_SCREEN);
         });
-        pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(eng));
-        pauseScreenButtons.get(5).addActionListener(e -> FileManager.loadGame(eng));
-        pauseScreenButtons.get(6).addActionListener(e -> {
+        pauseScreenButtons.get(4).addActionListener(_ -> FileManager.saveGame(eng));
+        pauseScreenButtons.get(5).addActionListener(_ -> FileManager.loadGame(eng));
+        pauseScreenButtons.get(6).addActionListener(_ -> {
             LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
             dialog.showDialog();
         });
@@ -384,16 +352,16 @@ public class UserInterface extends JFrame {
     }
 
     private void initGameOverButtons(){
-        endScreenButtons.getFirst().addActionListener(e -> {
+        endScreenButtons.getFirst().addActionListener(_ -> {
             eng.setGameState(GameState.GAME_MODE_SCREEN);
             eng.player.setPlayerHealth(100);
         });
-        endScreenButtons.get(1).addActionListener(e -> {
+        endScreenButtons.get(1).addActionListener(_ -> {
             FileManager.loadGame(eng);
             eng.setGameState(GameState.RUNNING);
         });
-        endScreenButtons.get(2).addActionListener(e -> System.exit(0));
-        endScreenButtons.get(3).addActionListener(e -> {
+        endScreenButtons.get(2).addActionListener(_ -> System.exit(0));
+        endScreenButtons.get(3).addActionListener(_ -> {
             LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
             dialog.showDialog();
         });
@@ -434,7 +402,6 @@ public class UserInterface extends JFrame {
         initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth, buttonHeight, "Load Game");
         initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth, buttonHeight, "Exit");
         initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 3 * (buttonHeight + 20), buttonWidth, buttonHeight, "Leaderboard");
-
 
         initScreenButtonBehavior();
     }

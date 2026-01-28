@@ -1,5 +1,6 @@
 package object;
 
+import entity.Player;
 import main.Engine;
 
 /**
@@ -20,6 +21,16 @@ public class OBJ_Boots extends Wearable{
         setMaxDurability(60 * eng.getFPS());
         setDurability(getMaxDurability());
         setUsageDamage(bootsUsageDamage);
+    }
+
+    @Override
+    public void use(){
+        if(Player.isAttacking) {
+            setDurability(Math.max(getDurability()-getUsageDamage(), 0));
+        }
+        if(getDurability() < 0) {
+            eng.player.getInventory().objectExpired(this);
+        }
     }
 
 }

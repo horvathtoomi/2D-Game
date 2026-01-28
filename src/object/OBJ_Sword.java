@@ -1,5 +1,6 @@
 package object;
 
+import entity.Player;
 import main.Engine;
 
 import java.awt.*;
@@ -8,6 +9,18 @@ import java.awt.*;
  * A kard tárgy osztálya, amely támadásra használható.
  */
 public class OBJ_Sword extends Weapon {
+
+    private int MAX_DURABILITY;
+    private int durability = 100;
+    private int usageDamage = 0;
+
+    public int getMaxDurability(){return MAX_DURABILITY;}
+    public int getDurability(){return durability;}
+    public int getUsageDamage(){return usageDamage;}
+
+    public void setMaxDurability(int a) {MAX_DURABILITY = a;}
+    public void setDurability(int a){durability = a;}
+    public void setUsageDamage(int a){usageDamage = a;}
 
     private static final int swordUsageDamage = 2;
 
@@ -28,6 +41,16 @@ public class OBJ_Sword extends Weapon {
         image2 = scale("sword2");
         image = image1;
         hitbox = new Rectangle(0,0,32,eng.getTileSize());
+    }
+
+    @Override
+    public void use(){
+        if(Player.isAttacking) {
+            setDurability(Math.max(getDurability()-getUsageDamage(), 0));
+        }
+        if(getDurability() < 0) {
+            eng.player.getInventory().objectExpired(this);
+        }
     }
 
 }

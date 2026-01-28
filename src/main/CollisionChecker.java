@@ -1,6 +1,7 @@
 package main;
 
 import entity.Entity;
+import object.OBJ_Door;
 import object.SuperObject;
 import tile.TileManager;
 
@@ -81,8 +82,8 @@ public class CollisionChecker {
         int index = 999;
         int it = 0;
 
-        for(SuperObject obj : eng.aSetter.list) {
-            if (obj != null) {
+        for(SuperObject iter : eng.aSetter.list) {
+            if (iter instanceof OBJ_Door obj) {
                 entity.solidArea.x = entity.getWorldX() + entity.solidArea.x;
                 entity.solidArea.y = entity.getWorldY() + entity.solidArea.y;
 

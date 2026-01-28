@@ -20,7 +20,7 @@ import java.util.Queue;
 
 public class MapDrawer extends JFrame {
 
-    private PaintPanel paintPanel;
+    private final PaintPanel paintPanel;
     private ResourcePanel resourcePanel;
 
     private Color currentColor = Color.BLACK;
@@ -82,10 +82,10 @@ public class MapDrawer extends JFrame {
         JButton exitButton = new JButton("Exit");
 
         // Gombok eseménykezelői
-        openButton.addActionListener(e -> openMapAction());
-        saveButton.addActionListener(e -> saveMapAction());
-        loadButton.addActionListener(e -> loadMapAction());
-        exitButton.addActionListener(e -> dispose());
+        openButton.addActionListener(_ -> openMapAction());
+        saveButton.addActionListener(_ -> saveMapAction());
+        loadButton.addActionListener(_ -> loadMapAction());
+        exitButton.addActionListener(_ -> dispose());
 
         // Stílus kiemelés az Open gombnak
         openButton.setFont(new Font("Arial", Font.BOLD, 12));
@@ -116,15 +116,14 @@ public class MapDrawer extends JFrame {
         group.add(bucketBtn);
         group.add(eraserBtn);
 
-        brushBtn.addActionListener(e -> currentTool = Tool.BRUSH);
-        bucketBtn.addActionListener(e -> currentTool = Tool.BUCKET);
-        eraserBtn.addActionListener(e -> currentTool = Tool.ERASER);
+        brushBtn.addActionListener(_ -> currentTool = Tool.BRUSH);
+        bucketBtn.addActionListener(_ -> currentTool = Tool.BUCKET);
+        eraserBtn.addActionListener(_ -> currentTool = Tool.ERASER);
 
-        // Méret csúszka
         JLabel sizeLabel = new JLabel("Méret: 16");
         JSlider sizeSlider = new JSlider(1, 64, 16);
         sizeSlider.setPreferredSize(new Dimension(150, 20));
-        sizeSlider.addChangeListener(e -> {
+        sizeSlider.addChangeListener(_ -> {
             brushSize = sizeSlider.getValue();
             sizeLabel.setText("Méret: " + brushSize);
         });
@@ -176,10 +175,7 @@ public class MapDrawer extends JFrame {
 
         } catch (Exception ex) {
             GameLogger.error(LOG_CONTEXT, "Failed to generate and open map", ex);
-            JOptionPane.showMessageDialog(this,
-                    "Critical error while processing map: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Critical error while processing map: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

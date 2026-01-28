@@ -50,7 +50,7 @@ public class GUIMapGenerator extends JFrame {
         gbc.gridy = 1;
         add(generateMapButton, gbc);
 
-        chooseMapButton.addActionListener(e -> {
+        chooseMapButton.addActionListener(_ -> {
             JFileChooser fileChooser = getFileChooser();
 
             int result = fileChooser.showOpenDialog(this);
@@ -71,7 +71,8 @@ public class GUIMapGenerator extends JFrame {
         });
 
         generateMapButton.addActionListener(_ -> {
-            MapDrawer drawer = new MapDrawer();
+            new MapDrawer();
+            dispose();
         });
     }
 

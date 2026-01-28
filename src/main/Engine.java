@@ -237,7 +237,7 @@ public class Engine extends JPanel implements Runnable {
      */
     public boolean isPlayerWithinRadius() {
         double distance = Math.sqrt(Math.pow(player.getWorldX() - endPoints[currentStoryLevel][0], 2) + Math.pow(player.getWorldY() - endPoints[currentStoryLevel][1], 2));
-        return distance < (3 * TILE_SIZE);
+        return distance < (2 * TILE_SIZE);
     }
 
     /**
@@ -264,5 +264,4 @@ public class Engine extends JPanel implements Runnable {
             }
         }
     }
-
 }

@@ -26,11 +26,11 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         switch (eng.getGameState()) {
-            case START -> eng.userInterface.handleStartScreenClick(e.getPoint());
-            case GAME_MODE_SCREEN -> eng.userInterface.handleGameModeScreenClick(e.getPoint());
+            case START -> eng.userInterface.handleClick(e.getPoint(), UserInterface.startScreenButtons);
+            case GAME_MODE_SCREEN -> eng.userInterface.handleClick(e.getPoint(), UserInterface.modeScreenButtons);
             case DIFFICULTY_SCREEN -> eng.userInterface.handleDifficultyScreenClick(e.getPoint());
-            case FINISHED_LOST -> eng.userInterface.handleGameOverClick(e.getPoint());
-            case PAUSED -> eng.userInterface.handlePauseScreenClick(e.getPoint());
+            case FINISHED_LOST -> eng.userInterface.handleClick(e.getPoint(), UserInterface.endScreenButtons);
+            case PAUSED -> eng.userInterface.handleClick(e.getPoint(), UserInterface.pauseScreenButtons);
             case RUNNING -> eng.player.attack();
         }
     }
@@ -50,14 +50,8 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     @Override
     public void mouseDragged(MouseEvent e) {}
 
-    /**
-     * Kezeli az egér mozgás eseményeket.
-     * Frissíti a felhasználói felület hover effektusait.
-     * @param e az egér esemény
-     */
     @Override
     public void mouseMoved(MouseEvent e) {
         eng.userInterface.handleHover(e.getPoint());
     }
-
 }
