@@ -134,7 +134,6 @@ public abstract class Enemy extends Entity {
         if (path != null && !path.isEmpty()) {
             followPath();
         } else {
-            // Existing movement logic
             collisionOn = false;
             eng.cChecker.checkTile(this);
             if (!collisionOn) {
@@ -194,26 +193,29 @@ public abstract class Enemy extends Entity {
     }
 
     private Attack getClosestEnemy() {
-        return eng.getEntity().stream()
-                .filter(e -> !(e instanceof Player) && !(e instanceof FriendlyEnemy) && !(e instanceof NPC_Wayfarer))
-                .min(Comparator.comparingDouble(e ->
-                        Math.pow(e.getWorldX() - getWorldX(), 2) +
-                                Math.pow(e.getWorldY() - getWorldY(), 2)))
-                .map(nearestEnemy -> {
-                    int dx = nearestEnemy.getWorldX() - getWorldX();
-                    int dy = nearestEnemy.getWorldY() - getWorldY();
-                    double length = Math.sqrt(dx * dx + dy * dy);
-                    double normalizedDx = dx / length;
-                    double normalizedDy = dy / length;
-
-                    // Calculate starting position
-                    int startX = (int) (getWorldX() + normalizedDx * eng.getTileSize());
-                    int startY = (int) (getWorldY() + normalizedDy * eng.getTileSize());
-
-                    return new FriendlyEnemyAttack(eng, startX, startY,
-                            nearestEnemy.getWorldX(), nearestEnemy.getWorldY());
-                })
-                .orElse(null);
+        Entity closest = null;
+        double minDistance = Double.MAX_VALUE;
+        for(Entity e: eng.getEntity()) {
+            if(e instanceof Player || e instanceof FriendlyEnemy || e instanceof NPC_Wayfarer) {
+                continue;
+            }
+            double distance = Math.pow(e.getWorldX() - getWorldX(), 2) + Math.pow(e.getWorldY() - getWorldY(), 2);
+            if(distance < minDistance) {
+                minDistance = distance;
+                closest = e;
+            }
+        }
+        if (closest == null) {
+            return null;
+        }
+        int dx = closest.getWorldX() - getWorldX();
+        int dy = closest.getWorldY() - getWorldY();
+        double length = Math.sqrt(dx * dx + dy * dy);
+        double normalizedDx = dx / length;
+        double normalizedDy = dy / length;
+        int startX = (int) (getWorldX() + normalizedDx * eng.getTileSize());
+        int startY = (int) (getWorldY() + normalizedDy * eng.getTileSize());
+        return new FriendlyEnemyAttack(eng, startX, startY, closest.getWorldX(), closest.getWorldY());
     }
 
     public void shoot() {
@@ -245,20 +247,22 @@ public abstract class Enemy extends Entity {
     }
 
     private void drawHealthBar(Graphics2D g2) {
-        int screenX = getWorldX() - eng.player.getWorldX() + eng.player.getScreenX();
-        int screenY = getWorldY() - eng.player.getWorldY() + eng.player.getScreenY();
-        screenX = adjustScreenX(screenX);
-        screenY = adjustScreenY(screenY);
+        int screenX = getWorldX() - eng.camera.getX();
+        int screenY = getWorldY() - eng.camera.getY();
+
         if (isValidScreenXY(screenX, screenY)) {
             g2.setColor(Color.BLACK);
-            g2.fillRect(screenX - 1, screenY - 11, eng.getTileSize() / 100 * getMaxHealth(), 7);
+            g2.fillRect(screenX - 1, screenY - 11, getWidth() + 2, 7);
+
             g2.setColor(Color.RED);
-            g2.fillRect(screenX + getWidth() - eng.getTileSize(), screenY - 10, eng.getTileSize(), 5);
+            g2.fillRect(screenX, screenY - 10, getWidth(), 5);
+
             g2.setColor(Color.GREEN);
-            int greenWidth = (int) ((double) getHealth() / getMaxHealth() * eng.getTileSize());
-            g2.fillRect(screenX + getWidth() - eng.getTileSize(), screenY - 10, greenWidth, 5);
+            int greenWidth = (int) ((double) getHealth() / getMaxHealth() * getWidth());
+            g2.fillRect(screenX, screenY - 10, greenWidth, 5);
         }
     }
+
 
 }
 

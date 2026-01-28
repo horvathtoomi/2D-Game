@@ -88,9 +88,11 @@ public class Player extends Entity {
 
     private int[] getNotSolidTile(int[][] custom_map) {
         int[] coordinates = new int[2];
-        for(int x = 1; x < 100; x++){
-            for(int y = 1; y < 100; y++){
-                if(!(eng.tileman.getTile(custom_map[eng.getMaxWorldCol()/2][eng.getMaxWorldRow()/2]).collision)){
+        int maxWorldCol = eng.getMaxWorldCol();
+        int maxWorldRow = eng.getMaxWorldRow();
+        for(int x = 1; x < maxWorldRow; x++){
+            for(int y = 1; y < maxWorldCol; y++){
+                if(!(eng.tileman.getTile(custom_map[x][y]).collision)){
                     coordinates[0] = x;
                     coordinates[1] = y;
                     return coordinates;

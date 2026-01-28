@@ -11,7 +11,6 @@ public enum Direction {
             case LEFT -> "LEFT";
             case RIGHT -> "RIGHT";
             case SHOOT -> "SHOOT";
-            default -> null;
         };
     }
 

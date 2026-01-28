@@ -30,6 +30,8 @@ public class Engine extends JPanel implements Runnable {
     public static int MAX_WORLD_ROW = 100;
     private static final int FPS = 60;
 
+    public Camera camera;
+
     private int currentStoryLevel = 0;
     private static final int MAX_STORY_LEVEL = 3;
 
@@ -101,6 +103,7 @@ public class Engine extends JPanel implements Runnable {
         mouseHandler=new MouseHandler(this);
         tileman = new TileManager(this);
         console=new ConsoleHandler(this);
+        camera = new Camera(getWorldWidth(), getWorldHeight(), getScreenWidth(), getScreenHeight());
         setGamePanel();
     }
 
@@ -178,6 +181,7 @@ public class Engine extends JPanel implements Runnable {
     public void update() {
         gameTimer.start();
         player.update();
+        camera.update(player);
         entities.removeIf(Objects::isNull);
         aSetter.list.removeIf(Objects::isNull);
         entities.forEach(Entity::update);

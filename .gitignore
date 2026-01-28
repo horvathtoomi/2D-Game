@@ -5,6 +5,9 @@ out/
 
 .idea
 /.idea
+.idea/
+
+2D-Game.iml
 
 ### Eclipse ###
 .apt_generated
@@ -27,8 +30,3 @@ bin/
 
 ### VS Code ###
 .vscode/
-
-.idea/
-
-### Mac OS ###
-.DS_Store

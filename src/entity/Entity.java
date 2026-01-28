@@ -7,13 +7,15 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * A játék alapvető entitás osztálya, minden mozgó játékelem ősosztálya.
  * Tartalmazza az általános tulajdonságokat és metódusokat, amiket minden entitás használ.
  */
 public class Entity{
+
+    private final String LOG_CONTEXT = "[ENTITY]";
+
     public String name;
     private int worldX, worldY;
     private int screenX, screenY;
@@ -95,50 +97,42 @@ public class Entity{
     }
 
     public void draw(Graphics2D g2) {
-        BufferedImage image = Direction.valueMapper(new BufferedImage[]{up,down,left,right,shoot}, direction);
-        screenX = adjustScreenX(screenX);
-        screenY = adjustScreenY(screenY);
+        BufferedImage image = switch (direction) {
+            case UP -> up;
+            case DOWN -> down;
+            case LEFT -> left;
+            case RIGHT -> right;
+            case SHOOT -> shoot;
+        };
+        screenX = worldX - eng.camera.getX();
+        screenY = worldY - eng.camera.getY();
         if (isValidScreenXY(screenX, screenY)) {
             g2.drawImage(image, screenX, screenY, width, height, null);
         }
     }
 
-    protected boolean isValidScreenXY(int screenX, int screenY){
-        return screenX > -eng.getTileSize() && screenX < eng.getScreenWidth() + eng.getTileSize() && screenY > -eng.getTileSize() && screenY < eng.getScreenHeight() + eng.getTileSize();
+    protected boolean isValidScreenXY(int x, int y) {
+        return x > -width &&
+                x < eng.getScreenWidth() + width &&
+                y > -height &&
+                y < eng.getScreenHeight() + height;
     }
 
-    protected int adjustScreenY(int screenY){
-        if (eng.player.getScreenY() > eng.player.getWorldY()) {
-            screenY = getWorldY();
-        }
-        int bottomOffset = eng.getScreenHeight() - eng.player.getScreenY();
-        if (bottomOffset > eng.getWorldHeight() - eng.player.getWorldY()) {
-            screenY = eng.getScreenHeight() - (eng.getWorldHeight() - getWorldY());
-        }
-        return screenY;
-    }
-
-    protected int adjustScreenX(int screenX){
-        if (eng.player.getScreenX() > eng.player.getWorldX()) {
-            screenX = getWorldX();
-        }
-        int rightOffset = eng.getScreenWidth() - eng.player.getScreenX();
-        if (rightOffset > eng.getWorldWidth() - eng.player.getWorldX()) {
-            screenX = eng.getScreenWidth() - (eng.getWorldWidth() - getWorldX());
-        }
-        return screenX;
-    }
 
     public BufferedImage scale(String folderName, String imageName){
         UtilityTool uTool = new UtilityTool();
         BufferedImage bufim = null;
         try {
-            bufim = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png")));
+            var inputStream = getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png");
+            if (inputStream == null) {
+                GameLogger.error(LOG_CONTEXT, "resource inputStream is null", new IOException());
+                return null;
+            }
+            bufim = ImageIO.read(inputStream);
             bufim = uTool.scaleImage(bufim, eng.getTileSize(), eng.getTileSize());
         } catch(IOException e) {
-            GameLogger.error("[ENTITY]", "Failed to load image: " + e.getMessage(), e);
+            GameLogger.error(LOG_CONTEXT, "Failed to load image: " + e.getMessage(), e);
         }
         return bufim;
     }
-
 }

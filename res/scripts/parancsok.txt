@@ -1,7 +1,0 @@
-asd1
-asd
-2
-asd4
-asd5
-vdv
-teleport 10 10

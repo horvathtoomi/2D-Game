@@ -1,3 +1,0 @@
-get health
-get speed
-script circular2

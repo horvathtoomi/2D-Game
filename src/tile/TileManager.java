@@ -205,47 +205,30 @@ public class TileManager {
         loadCustomMap("res/maps/map_matrices/default.txt");
     }
 
-    /**
-     * Kirajzolja a pályát a képernyőre.
-     * Csak azokat a tileokat rajzolja ki, amelyek láthatóak a képernyőn.
-     * @param g2 a grafikus kontextus
-     */
+
     public void draw(Graphics2D g2) {
-        int worldCol = 0;
-        int worldRow = 0;
-        while (worldCol < eng.getMaxWorldCol() && worldRow < eng.getMaxWorldRow()) {
-            int tileNum = mapTileNum[worldCol][worldRow];
-            int worldX = worldCol * eng.getTileSize();
-            int worldY = worldRow * eng.getTileSize();
-            int screenX = worldX - eng.player.getWorldX() + eng.player.getScreenX();
-            int screenY = worldY - eng.player.getWorldY() + eng.player.getScreenY();
+        int tileSize = eng.getTileSize();
+        int startCol = eng.camera.getX() / tileSize;
+        int endCol = (eng.camera.getX() + eng.getScreenWidth()) / tileSize + 1;
 
-            if (eng.player.getScreenX() > eng.player.getWorldX()) {
-                screenX = worldX;
-            }
-            if (eng.player.getScreenY() > eng.player.getWorldY()) {
-                screenY = worldY;
-            }
-            int rightOffset = eng.getScreenWidth() - eng.player.getScreenX();
-            if (rightOffset > eng.getWorldWidth() - eng.player.getWorldX()) {
-                screenX = eng.getScreenWidth() - (eng.getWorldWidth() - worldX);
-            }
-            int bottomOffset = eng.getScreenHeight() - eng.player.getScreenY();
-            if (bottomOffset > eng.getWorldHeight() - eng.player.getWorldY()) {
-                screenY = eng.getScreenHeight() - (eng.getWorldHeight() - worldY);
-            }
+        int startRow = eng.camera.getY() / tileSize;
+        int endRow = (eng.camera.getY() + eng.getScreenHeight()) / tileSize + 1;
 
-            if (screenX > -eng.getTileSize() && screenX < eng.getScreenWidth() &&
-                    screenY > -eng.getTileSize() && screenY < eng.getScreenHeight()) {
-                g2.drawImage(tile[tileNum].image, screenX, screenY, null);
-            }
+        startCol = Math.max(0, startCol);
+        startRow = Math.max(0, startRow);
+        endCol = Math.min(eng.getMaxWorldCol(), endCol);
+        endRow = Math.min(eng.getMaxWorldRow(), endRow);
 
-            worldCol++;
-            if (worldCol == eng.getMaxWorldCol()) {
-                worldCol = 0;
-                worldRow++;
+        for (int row = startRow; row < endRow; row++) {
+            for (int col = startCol; col < endCol; col++) {
+                int tileNum = mapTileNum[col][row];
+                int worldX = col * tileSize;
+                int worldY = row * tileSize;
+                int screenX = worldX - eng.camera.getX();
+                int screenY = worldY - eng.camera.getY();
+
+                g2.drawImage(tile[tileNum].image, screenX, screenY, tileSize, tileSize, null);
             }
         }
     }
-
 }

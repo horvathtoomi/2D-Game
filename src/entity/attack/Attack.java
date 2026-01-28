@@ -105,11 +105,13 @@ public class Attack extends Entity {
 
     @Override
     public void draw(Graphics2D g2) {
-        setScreenX(adjustScreenX(getScreenX()));
-        setScreenY(adjustScreenY(getScreenY()));
-        if (isValidScreenXY(getScreenX(), getScreenY())) {
-            g2.drawImage(image, getScreenX(), getScreenY(), getWidth(), getHeight(), null);
+        int screenX = getWorldX() - eng.camera.getX();
+        int screenY = getWorldY() - eng.camera.getY();
+
+        if (isValidScreenXY(screenX, screenY)) {
+            g2.drawImage(image, screenX, screenY, getWidth(), getHeight(), null);
         }
     }
+
 
 }

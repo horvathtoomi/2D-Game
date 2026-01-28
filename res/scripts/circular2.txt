@@ -1,3 +1,0 @@
-get dragonenemy health
-get dragonenemy speed
-script circular3

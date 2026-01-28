@@ -1,3 +1,0 @@
-get smallenemy health
-get smallenemy speed
-script circular1
