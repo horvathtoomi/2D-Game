@@ -197,6 +197,8 @@ public class Player extends Entity {
             GameObject obj = eng.aSetter.list.get(index);
             if (obj instanceof Interactable) {
                 ((Interactable) obj).interact(this);
+            } else if (obj instanceof Pickupable) {
+                ((Pickupable) obj).onPickup(this);
             }
         }
     }
@@ -258,18 +260,13 @@ public class Player extends Entity {
     private void attackByShooterWeapon() {
         if (inventory.getCurrent() instanceof PistolItem) {
             if (!shot) {
-                eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0],
-                        determineDirection()[1]));
-                inventory.getCurrent().use(this);
+                inventory.getCurrent().use(this); // use() checks ammo and calls shootLogic()
                 isAttacking = true;
                 shot = true;
             }
         } else if (inventory.getCurrent() instanceof RifleItem) {
             RifleItem rifle = (RifleItem) inventory.getCurrent();
-            // Use gun's cooldown mechanism
-            eng.addEntity(new Bullet(eng, "bullet", 40, getWorldX(), getWorldY(), determineDirection()[0],
-                    determineDirection()[1]));
-            rifle.use(this);
+            rifle.use(this); // use() checks ammo and calls shootLogic()
             isAttacking = true;
         }
     }

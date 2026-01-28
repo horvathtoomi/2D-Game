@@ -15,7 +15,7 @@ public class OBJ_Door extends GameObject implements Interactable {
 
     public OBJ_Door(Engine eng, int x, int y) {
         super(eng, x, y, "door_closed");
-        imageOpened = UtilityTool.getImage("objects", "door_opened");
+        imageOpened = scale("objects", "door_opened");
         this.collision = true;
     }
 

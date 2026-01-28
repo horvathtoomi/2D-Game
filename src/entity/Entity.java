@@ -1,15 +1,21 @@
 package entity;
 
 import main.Engine;
+import main.UtilityTool;
+import main.logger.GameLogger;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 /**
  * A játék alapvető entitás osztálya, minden mozgó játékelem ősosztálya.
- * Tartalmazza az általános tulajdonságokat és metódusokat, amiket minden entitás használ.
+ * Tartalmazza az általános tulajdonságokat és metódusokat, amiket minden
+ * entitás használ.
  */
-public class Entity{
+public class Entity {
 
     private final String LOG_CONTEXT = "[ENTITY]";
 
@@ -20,41 +26,97 @@ public class Entity{
     private int height;
     private int speed, health;
     public int actionLockCounter;
-    public BufferedImage right,left,up,down,shoot;
+    public BufferedImage right, left, up, down, shoot;
     public Direction direction = Direction.DOWN;
-    public Rectangle solidArea = new Rectangle(0,0,48,48);
+    public Rectangle solidArea = new Rectangle(0, 0, 48, 48);
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
     public Engine eng;
     protected int maxHealth;
 
-    public int getWidth() {return width;}
-    public int getHeight() {return height;}
-    public int getWorldX() {return worldX;}
-    public int getWorldY() {return worldY;}
-    public int getScreenX() {return screenX;}
-    public int getScreenY() {return screenY;}
-    public int getSpeed() {return speed;}
-    public int getHealth() {return health;}
-    public String getName(){return name;}
-    public int getMaxHealth(){return maxHealth;}
+    public int getWidth() {
+        return width;
+    }
 
-    public void setWidth(int a) {width=a;}
-    public void setHeight(int a) {height=a;}
-    public void setWorldX(int a) {worldX = Math.max(a,0);}
-    public void setWorldY(int a) {worldY = Math.max(a,0);}
-    public void setScreenX(int a) {screenX = a;}
-    public void setScreenY(int a) {screenY = a;}
-    public void setSpeed(int a) {speed = a;}
-    public void setHealth(int a) {health = a;}
-    public void setMaxHealth(int a) {maxHealth = a;}
+    public int getHeight() {
+        return height;
+    }
 
-    public void dealDamage(int damage){
+    public int getWorldX() {
+        return worldX;
+    }
+
+    public int getWorldY() {
+        return worldY;
+    }
+
+    public int getScreenX() {
+        return screenX;
+    }
+
+    public int getScreenY() {
+        return screenY;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    public void setWidth(int a) {
+        width = a;
+    }
+
+    public void setHeight(int a) {
+        height = a;
+    }
+
+    public void setWorldX(int a) {
+        worldX = Math.max(a, 0);
+    }
+
+    public void setWorldY(int a) {
+        worldY = Math.max(a, 0);
+    }
+
+    public void setScreenX(int a) {
+        screenX = a;
+    }
+
+    public void setScreenY(int a) {
+        screenY = a;
+    }
+
+    public void setSpeed(int a) {
+        speed = a;
+    }
+
+    public void setHealth(int a) {
+        health = a;
+    }
+
+    public void setMaxHealth(int a) {
+        maxHealth = a;
+    }
+
+    public void dealDamage(int damage) {
         setHealth(Math.max(getHealth() - damage, 0));
     }
 
     /**
      * Létrehoz egy új entitást.
+     * 
      * @param eng a játékmotor példánya
      */
     public Entity(Engine eng) {
@@ -67,15 +129,16 @@ public class Entity{
      * Az entitás cselekvésének meghatározása.
      * Az alosztályok felülírhatják saját viselkedés implementálásához.
      */
-    public void setAction(){}
+    public void setAction() {
+    }
 
-    public void update(){
+    public void update() {
         setAction();
         collisionOn = false;
         eng.cChecker.checkTile(this);
-        eng.cChecker.checkObject(this,false);
+        eng.cChecker.checkObject(this, false);
         eng.cChecker.checkPlayer(this);
-        if(!collisionOn){
+        if (!collisionOn) {
             switch (direction) {
                 case UP:
                     worldY -= speed;
@@ -113,5 +176,22 @@ public class Entity{
                 x < eng.getScreenWidth() &&
                 y + height > 0 &&
                 y < eng.getScreenHeight();
+    }
+
+    public BufferedImage scale(String folderName, String imageName) {
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage bufim = null;
+        try {
+            var inputStream = getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png");
+            if (inputStream == null) {
+                GameLogger.error(LOG_CONTEXT, "resource inputStream is null", new IOException());
+                return null;
+            }
+            bufim = ImageIO.read(inputStream);
+            bufim = uTool.scaleImage(bufim, eng.getTileSize(), eng.getTileSize());
+        } catch (IOException e) {
+            GameLogger.error(LOG_CONTEXT, "Failed to load image: " + e.getMessage(), e);
+        }
+        return bufim;
     }
 }

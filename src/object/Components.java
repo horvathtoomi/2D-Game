@@ -3,7 +3,6 @@ package object;
 import main.logger.GameLogger;
 
 public class Components {
-    // 1. Durability Component (for wearables and melee weapons)
     public static class Durability {
         private final int max;
         private int current;
@@ -78,12 +77,7 @@ public class Components {
             return remainingAmmo;
         }
 
-        public int getMaxMagSize() {
-            return maxMagSize;
-        }
     }
 
-    // 3. Damage record (simple value holder)
-    public record Damage(int value) {
-    }
+    public record Damage(int value) { }
 }

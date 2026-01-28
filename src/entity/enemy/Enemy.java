@@ -7,6 +7,7 @@ import entity.algorithm.AStar;
 import entity.attack.*;
 import entity.npc.NPC_Wayfarer;
 import main.Engine;
+import main.UtilityTool;
 import main.logger.GameLogger;
 
 import java.awt.*;
@@ -36,38 +37,38 @@ public abstract class Enemy extends Entity {
     public int pathIndex;
     protected int updateCounter;
     protected final int UPDATE_INTERVAL = 90;
-    private final int[] diffSpeed = {1,2,3,4};
-    private final int[] diffShootingRate = {200, 150, 100, 50};
+    private final int[] diffSpeed = { 1, 2, 3, 4 };
+    private final int[] diffShootingRate = { 200, 150, 100, 50 };
     private static final String LOG_CONTEXT = "[ENEMY]";
-    private static final Direction[] newDirection = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT};
+    private static final Direction[] newDirection = { Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT };
 
     /**
      * Létrehoz egy új ellenséget.
      *
-     * @param eng a játékmotor példánya
-     * @param name az ellenség neve
-     * @param startX kezdő X koordináta
-     * @param startY kezdő Y koordináta
-     * @param width szélesség
-     * @param height magasság
+     * @param eng          a játékmotor példánya
+     * @param name         az ellenség neve
+     * @param startX       kezdő X koordináta
+     * @param startY       kezdő Y koordináta
+     * @param width        szélesség
+     * @param height       magasság
      * @param shootingRate lövési gyakoriság alapértéke
      */
     protected Enemy(Engine eng, String name, int startX, int startY, int width, int height, int shootingRate) {
         super(eng);
-        solidArea = new Rectangle(10,10,width/2,height/2);
+        solidArea = new Rectangle(10, 10, width / 2, height / 2);
         random = new Random();
         setWidth(width);
         setHeight(height);
-        this.name=name;
+        this.name = name;
         this.startX = startX;
-        this.shootingRate=shootingRate;
+        this.shootingRate = shootingRate;
         initializeEnemy(startY, shootingRate);
         initializeBehavior();
     }
 
-    private void initializeEnemy(int startY, int shootingRate){
+    private void initializeEnemy(int startY, int shootingRate) {
         shootCooldown = SHOOT_COOLDOWN_TIME;
-        shootAnimationTimer=SHOOT_ANIMATION_DURATION;
+        shootAnimationTimer = SHOOT_ANIMATION_DURATION;
         setMaxHealth(getHealth());
         setWorldX(startX);
         setWorldY(startY);
@@ -81,8 +82,8 @@ public abstract class Enemy extends Entity {
         }
     }
 
-    private void initializeValues(int plusShootingRate){
-        switch(eng.getGameDifficulty()){
+    private void initializeValues(int plusShootingRate) {
+        switch (eng.getGameDifficulty()) {
             case EASY -> {
                 setSpeed(diffSpeed[0]);
                 this.shootingRate = diffShootingRate[0] + plusShootingRate;
@@ -118,7 +119,7 @@ public abstract class Enemy extends Entity {
 
     @Override
     public void update() {
-        if(getHealth() <= 0) {
+        if (getHealth() <= 0) {
             GameLogger.info(LOG_CONTEXT, name + " DIES");
             eng.removeEnemy(this);
             return;
@@ -143,7 +144,8 @@ public abstract class Enemy extends Entity {
                     case DOWN -> setWorldY(getWorldY() + getSpeed());
                     case UP -> setWorldY(getWorldY() - getSpeed());
                     case SHOOT -> {
-                        if (shootCooldown > 0) break;
+                        if (shootCooldown > 0)
+                            break;
                         if (shootAnimationTimer == SHOOT_ANIMATION_DURATION / 2) {
                             shoot();
                         }
@@ -195,12 +197,12 @@ public abstract class Enemy extends Entity {
     private Attack getClosestEnemy() {
         Entity closest = null;
         double minDistance = Double.MAX_VALUE;
-        for(Entity e: eng.getEntity()) {
-            if(e instanceof Player || e instanceof FriendlyEnemy || e instanceof NPC_Wayfarer) {
+        for (Entity e : eng.getEntity()) {
+            if (e instanceof Player || e instanceof FriendlyEnemy || e instanceof NPC_Wayfarer) {
                 continue;
             }
             double distance = Math.pow(e.getWorldX() - getWorldX(), 2) + Math.pow(e.getWorldY() - getWorldY(), 2);
-            if(distance < minDistance) {
+            if (distance < minDistance) {
                 minDistance = distance;
                 closest = e;
             }
@@ -229,14 +231,14 @@ public abstract class Enemy extends Entity {
 
         int startX = (int) (getWorldX() + normalizedDx * eng.getTileSize());
         int startY = (int) (getWorldY() + normalizedDy * eng.getTileSize());
-        Attack attack = switch(name){
+        Attack attack = switch (name) {
             case "SmallEnemy" -> new SmallEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
             case "GiantEnemy" -> new GiantEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
             case "TankEnemy" -> new TankEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
             case "FriendlyEnemy" -> getClosestEnemy();
             default -> new DragonEnemyAttack(eng, startX, startY, playerWorldX, playerWorldY);
         };
-        if(attack != null)
+        if (attack != null)
             eng.addEntity(attack);
     }
 
@@ -250,7 +252,8 @@ public abstract class Enemy extends Entity {
         int screenX = getWorldX() - eng.camera.getX();
         int screenY = getWorldY() - eng.camera.getY();
 
-        if (!isOnScreen(screenX, screenY)) return;
+        if (!isOnScreen(screenX, screenY))
+            return;
 
         int barWidth = eng.getTileSize();
         int barHeight = 5;
@@ -259,14 +262,11 @@ public abstract class Enemy extends Entity {
         g2.fillRect(screenX, screenY - 10, barWidth, barHeight);
 
         g2.setColor(Color.GREEN);
-        int greenWidth = (int)((double)getHealth() / getMaxHealth() * barWidth);
+        int greenWidth = (int) ((double) getHealth() / getMaxHealth() * barWidth);
         g2.fillRect(screenX, screenY - 10, greenWidth, barHeight);
     }
 
-
-
 }
-
 
 interface EnemyBehavior {
     void act(Enemy enemy);
@@ -277,12 +277,12 @@ class AggressiveBehavior implements EnemyBehavior {
 
     @Override
     public void act(Enemy enemy) {
-        if(motionCounter>10) {
-            enemy.path = AStar.findPath(enemy.eng, enemy.getWorldX(), enemy.getWorldY(), enemy.eng.player.getWorldX(), enemy.eng.player.getWorldY());
+        if (motionCounter > 10) {
+            enemy.path = AStar.findPath(enemy.eng, enemy.getWorldX(), enemy.getWorldY(), enemy.eng.player.getWorldX(),
+                    enemy.eng.player.getWorldY());
             enemy.pathIndex = 0;
             motionCounter = 0;
-        }
-        else {
+        } else {
             motionCounter++;
         }
     }
@@ -329,9 +329,10 @@ class PatrolBehavior implements EnemyBehavior {
     }
 }
 
-class FriendlyBehavior implements EnemyBehavior{
+class FriendlyBehavior implements EnemyBehavior {
     protected int startX, startY;
     private int motionCounter = 0;
+
     public FriendlyBehavior(int startX, int startY) {
         this.startX = startX;
         this.startY = startY;
@@ -340,11 +341,11 @@ class FriendlyBehavior implements EnemyBehavior{
     @Override
     public void act(Enemy enemy) {
         if (motionCounter > 10) {
-            enemy.path = AStar.findPath(enemy.eng, enemy.getWorldX(), enemy.getWorldY(), enemy.eng.player.getWorldX(), enemy.eng.player.getWorldY());
+            enemy.path = AStar.findPath(enemy.eng, enemy.getWorldX(), enemy.getWorldY(), enemy.eng.player.getWorldX(),
+                    enemy.eng.player.getWorldY());
             enemy.pathIndex = 0;
             motionCounter = 0;
-        }
-        else
+        } else
             motionCounter++;
     }
 }

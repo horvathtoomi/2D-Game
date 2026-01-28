@@ -29,7 +29,6 @@ public class ConsoleGUI extends JFrame {
     private String lastCompletedInput = "";
     private static int numOfMakeEnd = 0;
 
-
     public ConsoleGUI(Engine eng, ConsoleHandler consoleHandler) {
         super("Game Console");
         this.consoleHandler = consoleHandler;
@@ -61,7 +60,6 @@ public class ConsoleGUI extends JFrame {
         setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
         inputField.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
 
-
         setLayout(new BorderLayout());
         add(scrollPane, BorderLayout.CENTER);
 
@@ -76,7 +74,7 @@ public class ConsoleGUI extends JFrame {
         inputPanel.add(inputField, BorderLayout.CENTER);
         add(inputPanel, BorderLayout.SOUTH);
 
-        inputField.addActionListener(_ -> handleInput());
+        inputField.addActionListener(e -> handleInput());
 
         inputField.addKeyListener(new KeyAdapter() {
             @Override
@@ -125,7 +123,7 @@ public class ConsoleGUI extends JFrame {
         });
     }
 
-    private void resetMakeEndNum(){
+    private void resetMakeEndNum() {
         numOfMakeEnd = 0;
     }
 
@@ -140,15 +138,15 @@ public class ConsoleGUI extends JFrame {
             if (isScriptMode) {
                 document.appendUserInput(input, true);
                 inputQueue.offer(input);
-                if(input.startsWith("make")){
+                if (input.startsWith("make")) {
                     numOfMakeEnd++;
                 }
                 if (input.equalsIgnoreCase("end")) {
-                    if(numOfMakeEnd <= 0) {
+                    if (numOfMakeEnd <= 0) {
                         isScriptMode = false;
                         document.resetLineNumber();
                         document.appendPrompt();
-                    } else{
+                    } else {
                         numOfMakeEnd--;
                     }
                 }
@@ -188,8 +186,7 @@ public class ConsoleGUI extends JFrame {
             int lastSpaceIndex = completed.lastIndexOf(' ');
             String prefix = parts[0] + " ";
             inputField.setText(prefix + completed.substring(lastSpaceIndex + 1));
-        }
-        else {
+        } else {
             completed = commandCompleter.complete(currentInput, isLastCompletionSame);
             inputField.setText(completed);
         }

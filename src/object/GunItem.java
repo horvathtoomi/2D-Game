@@ -39,12 +39,10 @@ public abstract class GunItem implements Item {
             cooldownTimer = cooldownMax;
         } else {
             GameLogger.warn("[GUN]", "Click! Empty mag.");
-            // Optional: Auto reload
-            // magazine.reload();
         }
     }
 
-    protected abstract void shootLogic(Player player);
+    protected abstract void shootLogic(Player p);
 
     public void reload() {
         magazine.reload();

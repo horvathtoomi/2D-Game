@@ -2,12 +2,7 @@ package object;
 
 import entity.Player;
 import main.Engine;
-import main.UtilityTool;
-
 import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * A láda tárgy osztálya, amely véletlenszerű tárgyakat tartalmaz.
@@ -27,7 +22,7 @@ public class OBJ_Chest extends GameObject implements Interactable {
     public OBJ_Chest(Engine eng, int x, int y) {
         super(eng, x, y, "chest_closed");
         this.name = "chest";
-        openedImage = UtilityTool.getImage("objects","chest_opened");
+        openedImage = scale("objects","chest_opened");
     }
 
     @Override

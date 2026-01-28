@@ -2,9 +2,12 @@ package object;
 
 import main.Engine;
 import main.UtilityTool;
+import main.logger.GameLogger;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public abstract class GameObject {
     protected final Engine eng;
@@ -23,7 +26,7 @@ public abstract class GameObject {
         this.worldX = x;
         this.worldY = y;
         this.name = imageName; // Default name to image name
-        image = UtilityTool.getImage("object", imageName);
+        image = scale("objects", imageName);
     }
 
     public void update() {
@@ -37,6 +40,23 @@ public abstract class GameObject {
                 screenY + eng.getTileSize() > 0 && screenY < eng.getScreenHeight()) {
             g2.drawImage(image, screenX, screenY, eng.getTileSize(), eng.getTileSize(), null);
         }
+    }
+
+    public BufferedImage scale(String folderName, String imageName) {
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage bufim = null;
+        try {
+            var inputStream = getClass().getClassLoader().getResourceAsStream(folderName + "/" + imageName + ".png");
+            if (inputStream == null) {
+                GameLogger.error(LOG_CONTEXT, "resource inputStream is null", new IOException());
+                return null;
+            }
+            bufim = ImageIO.read(inputStream);
+            bufim = uTool.scaleImage(bufim, eng.getTileSize(), eng.getTileSize());
+        } catch (IOException e) {
+            GameLogger.error(LOG_CONTEXT, "Failed to load image: " + e.getMessage(), e);
+        }
+        return bufim;
     }
 
     public int getWorldX() {

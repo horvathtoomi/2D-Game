@@ -87,8 +87,74 @@ public class Inventory {
      * yet
      */
     public void drop() {
-        // TODO: Implement item dropping - need to create corresponding OBJ_* from *Item
-        // For now, items cannot be dropped
+        if (!items.isEmpty()) {
+            GameObject droppedObj = createDroppable(eng.player);
+            if (droppedObj != null) {
+                eng.aSetter.list.add(droppedObj);
+                items.removeFirst();
+            }
+        }
+    }
+
+    public GameObject createDroppable(Entity ent) {
+        if (items.isEmpty()) {
+            return null;
+        }
+
+        // Calculate drop position based on entity direction
+        int offSetX;
+        int offSetY;
+        switch (ent.direction) {
+            case UP -> {
+                offSetX = 0;
+                offSetY = eng.getTileSize();
+            }
+            case DOWN -> {
+                offSetX = 0;
+                offSetY = -(eng.getTileSize());
+            }
+            case LEFT -> {
+                offSetX = eng.getTileSize();
+                offSetY = 0;
+            }
+            default -> { // RIGHT and SHOOT
+                offSetX = -(eng.getTileSize());
+                offSetY = 0;
+            }
+        }
+        int x = ent.getWorldX() + offSetX;
+        int y = ent.getWorldY() + offSetY;
+
+        // Convert Item to GameObject based on type
+        Item item = items.getFirst();
+        GameObject droppedObject = null;
+
+        switch (item) {
+            case KeyItem keyItem -> droppedObject = new OBJ_Key(eng, x, y);
+
+            case BootsItem bootsItem -> droppedObject = new OBJ_Boots(eng, x, y);
+
+            case SwordItem swordItem ->
+                droppedObject = new OBJ_Sword(eng, x, y, swordItem.getDamage());
+
+            case PistolItem pistolItem -> {
+                Components.Magazine mag = pistolItem.getMagazine();
+                droppedObject = new OBJ_Pistol(eng, x, y, mag.getCurrentMag(), mag.getReserve());
+            }
+
+            case RifleItem rifleItem -> {
+                Components.Magazine mag = rifleItem.getMagazine();
+                droppedObject = new OBJ_Rifle(eng, x, y, mag.getCurrentMag(), mag.getReserve());
+            }
+
+            case PlasmaCannonItem plasmaItem ->
+                droppedObject = new OBJ_PlasmaCannon(eng, x, y);
+
+            default -> {
+                return null;
+            }
+        }
+        return droppedObject;
     }
 
     public void objectExpired(Item obj) {

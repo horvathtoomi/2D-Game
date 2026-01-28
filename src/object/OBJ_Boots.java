@@ -5,6 +5,7 @@ import main.Engine;
 
 // --- BOOTS PICKUP ---
 public class OBJ_Boots extends GameObject implements Pickupable {
+
     public OBJ_Boots(Engine eng, int x, int y) {
         super(eng, x, y, "boots");
     }

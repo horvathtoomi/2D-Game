@@ -12,6 +12,13 @@ public class OBJ_Rifle extends WeaponPickup {
         super(eng, x, y, "rifle");
     }
 
+    // Constructor for dropped weapons with specific ammo
+    public OBJ_Rifle(Engine eng, int x, int y, int currentMag, int reserve) {
+        super(eng, x, y, "rifle");
+        this.ammo = currentMag;
+        this.reserve = reserve;
+    }
+
     @Override
     public void onPickup(Player player) {
         if (!player.getInventory().isFull()) {
