@@ -53,9 +53,9 @@ public class VariableContext {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Variable name cannot be null or empty");
         }
-        // Store in the current (top) scope
+        // Store in the current (top) scope (case-insensitive)
         assert scopeStack.peek() != null;
-        scopeStack.peek().put(name, value);
+        scopeStack.peek().put(name.toLowerCase(), value);
     }
 
     /**
@@ -69,10 +69,11 @@ public class VariableContext {
             return null;
         }
 
-        // Search from top (innermost) to bottom (outermost) of stack
+        // Search from top (innermost) to bottom (outermost) of stack (case-insensitive)
+        String lowerName = name.toLowerCase();
         for (Map<String, Object> scope : scopeStack) {
-            if (scope.containsKey(name)) {
-                return scope.get(name);
+            if (scope.containsKey(lowerName)) {
+                return scope.get(lowerName);
             }
         }
         return null;
@@ -89,8 +90,10 @@ public class VariableContext {
             return false;
         }
 
+        // Case-insensitive lookup
+        String lowerName = name.toLowerCase();
         for (Map<String, Object> scope : scopeStack) {
-            if (scope.containsKey(name)) {
+            if (scope.containsKey(lowerName)) {
                 return true;
             }
         }

@@ -1,0 +1,8 @@
+set k 10
+set ZERO 0
+set iter 1
+for i = $ZERO until i < $k do i += $iter
+for j = $ZERO until j < $k do j += $iter
+add friendlyenemy $i $j
+endfor
+endfor

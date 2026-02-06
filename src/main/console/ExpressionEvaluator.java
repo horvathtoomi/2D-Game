@@ -149,9 +149,10 @@ public class ExpressionEvaluator {
 
     /**
      * Parses a string value to either Integer or String.
+     * First checks if the value is a variable name and returns its value.
      * 
      * @param value the value to parse
-     * @return Integer if numeric, otherwise String
+     * @return Integer if numeric or variable with numeric value, otherwise String
      */
     private Object parseValue(String value) {
         if (value == null) {
@@ -160,11 +161,15 @@ public class ExpressionEvaluator {
 
         value = value.trim();
 
-        // Try to parse as integer
+        // Try to parse as integer first
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            // Return as string if not a number
+            // Check if it's a variable name (without $ prefix)
+            if (context.has(value)) {
+                return context.get(value);
+            }
+            // Return as string if not a number and not a variable
             return value;
         }
     }

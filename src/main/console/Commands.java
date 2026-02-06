@@ -226,7 +226,7 @@ public class Commands {
                 } else if (line.startsWith("for")) {
                     // Resolve variables in the for line
                     String resolvedLine = variableContext.resolveVariables(line);
-                    
+
                     // Check if it's the new enhanced syntax or old simple syntax
                     if (resolvedLine.contains("until") && resolvedLine.contains("do")) {
                         // Enhanced syntax: for i = 0 until i < 10 do i += 1
@@ -267,30 +267,7 @@ public class Commands {
                 }
                 i++;
             } else if (command.startsWith("for")) {
-                // Handle nested for loop
-                String[] forParts = command.split("\\s+");
-                if (forParts.length != 2) {
-                    consoleHandler.printToConsole("Invalid format for 'for' command. Usage: for <number>");
-                    i++;
-                    continue;
-                }
-
-                int iterations;
-                try {
-                    iterations = Integer.parseInt(forParts[1]);
-                } catch (NumberFormatException e) {
-                    consoleHandler.printToConsole("Invalid number format in 'for' command: " + forParts[1]);
-                    i++;
-                    continue;
-                }
-
-                if (iterations < 0) {
-                    consoleHandler.printToConsole("Number of iterations cannot be negative: " + iterations);
-                    i++;
-                    continue;
-                }
-
-                // Collect nested for loop body
+                // Collect nested for loop body first
                 java.util.List<String> nestedCommands = new java.util.ArrayList<>();
                 int nestedForCount = 0;
                 i++; // Move past the "for" line
@@ -315,15 +292,102 @@ public class Commands {
                     i++;
                 }
 
-                // Execute nested loop
-                for (int j = 0; j < iterations; j++) {
-                    executeLoopCommands(nestedCommands, visitedScripts);
+                // Determine if it's enhanced or simple syntax
+                String resolvedCommand = variableContext.resolveVariables(command);
+                if (resolvedCommand.contains("until") && resolvedCommand.contains("do")) {
+                    // Enhanced syntax: for i = 0 until i < 10 do i += 1
+                    executeEnhancedNestedLoop(resolvedCommand, nestedCommands, visitedScripts);
+                } else {
+                    // Simple syntax: for <number>
+                    executeSimpleNestedLoop(resolvedCommand, nestedCommands, visitedScripts);
                 }
                 i++; // Move past the "endfor" line
             } else {
                 consoleHandler.executeCommand(command);
                 i++;
             }
+        }
+    }
+
+    /**
+     * Executes a simple nested for loop: for <number>
+     */
+    private void executeSimpleNestedLoop(String forLine, java.util.List<String> nestedCommands,
+            Set<String> visitedScripts) {
+        String[] forParts = forLine.split("\\s+");
+        if (forParts.length != 2) {
+            consoleHandler.printToConsole("Invalid format for 'for' command. Usage: for <number>");
+            return;
+        }
+
+        int iterations;
+        try {
+            iterations = Integer.parseInt(forParts[1]);
+        } catch (NumberFormatException e) {
+            consoleHandler.printToConsole("Invalid number format in 'for' command: " + forParts[1]);
+            return;
+        }
+
+        if (iterations < 0) {
+            consoleHandler.printToConsole("Number of iterations cannot be negative: " + iterations);
+            return;
+        }
+
+        for (int j = 0; j < iterations; j++) {
+            executeLoopCommands(nestedCommands, visitedScripts);
+        }
+    }
+
+    /**
+     * Executes an enhanced nested for loop: for <init> until <condition> do
+     * <increment>
+     */
+    private void executeEnhancedNestedLoop(String forLine, java.util.List<String> nestedCommands,
+            Set<String> visitedScripts) {
+        try {
+            String forContent = forLine.substring(3).trim();
+
+            if (!forContent.contains("until") || !forContent.contains("do")) {
+                consoleHandler.printToConsole(
+                        "Invalid enhanced for loop syntax. Expected: for <init> until <condition> do <increment>");
+                return;
+            }
+
+            String[] untilParts = forContent.split("until", 2);
+            if (untilParts.length != 2) {
+                consoleHandler.printToConsole("Invalid for loop: missing 'until' clause");
+                return;
+            }
+
+            String initPart = untilParts[0].trim();
+            String[] doParts = untilParts[1].split("do", 2);
+            if (doParts.length != 2) {
+                consoleHandler.printToConsole("Invalid for loop: missing 'do' clause");
+                return;
+            }
+
+            String condition = doParts[0].trim();
+            String increment = doParts[1].trim();
+
+            variableContext.pushScope();
+            try {
+                expressionEvaluator.executeAssignment(initPart);
+
+                int iterationCount = 0;
+                while (expressionEvaluator.evaluateCondition(condition)) {
+                    if (iterationCount++ > MAX_LOOP_ITERATIONS) {
+                        consoleHandler
+                                .printToConsole("ERROR: Loop exceeded max iterations (" + MAX_LOOP_ITERATIONS + ")");
+                        break;
+                    }
+                    executeLoopCommands(nestedCommands, visitedScripts);
+                    expressionEvaluator.executeAssignment(increment);
+                }
+            } finally {
+                variableContext.popScope();
+            }
+        } catch (Exception e) {
+            consoleHandler.printToConsole("Error in enhanced for loop: " + e.getMessage());
         }
     }
 
@@ -358,15 +422,15 @@ public class Commands {
             case "exit_game" -> consoleHandler.printToConsole("Exits game");
             case "for" -> consoleHandler.printToConsole("""
                     For loop usage:
-                    
+
                     Simple: for <number>
                         Executes commands <number> times.
                         Example: for 5
-                    
+
                     Enhanced: for <init> until <condition> do <increment>
                         Example: for i = 0 until i < 10 do i += 1
                         Variables: Use $varname to reference variables
-                    
+
                     Use 'endfor' to end the loop. Supports nested loops.""");
             default -> consoleHandler.printToConsole("""
                     script/make/set/get/add/reset
@@ -510,7 +574,8 @@ public class Commands {
     /**
      * Handles the old simple for loop syntax: for <number>
      */
-    private void handleSimpleForLoop(BufferedReader fileReader, String forLine, Set<String> visitedScripts) throws IOException {
+    private void handleSimpleForLoop(BufferedReader fileReader, String forLine, Set<String> visitedScripts)
+            throws IOException {
         String[] parts = forLine.split("\\s+");
         if (parts.length != 2) {
             consoleHandler.printToConsole("Invalid format for 'for' command. Usage: for <number>");
@@ -538,27 +603,30 @@ public class Commands {
             executeLoopCommands(loopCommands, visitedScripts);
         }
     }
-    
+
     /**
-     * Handles the enhanced for loop syntax: for <init> until <condition> do <increment>
+     * Handles the enhanced for loop syntax: for <init> until <condition> do
+     * <increment>
      */
-    private void handleEnhancedForLoop(BufferedReader fileReader, String forLine, Set<String> visitedScripts) throws IOException {
+    private void handleEnhancedForLoop(BufferedReader fileReader, String forLine, Set<String> visitedScripts)
+            throws IOException {
         try {
             String forContent = forLine.substring(3).trim();
-            
+
             if (!forContent.contains("until") || !forContent.contains("do")) {
-                consoleHandler.printToConsole("Invalid enhanced for loop syntax. Expected: for <init> until <condition> do <increment>");
+                consoleHandler.printToConsole(
+                        "Invalid enhanced for loop syntax. Expected: for <init> until <condition> do <increment>");
                 skipToEndFor(fileReader);
                 return;
             }
-            
+
             String[] untilParts = forContent.split("until", 2);
             if (untilParts.length != 2) {
                 consoleHandler.printToConsole("Invalid for loop: missing 'until' clause");
                 skipToEndFor(fileReader);
                 return;
             }
-            
+
             String initPart = untilParts[0].trim();
             String[] doParts = untilParts[1].split("do", 2);
             if (doParts.length != 2) {
@@ -566,20 +634,21 @@ public class Commands {
                 skipToEndFor(fileReader);
                 return;
             }
-            
+
             String condition = doParts[0].trim();
             String increment = doParts[1].trim();
-            
+
             java.util.List<String> loopCommands = collectLoopBody(fileReader);
-            
+
             variableContext.pushScope();
             try {
                 expressionEvaluator.executeAssignment(initPart);
-                
+
                 int iterationCount = 0;
                 while (expressionEvaluator.evaluateCondition(condition)) {
                     if (iterationCount++ > MAX_LOOP_ITERATIONS) {
-                        consoleHandler.printToConsole("ERROR: Loop exceeded max iterations (" + MAX_LOOP_ITERATIONS + ")");
+                        consoleHandler
+                                .printToConsole("ERROR: Loop exceeded max iterations (" + MAX_LOOP_ITERATIONS + ")");
                         break;
                     }
                     executeLoopCommands(loopCommands, visitedScripts);
@@ -593,7 +662,7 @@ public class Commands {
             skipToEndFor(fileReader);
         }
     }
-    
+
     /**
      * Collects all commands in a for loop body up to the matching endfor.
      */
@@ -620,7 +689,7 @@ public class Commands {
         }
         return loopCommands;
     }
-    
+
     /**
      * Skips to the matching endfor (used when a for loop has errors).
      */

@@ -1,0 +1,4 @@
+set j 10
+for i = 0 until i < $j do i +=1
+add smallenemy $i $j
+endfor
