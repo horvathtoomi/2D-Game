@@ -82,10 +82,10 @@ public class MapDrawer extends JFrame {
         JButton exitButton = new JButton("Exit");
 
         // Gombok eseménykezelői
-        openButton.addActionListener(_ -> openMapAction());
-        saveButton.addActionListener(_ -> saveMapAction());
-        loadButton.addActionListener(_ -> loadMapAction());
-        exitButton.addActionListener(_ -> dispose());
+        openButton.addActionListener(e -> openMapAction());
+        saveButton.addActionListener(e -> saveMapAction());
+        loadButton.addActionListener(e -> loadMapAction());
+        exitButton.addActionListener(e -> dispose());
 
         // Stílus kiemelés az Open gombnak
         openButton.setFont(new Font("Arial", Font.BOLD, 12));
@@ -116,14 +116,14 @@ public class MapDrawer extends JFrame {
         group.add(bucketBtn);
         group.add(eraserBtn);
 
-        brushBtn.addActionListener(_ -> currentTool = Tool.BRUSH);
-        bucketBtn.addActionListener(_ -> currentTool = Tool.BUCKET);
-        eraserBtn.addActionListener(_ -> currentTool = Tool.ERASER);
+        brushBtn.addActionListener(e -> currentTool = Tool.BRUSH);
+        bucketBtn.addActionListener(e -> currentTool = Tool.BUCKET);
+        eraserBtn.addActionListener(e -> currentTool = Tool.ERASER);
 
         JLabel sizeLabel = new JLabel("Méret: 16");
         JSlider sizeSlider = new JSlider(1, 64, 16);
         sizeSlider.setPreferredSize(new Dimension(150, 20));
-        sizeSlider.addChangeListener(_ -> {
+        sizeSlider.addChangeListener(e -> {
             brushSize = sizeSlider.getValue();
             sizeLabel.setText("Méret: " + brushSize);
         });
@@ -154,7 +154,8 @@ public class MapDrawer extends JFrame {
 
             GameLogger.info(LOG_CONTEXT, "Temporary map image saved: " + tempImageFile.getAbsolutePath());
 
-            // 2. Lépés: Kiszámítjuk mi lesz a következő ID, amit a MapGenerator generálni fog
+            // 2. Lépés: Kiszámítjuk mi lesz a következő ID, amit a MapGenerator generálni
+            // fog
             // Erre azért van szükség, hogy tudjuk melyik TXT fájlt kell betölteni
             int nextMapId = MapGenerator.getNextMapNumber();
 
@@ -175,7 +176,8 @@ public class MapDrawer extends JFrame {
 
         } catch (Exception ex) {
             GameLogger.error(LOG_CONTEXT, "Failed to generate and open map", ex);
-            JOptionPane.showMessageDialog(this, "Critical error while processing map: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Critical error while processing map: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -285,7 +287,8 @@ class PaintPanel extends JPanel implements MouseMotionListener, MouseListener {
 
     private void useTool(MouseEvent e, boolean isDrag) {
         MapDrawer frame = (MapDrawer) SwingUtilities.getWindowAncestor(this);
-        if (frame == null) return;
+        if (frame == null)
+            return;
 
         MapDrawer.Tool tool = frame.getCurrentTool();
 
@@ -313,12 +316,14 @@ class PaintPanel extends JPanel implements MouseMotionListener, MouseListener {
     }
 
     private void floodFill(int x, int y, Color fillColor) {
-        if (x < 0 || x >= CANVAS_WIDTH || y < 0 || y >= CANVAS_HEIGHT) return;
+        if (x < 0 || x >= CANVAS_WIDTH || y < 0 || y >= CANVAS_HEIGHT)
+            return;
 
         int targetRGB = canvas.getRGB(x, y);
         int fillRGB = fillColor.getRGB();
 
-        if (targetRGB == fillRGB) return;
+        if (targetRGB == fillRGB)
+            return;
 
         Queue<Point> queue = new LinkedList<>();
         queue.add(new Point(x, y));
@@ -326,8 +331,10 @@ class PaintPanel extends JPanel implements MouseMotionListener, MouseListener {
         while (!queue.isEmpty()) {
             Point p = queue.poll();
 
-            if (p.x < 0 || p.x >= CANVAS_WIDTH || p.y < 0 || p.y >= CANVAS_HEIGHT) continue;
-            if (canvas.getRGB(p.x, p.y) != targetRGB) continue;
+            if (p.x < 0 || p.x >= CANVAS_WIDTH || p.y < 0 || p.y >= CANVAS_HEIGHT)
+                continue;
+            if (canvas.getRGB(p.x, p.y) != targetRGB)
+                continue;
 
             canvas.setRGB(p.x, p.y, fillRGB);
 
@@ -349,11 +356,20 @@ class PaintPanel extends JPanel implements MouseMotionListener, MouseListener {
         useTool(e, true);
     }
 
-    public void mouseMoved(MouseEvent e) {}
-    public void mouseClicked(MouseEvent e) {}
-    public void mouseReleased(MouseEvent e) {}
-    public void mouseEntered(MouseEvent e) {}
-    public void mouseExited(MouseEvent e) {}
+    public void mouseMoved(MouseEvent e) {
+    }
+
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
 }
 
 /**
@@ -390,14 +406,16 @@ class ResourcePanel extends JPanel {
 
         for (TileColor tc : colors) {
             int id = tc.tileNumber;
-            if (id >= tileNames.length) continue;
+            if (id >= tileNames.length)
+                continue;
 
             String name = tileNames[id];
             String imgName = imageNames[id];
             Color representativeColor = new Color(tc.r, tc.g, tc.b);
 
             try {
-                BufferedImage rawImg = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("tiles/" + imgName + ".png")));
+                BufferedImage rawImg = ImageIO.read(Objects
+                        .requireNonNull(getClass().getClassLoader().getResourceAsStream("tiles/" + imgName + ".png")));
                 BufferedImage scaledImg = uTool.scaleImage(rawImg, 48, 48);
                 ImageIcon icon = new ImageIcon(scaledImg);
 

@@ -122,6 +122,16 @@ public class Engine extends JPanel implements Runnable {
     }
 
     public void setGameState(GameState state) {
+        // Request blur capture when entering pause or game over states
+        if ((state == GameState.PAUSED || state == GameState.FINISHED_LOST || state == GameState.FINISHED_WON)
+                && gameState == GameState.RUNNING) {
+            userInterface.requestBlurCapture();
+        }
+        // Clear blur when resuming
+        if (state == GameState.RUNNING && (gameState == GameState.PAUSED || gameState == GameState.FINISHED_LOST
+                || gameState == GameState.FINISHED_WON)) {
+            userInterface.clearBlurredBackground();
+        }
         gameState = state;
     }
 

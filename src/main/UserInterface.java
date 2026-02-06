@@ -1,8 +1,12 @@
 package main;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.util.ArrayList;
-import javax.swing.*;
+import javax.swing.JFrame;
+
 import leaderboard.LeaderboardDialog;
 import main.logger.GameLogger;
 import serializable.FileManager;
@@ -10,192 +14,329 @@ import serializable.FileManager;
 /**
  * A UserInterface osztály felelős a játék felhasználói felületének
  * megjelenítéséért.
- * Kezeli a menüket, gombokat és játékállapot kijelzőket.
+ * Kizárólag rajzolásért és UI input delegálásért felel.
  */
 public class UserInterface extends JFrame {
-    transient final Engine eng;
-    transient Graphics2D g2;
-    transient Font arial_40;
-    transient Font arial_80;
-    static ArrayList<Button> startScreenButtons;
-    static ArrayList<Button> endScreenButtons;
-    static ArrayList<Button> pauseScreenButtons;
-    static ArrayList<Button> modeScreenButtons;
-    static ArrayList<Button> difficultyScreenButtons;
+
+    private final Engine eng;
+    private Graphics2D g2;
+
+    // Blurred background for pause/game over screens
+    private BufferedImage blurredBackground;
+    private boolean needsBlurCapture = false;
+
+    // Title animation
+    private float titleGlow = 0f;
+    private boolean titleGlowIncreasing = true;
+
+    private final Font titleFont = new Font("Arial", Font.BOLD, 72);
+    private final Font subtitleFont = new Font("Arial", Font.PLAIN, 18);
+    private final Font defaultFont = new Font("Arial", Font.PLAIN, 40);
+
     private static final String LOG_CONTEXT = "[USER INTERFACE]";
 
-    // Start screen
-    private static final Color START_GRADIENT_TOP = new Color(50, 50, 150);
-    private static final Color START_GRADIENT_BOTTOM = new Color(0, 0, 50);
-    private static final Color START_BUTTON = new Color(70, 130, 180);
-    private static final Color START_BUTTON_HOVER = new Color(100, 149, 237);
+    // Button lists
+    static final ArrayList<Button> startScreenButtons = new ArrayList<>();
+    static final ArrayList<Button> modeScreenButtons = new ArrayList<>();
+    static final ArrayList<Button> difficultyScreenButtons = new ArrayList<>();
+    static final ArrayList<Button> pauseScreenButtons = new ArrayList<>();
+    static final ArrayList<Button> endScreenButtons = new ArrayList<>();
 
-    // Mode screen
-    private static final Color MODE_GRADIENT_TOP = new Color(70, 70, 170);
-    private static final Color MODE_GRADIENT_BOTTOM = new Color(20, 20, 70);
-    private static final Color MODE_BUTTON = new Color(90, 150, 200);
-    private static final Color MODE_BUTTON_HOVER = new Color(120, 169, 255);
+    // ===== COLORS =====
 
-    // Difficulty screen
-    private static final Color DIFFICULTY_GRADIENT_TOP = new Color(40, 60, 140);
-    private static final Color DIFFICULTY_GRADIENT_BOTTOM = new Color(10, 10, 40);
-    private static final Color DIFFICULTY_BUTTON = new Color(60, 120, 170);
-    private static final Color DIFFICULTY_BUTTON_HOVER = new Color(80, 139, 227);
+    // Start - Deep blue theme
+    private static final Color START_TOP = new Color(25, 35, 80);
+    private static final Color START_BOTTOM = new Color(5, 10, 30);
+    private static final Color START_BTN = new Color(60, 100, 160);
+    private static final Color START_BTN_H = new Color(80, 130, 200);
 
-    // Pause screen
-    private static final Color PAUSE_GRADIENT_TOP = new Color(40, 100, 40);
-    private static final Color PAUSE_GRADIENT_BOTTOM = new Color(0, 40, 0);
-    private static final Color PAUSE_BUTTON = new Color(60, 140, 60);
-    private static final Color PAUSE_BUTTON_HOVER = new Color(90, 170, 100);
+    // Mode - Purple theme
+    private static final Color MODE_TOP = new Color(50, 30, 100);
+    private static final Color MODE_BOTTOM = new Color(15, 10, 40);
+    private static final Color MODE_BTN = new Color(100, 70, 180);
+    private static final Color MODE_BTN_H = new Color(130, 100, 220);
 
-    // Game over screen
-    private static final Color GAMEOVER_OVERLAY = new Color(120, 0, 0, 180);
-    private static final Color GAMEOVER_BUTTON = new Color(140, 40, 40);
-    private static final Color GAMEOVER_BUTTON_HOVER = new Color(170, 60, 60);
+    // Difficulty - Teal theme
+    private static final Color DIFF_TOP = new Color(20, 60, 80);
+    private static final Color DIFF_BOTTOM = new Color(5, 20, 30);
+    private static final Color DIFF_BTN = new Color(40, 120, 140);
+    private static final Color DIFF_BTN_H = new Color(60, 160, 180);
 
-    /**
-     * Létrehoz egy új felhasználói felület példányt.
-     * 
-     * @param eng a játékmotor példánya
-     */
+    // Pause - Green theme
+    private static final Color PAUSE_BTN = new Color(50, 130, 70);
+    private static final Color PAUSE_BTN_H = new Color(70, 170, 100);
+
+    // Game Over - Red theme
+    private static final Color GAMEOVER_BTN = new Color(150, 50, 50);
+    private static final Color GAMEOVER_BTN_H = new Color(190, 70, 70);
+
+    // ===================
+
     public UserInterface(Engine eng) {
         this.eng = eng;
-        arial_40 = new Font("Arial", Font.PLAIN, 40);
-        arial_80 = new Font("Arial", Font.BOLD, 80);
-        startScreenButtons = new ArrayList<>();
-        endScreenButtons = new ArrayList<>();
-        pauseScreenButtons = new ArrayList<>();
-        difficultyScreenButtons = new ArrayList<>();
-        modeScreenButtons = new ArrayList<>();
-        initializeScreenButtons();
+        initializeButtons();
+        initializeButtonActions();
+    }
+
+    /* ===================== BLUR CAPTURE ===================== */
+
+    /**
+     * Call this when transitioning to pause or game over to capture the current
+     * frame
+     */
+    public void requestBlurCapture() {
+        needsBlurCapture = true;
     }
 
     /**
-     * Kirajzolja a felhasználói felületet az aktuális játékállapotnak megfelelően.
-     * 
-     * @param g2 a grafikus kontextus
+     * Captures the current game state and creates a blurred version
      */
+    public void captureAndBlurBackground() {
+        if (!needsBlurCapture)
+            return;
+        needsBlurCapture = false;
+
+        // Create image of current game state
+        BufferedImage capture = new BufferedImage(
+                eng.getScreenWidth(), eng.getScreenHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D captureG2 = capture.createGraphics();
+
+        // Draw game elements to the capture
+        eng.tileman.draw(captureG2);
+        for (object.GameObject obj : eng.aSetter.list) {
+            obj.draw(captureG2);
+        }
+        for (entity.Entity entity : eng.getEntity()) {
+            entity.draw(captureG2);
+        }
+        eng.player.draw(captureG2);
+        captureG2.dispose();
+
+        // Apply blur
+        blurredBackground = applyGaussianBlur(capture, 3);
+    }
+
+    private BufferedImage applyGaussianBlur(BufferedImage src, int radius) {
+        int size = radius * 2 + 1;
+        float weight = 1.0f / (size * size);
+        float[] data = new float[size * size];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = weight;
+        }
+
+        Kernel kernel = new Kernel(size, size, data);
+        ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+
+        // Apply blur multiple times for stronger effect
+        BufferedImage result = src;
+        for (int i = 0; i < 3; i++) {
+            BufferedImage temp = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+            op.filter(result, temp);
+            result = temp;
+        }
+        return result;
+    }
+
+    public void clearBlurredBackground() {
+        blurredBackground = null;
+    }
+
+    /* ===================== UPDATE ===================== */
+
+    public void update(Point mouse) {
+        getActiveButtons().forEach(b -> b.update(mouse));
+
+        // Animate title glow
+        if (titleGlowIncreasing) {
+            titleGlow += 0.02f;
+            if (titleGlow >= 1f)
+                titleGlowIncreasing = false;
+        } else {
+            titleGlow -= 0.02f;
+            if (titleGlow <= 0f)
+                titleGlowIncreasing = true;
+        }
+    }
+
+    /* ===================== DRAW ===================== */
+
     public void draw(Graphics2D g2) {
         this.g2 = g2;
-        g2.setFont(arial_40);
+        g2.setFont(defaultFont);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         switch (eng.getGameState()) {
-            case START -> drawStartScreen();
-            case GAME_MODE_SCREEN -> drawModeChoosingScreen();
-            case DIFFICULTY_SCREEN -> drawDifficultyScreen();
-            case FINISHED_LOST, FINISHED_WON -> drawGameEndScreen();
+            case START -> drawScreen("2D GAME", "Press Start to Begin", START_TOP, START_BOTTOM, startScreenButtons);
+            case GAME_MODE_SCREEN ->
+                drawScreen("GAME MODE", "Choose Your Adventure", MODE_TOP, MODE_BOTTOM, modeScreenButtons);
+            case DIFFICULTY_SCREEN ->
+                drawScreen("DIFFICULTY", "Select Challenge Level", DIFF_TOP, DIFF_BOTTOM, difficultyScreenButtons);
             case PAUSED, CONSOLE_INPUT -> drawPauseScreen();
+            case FINISHED_LOST, FINISHED_WON -> drawGameOverScreen();
             default -> drawPlayerHealthBar();
         }
     }
 
-    private void drawGradientBackground(Color topColor, Color bottomColor) {
-        GradientPaint gradient = new GradientPaint(0, 0, topColor, 0, eng.getScreenHeight(), bottomColor);
-        g2.setPaint(gradient);
-        g2.fillRect(0, 0, eng.getScreenWidth(), eng.getScreenHeight());
-    }
-
-    private void drawStartScreen() {
-        drawGradientBackground(START_GRADIENT_TOP, START_GRADIENT_BOTTOM);
-        g2.setFont(arial_80);
-        g2.setColor(Color.WHITE);
-        String title = "2D Game";
-        int x = getXforCenteredText(title);
-        int y = eng.getScreenHeight() / 4;
-        g2.drawString(title, x, y);
-
-        for (Button button : startScreenButtons) {
-            button.draw(g2);
-        }
-    }
-
-    private void drawModeChoosingScreen() {
-        drawGradientBackground(MODE_GRADIENT_TOP, MODE_GRADIENT_BOTTOM);
-        g2.setFont(arial_80);
-        g2.setColor(Color.WHITE);
-        String title = "Choose Game Mode!";
-        int x = getXforCenteredText(title);
-        int y = eng.getScreenHeight() / 4;
-        g2.drawString(title, x, y);
-
-        for (Button button : modeScreenButtons) {
-            button.draw(g2);
-        }
-    }
-
-    private void drawDifficultyScreen() {
-        drawGradientBackground(DIFFICULTY_GRADIENT_TOP, DIFFICULTY_GRADIENT_BOTTOM);
-        g2.setFont(arial_80);
-        g2.setColor(Color.WHITE);
-        String title = "SET DIFFICULTY";
-        int x = getXforCenteredText(title);
-        int y = eng.getScreenHeight() / 4;
-        g2.drawString(title, x, y);
-
-        g2.setFont(new Font("Arial", Font.PLAIN, 10));
-        g2.drawString("Keys: 1->EASY, 2->MEDIUM, 3->HARD, 4->IMPOSSIBLE", 10, 10);
-
-        for (Button button : difficultyScreenButtons) {
-            button.draw(g2);
-        }
+    private void drawScreen(String title, String subtitle, Color top, Color bottom, ArrayList<Button> buttons) {
+        drawGradientBackground(top, bottom);
+        drawDecorations();
+        drawTitle(title, subtitle);
+        buttons.forEach(b -> b.draw(g2));
     }
 
     private void drawPauseScreen() {
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.9f));
-        drawGradientBackground(PAUSE_GRADIENT_TOP, PAUSE_GRADIENT_BOTTOM);
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        // Capture blur if needed
+        captureAndBlurBackground();
 
-        g2.setColor(Color.WHITE);
-        g2.setFont(arial_80);
-        String pauseText = "PAUSED";
-        int x = getXforCenteredText(pauseText);
-        int y = eng.getScreenHeight() / 4;
-        g2.drawString(pauseText, x, y);
-
-        for (Button button : pauseScreenButtons) {
-            button.draw(g2);
+        // Draw blurred background or fallback to gradient
+        if (blurredBackground != null) {
+            g2.drawImage(blurredBackground, 0, 0, null);
+            // Dark overlay
+            g2.setColor(new Color(0, 0, 0, 180));
+            g2.fillRect(0, 0, eng.getScreenWidth(), eng.getScreenHeight());
+        } else {
+            drawGradientBackground(new Color(20, 40, 30), new Color(5, 15, 10));
         }
+
+        // Glass panel effect
+        drawGlassPanel();
+
+        // Title
+        drawTitle("PAUSED", "Game is paused");
+
+        pauseScreenButtons.forEach(b -> b.draw(g2));
     }
 
-    private void drawGameEndScreen() {
-        g2.setColor(GAMEOVER_OVERLAY);
+    private void drawGameOverScreen() {
+        // Capture blur if needed
+        captureAndBlurBackground();
+
+        // Draw blurred background
+        if (blurredBackground != null) {
+            g2.drawImage(blurredBackground, 0, 0, null);
+        }
+
+        // Red/green overlay based on win/loss
+        boolean won = eng.getGameState() == GameState.FINISHED_WON;
+        Color overlayColor = won ? new Color(0, 80, 40, 180) : new Color(100, 0, 0, 180);
+        g2.setColor(overlayColor);
         g2.fillRect(0, 0, eng.getScreenWidth(), eng.getScreenHeight());
 
-        g2.setFont(arial_80);
+        // Glass panel
+        drawGlassPanel();
+
+        // Title
+        String title = won ? "VICTORY!" : "GAME OVER";
+        String subtitle = won ? "Congratulations!" : "Better luck next time";
+        drawTitle(title, subtitle);
+
+        endScreenButtons.forEach(b -> b.draw(g2));
+    }
+
+    private void drawGlassPanel() {
+        int panelWidth = 500;
+        int panelHeight = 400;
+        int panelX = (eng.getScreenWidth() - panelWidth) / 2;
+        int panelY = (eng.getScreenHeight() - panelHeight) / 2 - 40;
+
+        // Panel background
+        g2.setColor(new Color(255, 255, 255, 15));
+        g2.fillRoundRect(panelX, panelY, panelWidth, panelHeight, 30, 30);
+
+        // Panel border
+        g2.setColor(new Color(255, 255, 255, 40));
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawRoundRect(panelX, panelY, panelWidth, panelHeight, 30, 30);
+    }
+
+    private void drawDecorations() {
+        // Subtle corner decorations
+        int sw = eng.getScreenWidth();
+        int sh = eng.getScreenHeight();
+
+        g2.setColor(new Color(255, 255, 255, 10));
+        g2.setStroke(new BasicStroke(2f));
+
+        // Top left corner
+        g2.drawLine(30, 30, 80, 30);
+        g2.drawLine(30, 30, 30, 80);
+
+        // Top right corner
+        g2.drawLine(sw - 30, 30, sw - 80, 30);
+        g2.drawLine(sw - 30, 30, sw - 30, 80);
+
+        // Bottom left corner
+        g2.drawLine(30, sh - 30, 80, sh - 30);
+        g2.drawLine(30, sh - 30, 30, sh - 80);
+
+        // Bottom right corner
+        g2.drawLine(sw - 30, sh - 30, sw - 80, sh - 30);
+        g2.drawLine(sw - 30, sh - 30, sw - 30, sh - 80);
+    }
+
+    private void drawTitle(String title, String subtitle) {
+        int centerX = eng.getScreenWidth() / 2;
+        int titleY = eng.getScreenHeight() / 4;
+
+        // Title glow effect
+        int glowAlpha = (int) (30 + 20 * titleGlow);
+        g2.setFont(titleFont);
+        g2.setColor(new Color(255, 255, 255, glowAlpha));
+        for (int i = 0; i < 3; i++) {
+            int offset = (i + 1) * 2;
+            g2.drawString(title, centerX - g2.getFontMetrics().stringWidth(title) / 2 - offset, titleY);
+            g2.drawString(title, centerX - g2.getFontMetrics().stringWidth(title) / 2 + offset, titleY);
+        }
+
+        // Title shadow
+        g2.setColor(new Color(0, 0, 0, 100));
+        g2.drawString(title, centerX - g2.getFontMetrics().stringWidth(title) / 2 + 3, titleY + 3);
+
+        // Main title
         g2.setColor(Color.WHITE);
-        String gameOverText = eng.getGameState() == GameState.FINISHED_LOST ? "YOU DIED" : "YOU WON";
-        int x = getXforCenteredText(gameOverText);
-        int y = eng.getScreenHeight() / 4;
-        g2.drawString(gameOverText, x, y);
+        g2.drawString(title, centerX - g2.getFontMetrics().stringWidth(title) / 2, titleY);
 
-        for (Button button : endScreenButtons) {
-            button.draw(g2);
-        }
+        // Subtitle
+        g2.setFont(subtitleFont);
+        g2.setColor(new Color(200, 200, 200, 180));
+        g2.drawString(subtitle, centerX - g2.getFontMetrics().stringWidth(subtitle) / 2, titleY + 35);
+
+        // Divider line
+        int dividerY = titleY + 55;
+        int dividerWidth = 200;
+        GradientPaint dividerGradient = new GradientPaint(
+                centerX - dividerWidth, dividerY, new Color(255, 255, 255, 0),
+                centerX, dividerY, new Color(255, 255, 255, 80));
+        g2.setPaint(dividerGradient);
+        g2.setStroke(new BasicStroke(1.5f));
+        g2.drawLine(centerX - dividerWidth, dividerY, centerX, dividerY);
+
+        dividerGradient = new GradientPaint(
+                centerX, dividerY, new Color(255, 255, 255, 80),
+                centerX + dividerWidth, dividerY, new Color(255, 255, 255, 0));
+        g2.setPaint(dividerGradient);
+        g2.drawLine(centerX, dividerY, centerX + dividerWidth, dividerY);
     }
 
-    protected final void handleClick(Point p, ArrayList<Button> buttons) {
-        for (Button button : buttons) {
-            if (button.contains(p)) {
-                button.doClick();
+    private void drawGradientBackground(Color top, Color bottom) {
+        g2.setPaint(new GradientPaint(0, 0, top, 0, eng.getScreenHeight(), bottom));
+        g2.fillRect(0, 0, eng.getScreenWidth(), eng.getScreenHeight());
+    }
+
+    /* ===================== INPUT ===================== */
+
+    protected void handleClick(Point p) {
+        for (Button b : getActiveButtons()) {
+            if (b.contains(p)) {
+                b.doClick();
                 break;
             }
         }
     }
 
-    public void handleDifficultyScreenClick(Point p) {
-        for (Button button : difficultyScreenButtons) {
-            if (button.contains(p)) {
-                button.doClick();
-                eng.setGameState(GameState.RUNNING);
-                eng.startGame();
-                break;
-            }
-        }
-    }
-
-    public void handleHover(Point p) {
-        ArrayList<Button> currentButtons = switch (eng.getGameState()) {
+    private ArrayList<Button> getActiveButtons() {
+        return switch (eng.getGameState()) {
             case START -> startScreenButtons;
             case GAME_MODE_SCREEN -> modeScreenButtons;
             case DIFFICULTY_SCREEN -> difficultyScreenButtons;
@@ -203,107 +344,135 @@ public class UserInterface extends JFrame {
             case FINISHED_LOST, FINISHED_WON -> endScreenButtons;
             default -> new ArrayList<>();
         };
-        for (Button button : currentButtons) {
-            if (button.contains(p)) {
-                Color hoverColor = switch (eng.getGameState()) {
-                    case GAME_MODE_SCREEN -> MODE_BUTTON_HOVER;
-                    case DIFFICULTY_SCREEN -> DIFFICULTY_BUTTON_HOVER;
-                    case PAUSED -> PAUSE_BUTTON_HOVER;
-                    case FINISHED_LOST, FINISHED_WON -> GAMEOVER_BUTTON_HOVER;
-                    default -> START_BUTTON_HOVER;
-                };
-                button.setBackgroundColor(hoverColor);
-            } else {
-                Color normalColor = switch (eng.getGameState()) {
-                    case GAME_MODE_SCREEN -> MODE_BUTTON;
-                    case DIFFICULTY_SCREEN -> DIFFICULTY_BUTTON;
-                    case PAUSED -> PAUSE_BUTTON;
-                    case FINISHED_LOST, FINISHED_WON -> GAMEOVER_BUTTON;
-                    default -> START_BUTTON;
-                };
-                button.setBackgroundColor(normalColor);
-            }
-        }
     }
 
-    private int getXforCenteredText(String text) {
-        int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        return eng.getScreenWidth() / 2 - length / 2;
-    }
+    /* ===================== HEALTH BAR ===================== */
+
+    // Animated health value
+    private float displayedHealth = 100f;
+    private float lowHealthGlow = 0f;
 
     private void drawPlayerHealthBar() {
-        int x = eng.getTileSize();
-        int y = eng.getTileSize();
-        int width = 200;
-        int height = 20;
+        int barX = eng.getTileSize();
+        int barY = eng.getTileSize();
+        int barWidth = 220;
+        int barHeight = 24;
 
-        int maxHealthBarWidth = (int) ((eng.player.getMaxHealth() / 100.0) * width);
-        int normalHealthBarWidth = (int) ((eng.player.getHealth() / 100.0) * width);
-        g2.setColor(Color.BLACK);
-        g2.fillRect(x, y, maxHealthBarWidth, height);
-        g2.setColor(Color.RED);
-        g2.fillRect(x, y, normalHealthBarWidth, height);
+        float currentHealth = eng.player.getHealth();
+        float maxHealth = eng.player.getMaxHealth();
 
-        g2.setColor(Color.WHITE);
-        g2.setStroke(new BasicStroke(2));
-        g2.drawRect(x, y, maxHealthBarWidth, height);
+        // Smooth health animation
+        displayedHealth = lerp(displayedHealth, currentHealth, 0.1f);
 
-        g2.setFont(new Font("Arial", Font.BOLD, 12));
-        g2.setColor(Color.WHITE);
-        String hpText = eng.player.getHealth() + "/" + eng.player.getMaxHealth() + " HP";
-        int textX = x + maxHealthBarWidth / 2 - g2.getFontMetrics().stringWidth(hpText) / 2;
-        int textY = y - 5;
-        g2.drawString(hpText, textX, textY);
-    }
+        // Calculate widths
+        int maxW = (int) ((maxHealth / 100.0) * barWidth);
+        int curW = (int) ((displayedHealth / 100.0) * barWidth);
 
-    /**
-     * Inicializálja a képernyők gombjait.
-     * 
-     * @param type  a gomb típusa
-     * @param x     x koordináta
-     * @param y     y koordináta
-     * @param width szélesség
-     *              //@param height magasság
-     * @param text  gomb szövege
-     */
-    private void initButtons(String type, int x, int y, int width, int heigth, String text) {
-        switch (type.toLowerCase()) {
-            case "start" -> startScreenButtons.add(new Button(x, y, width, heigth, text));
-            case "pause" -> pauseScreenButtons.add(new Button(x, y, width, heigth, text));
-            case "difficulty" -> difficultyScreenButtons.add(new Button(x, y, width, heigth, text));
-            case "gamemode" -> modeScreenButtons.add(new Button(x, y, width, heigth, text));
-            case "end" -> endScreenButtons.add(new Button(x, y, width, heigth, text));
+        // Low health glow effect
+        boolean isLowHealth = currentHealth <= maxHealth * 0.25f;
+        lowHealthGlow = lerp(lowHealthGlow, isLowHealth ? 1f : 0f, 0.05f);
+
+        // Draw glow if low health
+        if (lowHealthGlow > 0.01f) {
+            int glowAlpha = (int) (30 * lowHealthGlow * (0.5f + 0.5f * Math.sin(System.currentTimeMillis() * 0.005)));
+            g2.setColor(new Color(255, 50, 50, Math.max(0, glowAlpha)));
+            g2.fillRoundRect(barX - 5, barY - 5, maxW + 10, barHeight + 10, 12, 12);
         }
+
+        // Background
+        g2.setColor(new Color(30, 30, 30, 200));
+        g2.fillRoundRect(barX, barY, maxW, barHeight, 10, 10);
+
+        // Health gradient
+        if (curW > 0) {
+            GradientPaint healthGradient = new GradientPaint(
+                    barX, barY, new Color(220, 60, 60),
+                    barX, barY + barHeight, new Color(150, 30, 30));
+            g2.setPaint(healthGradient);
+            g2.fillRoundRect(barX, barY, curW, barHeight, 10, 10);
+
+            // Highlight
+            g2.setColor(new Color(255, 255, 255, 50));
+            g2.fillRoundRect(barX + 2, barY + 2, curW - 4, barHeight / 3, 8, 8);
+        }
+
+        // Border
+        g2.setColor(new Color(80, 80, 80));
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawRoundRect(barX, barY, maxW, barHeight, 10, 10);
+
+        // HP text
+        g2.setFont(new Font("Arial", Font.BOLD, 12));
+        String hpText = (int) currentHealth + " / " + (int) maxHealth;
+        g2.setColor(new Color(0, 0, 0, 150));
+        g2.drawString(hpText, barX + maxW / 2 - g2.getFontMetrics().stringWidth(hpText) / 2 + 1,
+                barY + barHeight / 2 + 5);
+        g2.setColor(Color.WHITE);
+        g2.drawString(hpText, barX + maxW / 2 - g2.getFontMetrics().stringWidth(hpText) / 2, barY + barHeight / 2 + 4);
     }
 
-    private void initScreenButtonBehavior() {
-        initStartButtons();
-        initModeButtons();
-        initDiffButtons();
-        initPauseButtons();
-        initGameOverButtons();
+    private float lerp(float a, float b, float t) {
+        return a + (b - a) * t;
     }
 
-    private void initStartButtons() {
-        startScreenButtons.getFirst().addActionListener(e -> eng.setGameState(GameState.GAME_MODE_SCREEN));
+    /* ===================== INIT ===================== */
+
+    private void initializeButtons() {
+        int w = 200;
+        int h = 50;
+        int y = eng.getScreenHeight() / 2;
+        int cx = eng.getScreenWidth() / 2 - w / 2;
+
+        // START
+        addButton(startScreenButtons, cx, y, w, h, "Start Game", START_BTN, START_BTN_H);
+        addButton(startScreenButtons, cx, y + 60, w, h, "Load Game", START_BTN, START_BTN_H);
+        addButton(startScreenButtons, cx, y + 120, w, h, "Leaderboard", START_BTN, START_BTN_H);
+        addButton(startScreenButtons, cx, y + 180, w, h, "Quit", START_BTN, START_BTN_H);
+
+        // MODE
+        addButton(modeScreenButtons, cx, y, w, h, "Story Mode", MODE_BTN, MODE_BTN_H);
+        addButton(modeScreenButtons, cx, y + 60, w, h, "Custom Map", MODE_BTN, MODE_BTN_H);
+        addButton(modeScreenButtons, cx, y + 120, w, h, "Back", MODE_BTN, MODE_BTN_H);
+
+        // DIFFICULTY
+        addButton(difficultyScreenButtons, cx - 120, y, w, h, "Easy", DIFF_BTN, DIFF_BTN_H);
+        addButton(difficultyScreenButtons, cx - 120, y + 60, w, h, "Medium", DIFF_BTN, DIFF_BTN_H);
+        addButton(difficultyScreenButtons, cx + 120, y, w, h, "Hard", DIFF_BTN, DIFF_BTN_H);
+        addButton(difficultyScreenButtons, cx + 120, y + 60, w, h, "Impossible", DIFF_BTN, DIFF_BTN_H);
+
+        // PAUSE - Centered layout (moved up)
+        addButton(pauseScreenButtons, cx - 120, y - 60, w, h, "Resume", PAUSE_BTN, PAUSE_BTN_H);
+        addButton(pauseScreenButtons, cx + 120, y - 60, w, h, "New Game", PAUSE_BTN, PAUSE_BTN_H);
+        addButton(pauseScreenButtons, cx - 120, y, w, h, "Console", PAUSE_BTN, PAUSE_BTN_H);
+        addButton(pauseScreenButtons, cx + 120, y, w, h, "Save", PAUSE_BTN, PAUSE_BTN_H);
+        addButton(pauseScreenButtons, cx - 120, y + 60, w, h, "Leaderboard", PAUSE_BTN, PAUSE_BTN_H);
+        addButton(pauseScreenButtons, cx + 120, y + 60, w, h, "Load", PAUSE_BTN, PAUSE_BTN_H);
+        addButton(pauseScreenButtons, cx, y + 120, w, h, "Exit", PAUSE_BTN, PAUSE_BTN_H);
+
+        // GAME OVER
+        addButton(endScreenButtons, cx, y, w, h, "New Game", GAMEOVER_BTN, GAMEOVER_BTN_H);
+        addButton(endScreenButtons, cx, y + 60, w, h, "Load Game", GAMEOVER_BTN, GAMEOVER_BTN_H);
+        addButton(endScreenButtons, cx, y + 120, w, h, "Leaderboard", GAMEOVER_BTN, GAMEOVER_BTN_H);
+        addButton(endScreenButtons, cx, y + 180, w, h, "Exit", GAMEOVER_BTN, GAMEOVER_BTN_H);
+    }
+
+    private void addButton(ArrayList<Button> list, int x, int y, int w, int h,
+            String text, Color base, Color hover) {
+        list.add(new Button(x, y, w, h, text, base, hover));
+    }
+
+    private void initializeButtonActions() {
+        // START
+        startScreenButtons.get(0).addActionListener(e -> eng.setGameState(GameState.GAME_MODE_SCREEN));
         startScreenButtons.get(1).addActionListener(e -> {
             if (FileManager.loadGame(eng))
                 eng.setGameState(GameState.RUNNING);
-            else
-                eng.setGameState(GameState.START);
         });
-        startScreenButtons.get(2).addActionListener(e -> System.exit(0));
-        startScreenButtons.get(3).addActionListener(e -> {
-            LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
-            dialog.showDialog();
-        });
-        for (Button button : startScreenButtons) {
-            button.setBackgroundColor(START_BUTTON);
-        }
-    }
+        startScreenButtons.get(2).addActionListener(e -> new LeaderboardDialog(eng, null).showDialog());
+        startScreenButtons.get(3).addActionListener(e -> System.exit(0));
 
-    private void initModeButtons() {
-        modeScreenButtons.getFirst().addActionListener(e -> {
+        // MODE
+        modeScreenButtons.get(0).addActionListener(e -> {
             eng.setGameMode(GameMode.STORY);
             eng.setGameState(GameState.DIFFICULTY_SCREEN);
         });
@@ -312,118 +481,51 @@ public class UserInterface extends JFrame {
             Engine.setupCustomMode();
         });
         modeScreenButtons.get(2).addActionListener(e -> eng.setGameState(GameState.START));
-        for (Button button : modeScreenButtons) {
-            button.setBackgroundColor(MODE_BUTTON);
-        }
-    }
 
-    private void initDiffButtons() {
-        difficultyScreenButtons.getFirst().addActionListener(e -> eng.setGameDifficulty(GameDifficulty.EASY));
-        difficultyScreenButtons.get(1).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.MEDIUM));
-        difficultyScreenButtons.get(2).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.HARD));
-        difficultyScreenButtons.get(3).addActionListener(e -> eng.setGameDifficulty(GameDifficulty.IMPOSSIBLE));
-        for (Button button : difficultyScreenButtons) {
-            button.setBackgroundColor(DIFFICULTY_BUTTON);
-        }
-    }
+        // DIFFICULTY
+        difficultyScreenButtons.get(0).addActionListener(e -> startGame(GameDifficulty.EASY));
+        difficultyScreenButtons.get(1).addActionListener(e -> startGame(GameDifficulty.MEDIUM));
+        difficultyScreenButtons.get(2).addActionListener(e -> startGame(GameDifficulty.HARD));
+        difficultyScreenButtons.get(3).addActionListener(e -> startGame(GameDifficulty.IMPOSSIBLE));
 
-    private void initPauseButtons() {
-        pauseScreenButtons.getFirst().addActionListener(e -> eng.setGameState(GameState.RUNNING));
+        // PAUSE
+        pauseScreenButtons.get(0).addActionListener(e -> {
+            clearBlurredBackground();
+            eng.setGameState(GameState.RUNNING);
+        });
         pauseScreenButtons.get(1).addActionListener(e -> {
+            clearBlurredBackground();
+            eng.startGame();
+        });
+        pauseScreenButtons.get(2).addActionListener(e -> {
             eng.setGameState(GameState.CONSOLE_INPUT);
             try {
                 eng.console.startConsoleInput();
-            } catch (Exception err) {
-                GameLogger.error(LOG_CONTEXT, "Console input error: {0}", err.getCause());
+            } catch (Exception ex) {
+                GameLogger.error(LOG_CONTEXT, "Console error", ex);
             }
         });
-        pauseScreenButtons.get(2).addActionListener(e -> System.exit(0));
-        pauseScreenButtons.get(3).addActionListener(e -> {
-            eng.startGame();
-            eng.setGameState(GameState.DIFFICULTY_SCREEN);
-        });
-        pauseScreenButtons.get(4).addActionListener(e -> FileManager.saveGame(eng));
+        pauseScreenButtons.get(3).addActionListener(e -> FileManager.saveGame(eng));
+        pauseScreenButtons.get(4).addActionListener(e -> new LeaderboardDialog(eng, null).showDialog());
         pauseScreenButtons.get(5).addActionListener(e -> FileManager.loadGame(eng));
-        pauseScreenButtons.get(6).addActionListener(e -> {
-            LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
-            dialog.showDialog();
-        });
-        for (Button button : pauseScreenButtons) {
-            button.setBackgroundColor(PAUSE_BUTTON);
-        }
-    }
+        pauseScreenButtons.get(6).addActionListener(e -> System.exit(0));
 
-    private void initGameOverButtons() {
-        endScreenButtons.getFirst().addActionListener(e -> {
+        // GAME OVER
+        endScreenButtons.get(0).addActionListener(e -> {
+            clearBlurredBackground();
             eng.setGameState(GameState.GAME_MODE_SCREEN);
-            eng.player.setPlayerHealth(100);
         });
         endScreenButtons.get(1).addActionListener(e -> {
+            clearBlurredBackground();
             FileManager.loadGame(eng);
-            eng.setGameState(GameState.RUNNING);
         });
-        endScreenButtons.get(2).addActionListener(e -> System.exit(0));
-        endScreenButtons.get(3).addActionListener(e -> {
-            LeaderboardDialog dialog = new LeaderboardDialog(eng, null);
-            dialog.showDialog();
-        });
-        for (Button button : endScreenButtons) {
-            button.setBackgroundColor(GAMEOVER_BUTTON);
-        }
+        endScreenButtons.get(2).addActionListener(e -> new LeaderboardDialog(eng, null).showDialog());
+        endScreenButtons.get(3).addActionListener(e -> System.exit(0));
     }
 
-    private void initializeScreenButtons() {
-        int buttonWidth = 200;
-        int buttonHeight = 50;
-        int startY = eng.getScreenHeight() / 2;
-        initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight,
-                "Start Game");
-        initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth,
-                buttonHeight, "Load Game");
-        initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth,
-                buttonHeight, "Quit");
-        initButtons("start", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 3 * (buttonHeight + 20), buttonWidth,
-                buttonHeight, "Leaderboard");
-
-        initButtons("gamemode", eng.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight,
-                "Story Mode");
-        initButtons("gamemode", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth,
-                buttonHeight, "Custom Map");
-        initButtons("gamemode", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20),
-                buttonWidth, buttonHeight, "Back");
-
-        initButtons("pause", eng.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY, buttonWidth,
-                buttonHeight, "Resume");
-        initButtons("pause", eng.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY + buttonHeight + 20,
-                buttonWidth, buttonHeight, "Console Input");
-        initButtons("pause", eng.getScreenWidth() / 2 - buttonWidth - buttonWidth / 8, startY + 2 * (buttonHeight + 20),
-                buttonWidth, buttonHeight, "Exit");
-        initButtons("pause", eng.getScreenWidth() / 2 + buttonWidth / 8, startY, buttonWidth, buttonHeight, "New Game");
-        initButtons("pause", eng.getScreenWidth() / 2 + buttonWidth / 8, startY + buttonHeight + 20, buttonWidth,
-                buttonHeight, "Save Game");
-        initButtons("pause", eng.getScreenWidth() / 2 + buttonWidth / 8, startY + 2 * (buttonHeight + 20), buttonWidth,
-                buttonHeight, "Load Game");
-        initButtons("pause", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 3 * (buttonHeight + 20), buttonWidth,
-                buttonHeight, "Leaderboard");
-
-        initButtons("difficulty", eng.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY, buttonWidth,
-                buttonHeight, "EASY");
-        initButtons("difficulty", eng.getScreenWidth() / 2 - buttonWidth / 2 - buttonWidth, startY + buttonHeight + 20,
-                buttonWidth, buttonHeight, "MEDIUM");
-        initButtons("difficulty", eng.getScreenWidth() / 2 + buttonWidth / 2, startY, buttonWidth, buttonHeight,
-                "HARD");
-        initButtons("difficulty", eng.getScreenWidth() / 2 + buttonWidth / 2, startY + buttonHeight + 20, buttonWidth,
-                buttonHeight, "IMPOSSIBLE");
-
-        initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY, buttonWidth, buttonHeight, "New Game");
-        initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + buttonHeight + 20, buttonWidth,
-                buttonHeight, "Load Game");
-        initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 2 * (buttonHeight + 20), buttonWidth,
-                buttonHeight, "Exit");
-        initButtons("end", eng.getScreenWidth() / 2 - buttonWidth / 2, startY + 3 * (buttonHeight + 20), buttonWidth,
-                buttonHeight, "Leaderboard");
-
-        initScreenButtonBehavior();
+    private void startGame(GameDifficulty diff) {
+        eng.setGameDifficulty(diff);
+        eng.startGame();
+        eng.setGameState(GameState.RUNNING);
     }
-
 }

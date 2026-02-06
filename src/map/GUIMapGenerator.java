@@ -9,7 +9,8 @@ import java.awt.*;
 import java.io.File;
 
 /**
- * A GUIMapGenerator osztály biztosítja a pályagenerálás grafikus felhasználói felületét.
+ * A GUIMapGenerator osztály biztosítja a pályagenerálás grafikus felhasználói
+ * felületét.
  */
 public class GUIMapGenerator extends JFrame {
 
@@ -50,7 +51,7 @@ public class GUIMapGenerator extends JFrame {
         gbc.gridy = 1;
         add(generateMapButton, gbc);
 
-        chooseMapButton.addActionListener(_ -> {
+        chooseMapButton.addActionListener(e -> {
             JFileChooser fileChooser = getFileChooser();
 
             int result = fileChooser.showOpenDialog(this);
@@ -70,7 +71,7 @@ public class GUIMapGenerator extends JFrame {
             }
         });
 
-        generateMapButton.addActionListener(_ -> {
+        generateMapButton.addActionListener(e -> {
             new MapDrawer();
             dispose();
         });
