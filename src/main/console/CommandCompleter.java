@@ -20,11 +20,9 @@ public class CommandCompleter {
     private final Map<String, List<String>> subCommands = Map.of(
             "set", Arrays.asList("player", "entity", "speed", "health", "maxhealth"),
             "get", Arrays.asList("player", "health", "speed", "maxhealth"),
-            "add", Arrays.asList("boots", "chest", "door", "dragonenemy", "friendlyenemy",
-                    "giantenemy", "key", "smallenemy", "sword"),
+            "add", Arrays.asList("boots", "chest", "door", "dragonenemy", "friendlyenemy", "giantenemy", "key", "smallenemy", "sword"),
             "remove", Arrays.asList("all", "dragonenemy", "friendlyenemy", "giantenemy", "smallenemy"),
-            "help", Arrays.asList("reset", "remove", "save", "load", "set", "get", "add", "teleport",
-                    "script", "make"));
+            "help", Arrays.asList("reset", "remove", "save", "load", "set", "get", "add", "teleport", "script", "make"));
 
     /**
      * Kiegészíti a megadott bemenetet a következő lehetséges paranccsal.
@@ -134,15 +132,9 @@ public class CommandCompleter {
         currentCompletions.clear();
         currentIndex = -1;
         lastCompletion = partial;
-
         if (!partial.isEmpty()) {
-            commands.stream()
-                    .filter(cmd -> cmd.startsWith(partial))
-                    .sorted().forEach(currentCompletions::add);
+            commands.stream().filter(cmd -> cmd.startsWith(partial)).sorted().forEach(currentCompletions::add);
         }
-
-        commands.stream()
-                .filter(cmd -> !currentCompletions.contains(cmd))
-                .sorted().forEach(currentCompletions::add);
+        commands.stream().filter(cmd -> !currentCompletions.contains(cmd)).sorted().forEach(currentCompletions::add);
     }
 }

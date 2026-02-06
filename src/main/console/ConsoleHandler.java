@@ -17,10 +17,12 @@ public class ConsoleHandler {
     protected boolean abortProcess;
     private final Map<String, Command> commandMap;
     private ConsoleGUI consoleGUI;
+    private final VariableContext variableContext;
 
     public ConsoleHandler(Engine eng) {
         this.eng = eng;
-        this.commands = new Commands(eng, this);
+        this.variableContext = new VariableContext();
+        this.commands = new Commands(eng, this, variableContext);
         this.abortProcess = false;
         this.commandMap = initializeCommands();
     }
@@ -99,10 +101,21 @@ public class ConsoleHandler {
                         commands.setEntity(args[1], args[2], Integer.parseInt(args[3]));
                     }
                 }
-                case 3 -> commands.setGameValue(args[1], args[2]);
+                case 3 -> {
+                    // User variable: set varname value
+                    Object value;
+                    try {
+                        value = Integer.parseInt(args[2]);
+                    } catch (NumberFormatException e) {
+                        value = args[2];
+                    }
+                    variableContext.set(args[1], value);
+                    printToConsole("Variable '" + args[1] + "' set to: " + value);
+                }
                 default -> printToConsole("""
                         Invalid format for 'set' command.
-                        Usage: set entity arg1 value
+                        Usage for game values: set entity arg1 value
+                        Usage for variables: set varname value
                         Entity types: *Enemy, Player
                         Arguments: speed, health, maxhealth""");
             }
@@ -195,7 +208,10 @@ public class ConsoleHandler {
     public void executeCommand(String input) {
         if (input.isEmpty())
             return;
-        String[] parts = input.trim().toLowerCase().split("\\s+");
+
+        // Resolve variables before executing
+        String resolvedInput = variableContext.resolveVariables(input);
+        String[] parts = resolvedInput.trim().toLowerCase().split("\\s+");
         Command command = commandMap.get(parts[0]);
         if (command != null) {
             try {
@@ -224,6 +240,7 @@ public class ConsoleHandler {
                 | teleport       : Teleports player                  |
                 | script         : Run a script file                 |
                 | make           : Create a new script file          |
+                | for            : Create a loop                     |
                 ------------------------------------------------------
                 Type 'help <command>' for detailed usage information.""";
     }

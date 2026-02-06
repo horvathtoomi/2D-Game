@@ -9,6 +9,7 @@ import map.MapGenerator;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.*;
+import java.util.Dictionary;
 import java.util.Objects;
 import java.util.Random;
 
@@ -58,18 +59,11 @@ public class TileManager {
      * Betölti az összes tile képét és beállítja tulajdonságaikat.
      */
     public void getTileImage(){
-        setup(0,"wall",true);
-        setup(1,"grass",false);
-        setup(2,"earth",false);
-        setup(3,"sand",false);
-        setup(4,"water",true);
-        setup(5,"blackborder",true);
-        setup(6,"blacksand",false);
-        setup(7,"deadbush",false);
-        setup(8,"cactus",false);
-        setup(9,"tree",true);
-        setup(10,"gravel",false);
-        setup(11, "lava", true);
+        String[] tileName = {"wall", "grass", "earth", "sand", "water", "blackborder", "blacksand", "deadbush", "cactus", "tree", "gravel", "lava"};
+        Boolean[] tileCollision = {true, false, false, false, true, true, false, false, false, true, false, true};
+        for(int idx = 0; idx < tileName.length; idx++){
+            setup(idx, tileName[idx], tileCollision[idx]);
+        }
     }
 
     /**

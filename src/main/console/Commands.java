@@ -19,6 +19,9 @@ public class Commands {
     private final Engine eng;
     private static int numMakeEnd = 0;
     private final ConsoleHandler consoleHandler;
+    private final VariableContext variableContext;
+    private final ExpressionEvaluator expressionEvaluator;
+    private static final int MAX_LOOP_ITERATIONS = 10000;
     private static final String RES_SAVE_PATH = "res/save/";
     private static final String RES_SCRIPTS_PATH = "res/scripts/";
     private static final String UNKNOWN_ATTRIBUTE = "Unknown attribute: ";
@@ -26,9 +29,11 @@ public class Commands {
     private static final String HEALTH = "health";
     private static final String LOG_CONTEXT = "[COMMANDS]";
 
-    public Commands(Engine eng, ConsoleHandler consoleHandler) {
+    public Commands(Engine eng, ConsoleHandler consoleHandler, VariableContext variableContext) {
         this.eng = eng;
         this.consoleHandler = consoleHandler;
+        this.variableContext = variableContext;
+        this.expressionEvaluator = new ExpressionEvaluator(variableContext);
     }
 
     /**
@@ -218,6 +223,18 @@ public class Commands {
                     } catch (IOException e) {
                         consoleHandler.printToConsole("An error occurred while writing to the file: " + e.getMessage());
                     }
+                } else if (line.startsWith("for")) {
+                    // Resolve variables in the for line
+                    String resolvedLine = variableContext.resolveVariables(line);
+                    
+                    // Check if it's the new enhanced syntax or old simple syntax
+                    if (resolvedLine.contains("until") && resolvedLine.contains("do")) {
+                        // Enhanced syntax: for i = 0 until i < 10 do i += 1
+                        handleEnhancedForLoop(fileReader, resolvedLine, visitedScripts);
+                    } else {
+                        // Old simple syntax: for <number>
+                        handleSimpleForLoop(fileReader, resolvedLine, visitedScripts);
+                    }
                 } else {
                     consoleHandler.executeCommand(line);
                 }
@@ -228,6 +245,92 @@ public class Commands {
         visitedScripts.remove(normalizedFilename);
         consoleHandler.printToConsole("Finished executing script: " + filename);
     }
+
+    /**
+     * Végrehajtja a for ciklus belsejében lévő parancsokat.
+     * Támogatja a beágyazott for ciklusokat is.
+     * 
+     * @param commands       a végrehajtandó parancsok listája
+     * @param visitedScripts a már végrehajtott scriptek halmaza
+     */
+    private void executeLoopCommands(java.util.List<String> commands, Set<String> visitedScripts) {
+        int i = 0;
+        while (i < commands.size()) {
+            String command = commands.get(i);
+
+            if (command.startsWith("script")) {
+                String[] cmdParts = command.split("\\s+");
+                if (cmdParts.length == 2) {
+                    runScript(cmdParts[1], visitedScripts);
+                } else {
+                    consoleHandler.printToConsole("Invalid script command: " + command);
+                }
+                i++;
+            } else if (command.startsWith("for")) {
+                // Handle nested for loop
+                String[] forParts = command.split("\\s+");
+                if (forParts.length != 2) {
+                    consoleHandler.printToConsole("Invalid format for 'for' command. Usage: for <number>");
+                    i++;
+                    continue;
+                }
+
+                int iterations;
+                try {
+                    iterations = Integer.parseInt(forParts[1]);
+                } catch (NumberFormatException e) {
+                    consoleHandler.printToConsole("Invalid number format in 'for' command: " + forParts[1]);
+                    i++;
+                    continue;
+                }
+
+                if (iterations < 0) {
+                    consoleHandler.printToConsole("Number of iterations cannot be negative: " + iterations);
+                    i++;
+                    continue;
+                }
+
+                // Collect nested for loop body
+                java.util.List<String> nestedCommands = new java.util.ArrayList<>();
+                int nestedForCount = 0;
+                i++; // Move past the "for" line
+
+                while (i < commands.size()) {
+                    String nestedLine = commands.get(i);
+
+                    if (nestedLine.startsWith("for")) {
+                        nestedForCount++;
+                        nestedCommands.add(nestedLine);
+                    } else if (nestedLine.equalsIgnoreCase("endfor")) {
+                        if (nestedForCount > 0) {
+                            nestedForCount--;
+                            nestedCommands.add(nestedLine);
+                        } else {
+                            // This is the endfor of the nested for loop
+                            break;
+                        }
+                    } else {
+                        nestedCommands.add(nestedLine);
+                    }
+                    i++;
+                }
+
+                // Execute nested loop
+                for (int j = 0; j < iterations; j++) {
+                    executeLoopCommands(nestedCommands, visitedScripts);
+                }
+                i++; // Move past the "endfor" line
+            } else {
+                consoleHandler.executeCommand(command);
+                i++;
+            }
+        }
+    }
+
+    // for i = x until i <= y do i += z:
+    // add ammo 1
+    // ...
+    // end
 
     public void printHelp(String command) {
         switch (command) {
@@ -253,9 +356,21 @@ public class Commands {
             case "load" -> consoleHandler.printToConsole("Load use: load <filename> without extension");
             case "exit" -> consoleHandler.printToConsole("Exit use: exit - exits console mode");
             case "exit_game" -> consoleHandler.printToConsole("Exits game");
+            case "for" -> consoleHandler.printToConsole("""
+                    For loop usage:
+                    
+                    Simple: for <number>
+                        Executes commands <number> times.
+                        Example: for 5
+                    
+                    Enhanced: for <init> until <condition> do <increment>
+                        Example: for i = 0 until i < 10 do i += 1
+                        Variables: Use $varname to reference variables
+                    
+                    Use 'endfor' to end the loop. Supports nested loops.""");
             default -> consoleHandler.printToConsole("""
                     script/make/set/get/add/reset
-                    save/load/exit/exit_game/remove
+                    save/load/exit/exit_game/remove/for
                     | Use 'help <command>' from above commands |
                     """);
         }
@@ -391,4 +506,139 @@ public class Commands {
             default -> consoleHandler.printToConsole("VARIABLE NOT FOUND");
         }
     }
+
+    /**
+     * Handles the old simple for loop syntax: for <number>
+     */
+    private void handleSimpleForLoop(BufferedReader fileReader, String forLine, Set<String> visitedScripts) throws IOException {
+        String[] parts = forLine.split("\\s+");
+        if (parts.length != 2) {
+            consoleHandler.printToConsole("Invalid format for 'for' command. Usage: for <number>");
+            skipToEndFor(fileReader);
+            return;
+        }
+
+        int iterations;
+        try {
+            iterations = Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            consoleHandler.printToConsole("Invalid number format in 'for' command: " + parts[1]);
+            skipToEndFor(fileReader);
+            return;
+        }
+
+        if (iterations < 0) {
+            consoleHandler.printToConsole("Number of iterations cannot be negative: " + iterations);
+            skipToEndFor(fileReader);
+            return;
+        }
+
+        java.util.List<String> loopCommands = collectLoopBody(fileReader);
+        for (int i = 0; i < iterations; i++) {
+            executeLoopCommands(loopCommands, visitedScripts);
+        }
+    }
+    
+    /**
+     * Handles the enhanced for loop syntax: for <init> until <condition> do <increment>
+     */
+    private void handleEnhancedForLoop(BufferedReader fileReader, String forLine, Set<String> visitedScripts) throws IOException {
+        try {
+            String forContent = forLine.substring(3).trim();
+            
+            if (!forContent.contains("until") || !forContent.contains("do")) {
+                consoleHandler.printToConsole("Invalid enhanced for loop syntax. Expected: for <init> until <condition> do <increment>");
+                skipToEndFor(fileReader);
+                return;
+            }
+            
+            String[] untilParts = forContent.split("until", 2);
+            if (untilParts.length != 2) {
+                consoleHandler.printToConsole("Invalid for loop: missing 'until' clause");
+                skipToEndFor(fileReader);
+                return;
+            }
+            
+            String initPart = untilParts[0].trim();
+            String[] doParts = untilParts[1].split("do", 2);
+            if (doParts.length != 2) {
+                consoleHandler.printToConsole("Invalid for loop: missing 'do' clause");
+                skipToEndFor(fileReader);
+                return;
+            }
+            
+            String condition = doParts[0].trim();
+            String increment = doParts[1].trim();
+            
+            java.util.List<String> loopCommands = collectLoopBody(fileReader);
+            
+            variableContext.pushScope();
+            try {
+                expressionEvaluator.executeAssignment(initPart);
+                
+                int iterationCount = 0;
+                while (expressionEvaluator.evaluateCondition(condition)) {
+                    if (iterationCount++ > MAX_LOOP_ITERATIONS) {
+                        consoleHandler.printToConsole("ERROR: Loop exceeded max iterations (" + MAX_LOOP_ITERATIONS + ")");
+                        break;
+                    }
+                    executeLoopCommands(loopCommands, visitedScripts);
+                    expressionEvaluator.executeAssignment(increment);
+                }
+            } finally {
+                variableContext.popScope();
+            }
+        } catch (Exception e) {
+            consoleHandler.printToConsole("Error in enhanced for loop: " + e.getMessage());
+            skipToEndFor(fileReader);
+        }
+    }
+    
+    /**
+     * Collects all commands in a for loop body up to the matching endfor.
+     */
+    private java.util.List<String> collectLoopBody(BufferedReader fileReader) throws IOException {
+        java.util.List<String> loopCommands = new java.util.ArrayList<>();
+        int nestedForCount = 0;
+        String loopLine;
+
+        while ((loopLine = fileReader.readLine()) != null) {
+            loopLine = loopLine.trim();
+            if (loopLine.startsWith("for")) {
+                nestedForCount++;
+                loopCommands.add(loopLine);
+            } else if (loopLine.equalsIgnoreCase("endfor")) {
+                if (nestedForCount > 0) {
+                    nestedForCount--;
+                    loopCommands.add(loopLine);
+                } else {
+                    break;
+                }
+            } else {
+                loopCommands.add(loopLine);
+            }
+        }
+        return loopCommands;
+    }
+    
+    /**
+     * Skips to the matching endfor (used when a for loop has errors).
+     */
+    private void skipToEndFor(BufferedReader fileReader) throws IOException {
+        int nestedForCount = 0;
+        String line;
+        while ((line = fileReader.readLine()) != null) {
+            line = line.trim();
+            if (line.startsWith("for")) {
+                nestedForCount++;
+            } else if (line.equalsIgnoreCase("endfor")) {
+                if (nestedForCount > 0) {
+                    nestedForCount--;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
 }

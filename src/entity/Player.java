@@ -1,6 +1,5 @@
 package entity;
 
-import entity.attack.Bullet;
 import main.Engine;
 import main.GameMode;
 import main.InputHandler;
@@ -264,8 +263,7 @@ public class Player extends Entity {
                 isAttacking = true;
                 shot = true;
             }
-        } else if (inventory.getCurrent() instanceof RifleItem) {
-            RifleItem rifle = (RifleItem) inventory.getCurrent();
+        } else if (inventory.getCurrent() instanceof RifleItem rifle) {
             rifle.use(this); // use() checks ammo and calls shootLogic()
             isAttacking = true;
         }

@@ -201,8 +201,7 @@ public class Inventory {
         int screenY = 3 * eng.getTileSize() + (eng.getTileSize() + 10) * index - 2;
         Item item = items.get(index);
 
-        if (item instanceof GunItem) {
-            GunItem gun = (GunItem) item;
+        if (item instanceof GunItem gun) {
             Components.Magazine mag = gun.getMagazine();
             g2.drawString(mag.getCurrentMag() + "/" + mag.getReserve(), screenX, screenY);
         }

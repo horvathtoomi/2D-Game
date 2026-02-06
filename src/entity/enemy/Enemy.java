@@ -7,12 +7,10 @@ import entity.algorithm.AStar;
 import entity.attack.*;
 import entity.npc.NPC_Wayfarer;
 import main.Engine;
-import main.UtilityTool;
 import main.logger.GameLogger;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Random;
 
 /**
